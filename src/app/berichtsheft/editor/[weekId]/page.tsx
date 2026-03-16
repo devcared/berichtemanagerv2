@@ -92,7 +92,7 @@ export default function EditorPage() {
     r => r.calendarWeek === week && r.year === year
   )
 
-    useEffect(() => {
+  useEffect(() => {
     setIsLoaded(false)
     if (currentReport) {
       setEntries(currentReport.entries)
@@ -112,7 +112,7 @@ export default function EditorPage() {
       setPdfData(undefined)
       setIsLoaded(true)
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [week, year, reports.length]) // Only depend on reports length to prevent infinite loops, and week/year.
 
   const totalHours = entries.reduce((sum, e) => sum + (e.hours || 0), 0)
@@ -164,7 +164,7 @@ export default function EditorPage() {
     return () => {
       if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current)
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entries, isPdfReport, pdfData, isLoaded])
 
   function handleWeekChange(newWeek: number, newYear: number) {
@@ -213,13 +213,13 @@ export default function EditorPage() {
               Wie möchtest du deinen Bericht für KW {week} / {year} erstellen?
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 gap-4 mt-8">
             <button
               onClick={() => handleChooseType(false)}
               className="relative group flex p-6 flex-col items-center justify-center gap-4 rounded-3xl border-2 border-border/60 bg-card hover:bg-muted/30 hover:border-primary/50 transition-all text-center"
             >
-              <div className="size-16 rounded-2xl bg-primary/10 text-primary flex items-center justify-center group-hover:scale-110 transition-transform">
+              <div className="size-16 bg-primary/10 text-primary flex items-center justify-center group-hover:scale-110 transition-transform">
                 <HugeiconsIcon icon={Edit02Icon} size={32} />
               </div>
               <div>
@@ -234,7 +234,7 @@ export default function EditorPage() {
               onClick={() => handleChooseType(true)}
               className="relative group flex p-6 flex-col items-center justify-center gap-4 rounded-3xl border-2 border-border/60 bg-card hover:bg-muted/30 hover:border-primary/50 transition-all text-center"
             >
-              <div className="size-16 rounded-2xl bg-primary/10 text-primary flex items-center justify-center group-hover:scale-110 transition-transform">
+              <div className="size-16 bg-primary/10 text-primary flex items-center justify-center group-hover:scale-110 transition-transform">
                 <HugeiconsIcon icon={FileUploadIcon} size={32} />
               </div>
               <div>
@@ -307,13 +307,13 @@ export default function EditorPage() {
         <Tabs value={isPdfReport ? "pdf" : "text"} className="w-full">
           {/* TEXT EDITOR TAB */}
           <TabsContent value="text" className="space-y-6 m-0 print:block">
-            
+
             {/* PRINT HEADER ONLY VISIBLE WHEN PRINTING */}
             <div className="hidden print:block mb-8 border-b-2 border-black pb-4">
               <h1 className="text-2xl font-bold mb-2">Ausbildungsnachweis - Woche {week} / {year}</h1>
               <div className="flex justify-between text-sm">
                 <div>
-                  <strong>Name:</strong> {profile?.firstName} {profile?.lastName}<br/>
+                  <strong>Name:</strong> {profile?.firstName} {profile?.lastName}<br />
                   <strong>Beruf:</strong> {profile?.occupation}
                 </div>
                 <div className="text-right">
@@ -336,7 +336,7 @@ export default function EditorPage() {
                         <div className="flex items-center justify-between mb-5 border-b border-border/50 pb-4 print:border-black/20">
                           <div>
                             <h3 className="font-bold text-lg text-foreground flex items-center gap-2 print:text-black">
-                              {dayName} 
+                              {dayName}
                               <span className="text-xs font-normal text-muted-foreground px-2 py-0.5 bg-muted rounded-full print:bg-transparent print:text-gray-600 print:p-0">
                                 {dateLabel}
                               </span>
@@ -420,7 +420,7 @@ export default function EditorPage() {
                 )
               })}
             </div>
-            
+
             {/* Signature Area Only visible on Print */}
             <div className="hidden print:flex justify-between items-end mt-16 pt-8 break-inside-avoid">
               <div className="w-[40%] border-t border-black text-center pt-2">
@@ -458,7 +458,7 @@ export default function EditorPage() {
                   </div>
                   <h3 className="text-xl font-bold mb-2 text-foreground">Bericht hochladen (PDF)</h3>
                   <p className="text-muted-foreground text-sm mb-6 leading-relaxed">
-                    Statt das Dashboard zu nutzen, kannst du hier deinen eigenen Bericht als PDF hochladen. 
+                    Statt das Dashboard zu nutzen, kannst du hier deinen eigenen Bericht als PDF hochladen.
                   </p>
                   <Button asChild className="relative overflow-hidden cursor-pointer h-12 w-full text-base font-medium">
                     <Label htmlFor="pdf-upload" className="cursor-pointer">
