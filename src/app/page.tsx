@@ -6,14 +6,17 @@ import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { useProfile } from '@/hooks/use-profile'
+import { useAuth } from '@/contexts/AuthContext'
 import type { AppModule } from '@/types'
 import {
   BookOpenIcon,
   CheckListIcon,
   CalendarIcon,
   GridViewIcon,
+  Logout01Icon,
 } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 
@@ -75,6 +78,7 @@ function getGreeting(): string {
 export default function HomePage() {
   const router = useRouter()
   const { profile } = useProfile()
+  const { logout } = useAuth()
   const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => {
@@ -91,11 +95,22 @@ export default function HomePage() {
       <div className="max-w-5xl mx-auto px-6 py-12">
         {/* Header */}
         <div className="mb-10">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="size-10 rounded-xl bg-primary/20 flex items-center justify-center">
-              <span className="text-primary font-bold text-lg">A</span>
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-3">
+              <div className="size-10 rounded-xl bg-primary/20 flex items-center justify-center">
+                <span className="text-primary font-bold text-lg">A</span>
+              </div>
+              <span className="text-muted-foreground text-sm font-medium tracking-wider uppercase">AzubiHub</span>
             </div>
-            <span className="text-muted-foreground text-sm font-medium tracking-wider uppercase">AzubiHub</span>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => logout()} 
+              className="text-muted-foreground hover:text-foreground gap-2"
+            >
+              <HugeiconsIcon icon={Logout01Icon} size={16} />
+              <span className="hidden sm:inline">Abmelden</span>
+            </Button>
           </div>
           <h1 className="text-3xl font-bold text-foreground mt-4">{greeting}</h1>
           <p className="text-muted-foreground mt-1">{today}</p>

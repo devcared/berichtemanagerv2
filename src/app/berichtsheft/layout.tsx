@@ -21,6 +21,7 @@ import { Separator } from '@/components/ui/separator'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { useProfile } from '@/hooks/use-profile'
+import { useAuth } from '@/contexts/AuthContext'
 import {
   HomeIcon,
   CalendarIcon,
@@ -28,6 +29,7 @@ import {
   UserCircleIcon,
   GridViewIcon,
   BookOpenIcon,
+  Logout01Icon,
 } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { cn } from '@/lib/utils'
@@ -54,6 +56,7 @@ function AppSidebar() {
   const pathname = usePathname()
   const router = useRouter()
   const { profile } = useProfile()
+  const { logout } = useAuth()
 
   const initials = profile
     ? `${profile.firstName[0] ?? ''}${profile.lastName[0] ?? ''}`.toUpperCase()
@@ -128,6 +131,16 @@ function AppSidebar() {
                   </SidebarMenuItem>
                 )
               })}
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  onClick={() => logout()}
+                  tooltip="Abmelden"
+                  className="cursor-pointer text-destructive hover:bg-destructive/10 hover:text-destructive"
+                >
+                  <HugeiconsIcon icon={Logout01Icon} size={16} />
+                  <span>Abmelden</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
