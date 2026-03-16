@@ -73,7 +73,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (isLoading) return
 
     const isAuthRoute = pathname.startsWith('/auth/login') || pathname.startsWith('/auth/register')
-    const isSetupRoute = pathname.startsWith('/berichtsheft/profil/setup')
+    const isSetupRoute = pathname.startsWith('/setup')
 
     if (!authState.isAuthenticated) {
       if (!isAuthRoute) {
@@ -82,7 +82,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } else {
       if (authState.needsSetup) {
         if (!isSetupRoute) {
-          router.push('/berichtsheft/profil/setup')
+          router.push('/setup')
         }
       } else {
         if (isAuthRoute || isSetupRoute) {

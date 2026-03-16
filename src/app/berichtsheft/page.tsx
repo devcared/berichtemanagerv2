@@ -193,7 +193,7 @@ export default function BerichtsheftDashboard() {
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => router.push('/berichtsheft/profil/setup')}
+                    onClick={() => router.push('/setup')}
                   >
                     Profil einrichten
                   </Button>

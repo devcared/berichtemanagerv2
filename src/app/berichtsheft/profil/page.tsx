@@ -128,7 +128,7 @@ export default function ProfilPage() {
     return (
       <div className="flex flex-col items-center justify-center flex-1 p-6 gap-4">
         <p className="text-muted-foreground text-sm">Noch kein Profil vorhanden.</p>
-        <Button onClick={() => router.push('/berichtsheft/profil/setup')}>
+        <Button onClick={() => router.push('/setup')}>
           <HugeiconsIcon icon={Add01Icon} size={16} data-icon="inline-start" />
           Profil einrichten
         </Button>
