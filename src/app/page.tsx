@@ -75,11 +75,14 @@ function getGreeting(): string {
 export default function HomePage() {
   const router = useRouter()
   const { profile } = useProfile()
-  const [today, setToday] = useState('')
+  const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => {
-    setToday(format(new Date(), "EEEE, d. MMMM yyyy", { locale: de }))
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setIsMounted(true)
   }, [])
+
+  const today = isMounted ? format(new Date(), "EEEE, d. MMMM yyyy", { locale: de }) : ''
 
   const greeting = `${getGreeting()}${profile ? `, ${profile.firstName}` : ''}!`
 
