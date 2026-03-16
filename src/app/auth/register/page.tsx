@@ -6,22 +6,22 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-
 import { useAuth } from '@/contexts/AuthContext'
 
-export default function LoginPage() {
-  const { login } = useAuth()
+export default function RegisterPage() {
+  const { register } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleRegister = (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
-    // Simuliere einen Login-Vorgang
+    // Simuliere einen Registrierungs-Vorgang
     setTimeout(() => {
       setIsLoading(false)
-      login()
+      register() // ruft setAuth mit needsSetup: true auf und leitet zu /auth/setup weiter
     }, 1500)
   }
 
@@ -35,22 +35,22 @@ export default function LoginPage() {
           </div>
           <div className="text-center">
             <span className="text-foreground text-xl font-bold tracking-wider uppercase">AzubiHub</span>
-            <p className="text-sm text-muted-foreground mt-1">Dein Ausbildungsassistent</p>
+            <p className="text-sm text-muted-foreground mt-1">Starte in deine Ausbildung</p>
           </div>
         </div>
 
-        {/* Login Card */}
+        {/* Register Card */}
         <Card className="border border-border bg-card shadow-lg shadow-primary/5 relative overflow-hidden transition-all duration-300">
           <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary/30 via-primary to-primary/30" />
           
           <CardHeader className="space-y-2 pb-6 pt-8 text-center">
-            <CardTitle className="text-2xl font-bold">Willkommen zurück</CardTitle>
+            <CardTitle className="text-2xl font-bold">Konto erstellen</CardTitle>
             <CardDescription className="text-sm">
-              Bitte melde dich an, um fortzufahren.
+              Registriere dich, um loszulegen.
             </CardDescription>
           </CardHeader>
           
-          <form onSubmit={handleLogin}>
+          <form onSubmit={handleRegister}>
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
@@ -67,17 +67,9 @@ export default function LoginPage() {
                 />
               </div>
               <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="password" className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
-                    Passwort
-                  </Label>
-                  <Link
-                    href="#"
-                    className="text-xs text-primary hover:text-primary/80 transition-colors font-medium"
-                  >
-                    Vergessen?
-                  </Link>
-                </div>
+                <Label htmlFor="password" className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
+                  Passwort
+                </Label>
                 <Input
                   id="password"
                   type="password"
@@ -88,34 +80,48 @@ export default function LoginPage() {
                   className="bg-background h-11 transition-shadow hover:border-primary/50 focus-visible:ring-primary/20"
                 />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword" className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
+                  Passwort bestätigen
+                </Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  placeholder="••••••••"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  className="bg-background h-11 transition-shadow hover:border-primary/50 focus-visible:ring-primary/20"
+                />
+              </div>
             </CardContent>
             
             <CardFooter className="flex flex-col gap-5 pt-2 pb-8">
               <Button
                 type="submit"
                 className="w-full h-11 text-base font-medium relative overflow-hidden group"
-                disabled={isLoading}
+                disabled={isLoading || password !== confirmPassword || password === ''}
               >
                 {isLoading ? (
                   <div className="flex items-center gap-2">
                     <span className="size-5 rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground animate-spin" />
-                    <span>Anmelden...</span>
+                    <span>Registrieren...</span>
                   </div>
                 ) : (
                   <span className="relative z-10 flex items-center justify-center gap-2">
-                    Anmelden
+                    Registrieren
                   </span>
                 )}
                 <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out" />
               </Button>
               
               <div className="text-center text-sm">
-                <span className="text-muted-foreground">Noch keinen Account? </span>
+                <span className="text-muted-foreground">Bereits einen Account? </span>
                 <Link
-                  href="/auth/register"
+                  href="/auth/login"
                   className="text-primary hover:underline font-medium transition-colors"
                 >
-                  Registrieren
+                  Anmelden
                 </Link>
               </div>
             </CardFooter>

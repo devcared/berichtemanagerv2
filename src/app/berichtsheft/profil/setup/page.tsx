@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { useProfile } from '@/hooks/use-profile'
+import { useAuth } from '@/contexts/AuthContext'
 import type { TrainingProfile, ReportType } from '@/types'
 import { cn } from '@/lib/utils'
 import {
@@ -77,6 +78,7 @@ function StepIndicator({ steps, current }: StepIndicatorProps) {
 export default function ProfilSetupPage() {
   const router = useRouter()
   const { saveProfile } = useProfile()
+  const { completeSetup } = useAuth()
   const [step, setStep] = useState(0)
   const [isSaving, setIsSaving] = useState(false)
 
@@ -138,7 +140,7 @@ export default function ProfilSetupPage() {
         updatedAt: now,
       }
       await saveProfile(profile)
-      router.push('/berichtsheft')
+      completeSetup()
     } finally {
       setIsSaving(false)
     }
