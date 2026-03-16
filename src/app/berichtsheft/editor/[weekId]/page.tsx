@@ -25,6 +25,7 @@ import {
   Delete02Icon,
   ViewIcon,
   PrinterIcon,
+  Edit02Icon,
 } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 
@@ -241,14 +242,32 @@ export default function EditorPage() {
       {/* Main Content Area */}
       <div className="flex-1 w-full max-w-5xl mx-auto p-6 flex flex-col gap-6 print:p-0 print:max-w-full">
         <Tabs value={isPdfReport ? "pdf" : "text"} onValueChange={(v) => setIsPdfReport(v === "pdf")} className="w-full">
-          <TabsList className="mb-6 grid w-full grid-cols-2 max-w-sm mx-auto print:hidden border border-border bg-card p-1 rounded-xl">
-            <TabsTrigger value="text" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              Text-Bericht
-            </TabsTrigger>
-            <TabsTrigger value="pdf" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              PDF-Upload
-            </TabsTrigger>
-          </TabsList>
+          <div className="mb-10 flex justify-center print:hidden">
+            <TabsList className="grid w-full grid-cols-2 max-w-md h-auto bg-muted/40 p-1.5 rounded-[1.25rem] border border-border/60 shadow-inner">
+              <TabsTrigger 
+                value="text" 
+                className="rounded-xl py-3 px-2 data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm data-[state=active]:border-border/50 transition-all border border-transparent font-medium"
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className={cn("p-1.5 rounded-lg transition-colors", !isPdfReport ? "bg-primary/15 text-primary" : "text-muted-foreground")}>
+                    <HugeiconsIcon icon={Edit02Icon} size={18} />
+                  </div>
+                  Text-Editor
+                </div>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="pdf" 
+                className="rounded-xl py-3 px-2 data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm data-[state=active]:border-border/50 transition-all border border-transparent font-medium"
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className={cn("p-1.5 rounded-lg transition-colors", isPdfReport ? "bg-primary/15 text-primary" : "text-muted-foreground")}>
+                    <HugeiconsIcon icon={FileUploadIcon} size={18} />
+                  </div>
+                  PDF anhängen
+                </div>
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* TEXT EDITOR TAB */}
           <TabsContent value="text" className="space-y-6 m-0 print:block">
