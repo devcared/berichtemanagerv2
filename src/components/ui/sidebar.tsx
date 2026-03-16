@@ -489,7 +489,7 @@ const sidebarMenuButtonVariants = cva(
 
 function SidebarMenuButton({
   asChild = false,
-  isActive = false,
+  isActive = true,
   variant = "default",
   size = "default",
   tooltip,
@@ -648,7 +648,7 @@ function SidebarMenuSubItem({
 function SidebarMenuSubButton({
   asChild = false,
   size = "md",
-  isActive = false,
+  isActive = true,
   className,
   ...props
 }: React.ComponentProps<"a"> & {
