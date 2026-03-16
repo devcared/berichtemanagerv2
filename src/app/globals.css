@@ -2,40 +2,56 @@
 
 @layer base {
   :root {
-    --background: 222 47% 5%;
-    --foreground: 220 15% 95%;
-    --card: 220 30% 10%;
-    --card-foreground: 220 15% 95%;
-    --popover: 220 30% 10%;
-    --popover-foreground: 220 15% 95%;
-    --primary: 217 91% 60%;
+    /* Main background (black tone) */
+    --background: 0 0% 6%;
+    --foreground: 0 0% 95%;
+
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 95%;
+
+    --popover: 0 0% 10%;
+    --popover-foreground: 0 0% 95%;
+
+    /* RED PRIMARY */
+    --primary: 0 84% 55%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 220 25% 15%;
-    --secondary-foreground: 220 15% 75%;
-    --muted: 220 25% 13%;
-    --muted-foreground: 220 10% 55%;
-    --accent: 220 25% 15%;
-    --accent-foreground: 220 15% 95%;
+
+    --secondary: 0 0% 16%;
+    --secondary-foreground: 0 0% 75%;
+
+    --muted: 0 0% 14%;
+    --muted-foreground: 0 0% 55%;
+
+    --accent: 0 0% 16%;
+    --accent-foreground: 0 0% 95%;
+
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 220 20% 17%;
-    --input: 220 25% 12%;
-    --ring: 217 91% 60%;
+
+    --border: 0 0% 18%;
+    --input: 0 0% 14%;
+    --ring: 0 84% 55%;
+
     --radius: 0rem;
+
     /* Status colors */
     --status-success: 160 84% 39%;
     --status-warning: 38 92% 50%;
     --status-error: 0 84% 60%;
     --status-info: 199 89% 48%;
-    /* Sidebar */
-    --sidebar: 220 30% 8%;
-    --sidebar-foreground: 220 15% 85%;
-    --sidebar-primary: 217 91% 60%;
+
+    /* Sidebar (dark neutral instead of blue) */
+    --sidebar: 0 0% 8%;
+    --sidebar-foreground: 0 0% 85%;
+
+    --sidebar-primary: 0 84% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 25% 14%;
-    --sidebar-accent-foreground: 220 15% 90%;
-    --sidebar-border: 220 20% 15%;
-    --sidebar-ring: 217 91% 60%;
+
+    --sidebar-accent: 0 0% 14%;
+    --sidebar-accent-foreground: 0 0% 90%;
+
+    --sidebar-border: 0 0% 16%;
+    --sidebar-ring: 0 84% 55%;
   }
 }
 
