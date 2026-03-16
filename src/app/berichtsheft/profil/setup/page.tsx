@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -76,7 +75,6 @@ function StepIndicator({ steps, current }: StepIndicatorProps) {
 }
 
 export default function ProfilSetupPage() {
-  const router = useRouter()
   const { saveProfile } = useProfile()
   const { completeSetup } = useAuth()
   const [step, setStep] = useState(0)

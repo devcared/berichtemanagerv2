@@ -14,15 +14,19 @@ export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [errorMsg, setErrorMsg] = useState('')
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
-    // Simuliere einen Login-Vorgang
-    setTimeout(() => {
+    setErrorMsg('')
+    
+    const { error } = await login(email, password)
+    if (error) {
+      setErrorMsg(error)
       setIsLoading(false)
-      login()
-    }, 1500)
+    }
+    // Bei Erfolg greift der useEffect im AuthContext und leitet automatisch weiter
   }
 
   return (
@@ -41,7 +45,7 @@ export default function LoginPage() {
 
         {/* Login Card */}
         <Card className="border border-border bg-card shadow-lg shadow-primary/5 relative overflow-hidden transition-all duration-300">
-          <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary/30 via-primary to-primary/30" />
+          <div className="absolute inset-x-0 top-0 h-1 bg-primary" />
           
           <CardHeader className="space-y-2 pb-6 pt-8 text-center">
             <CardTitle className="text-2xl font-bold">Willkommen zurück</CardTitle>
@@ -91,6 +95,11 @@ export default function LoginPage() {
             </CardContent>
             
             <CardFooter className="flex flex-col gap-5 pt-2 pb-8">
+              {errorMsg && (
+                <div className="w-full p-3 bg-destructive/15 text-destructive border border-destructive/20 rounded-md text-sm text-center">
+                  {errorMsg}
+                </div>
+              )}
               <Button
                 type="submit"
                 className="w-full h-11 text-base font-medium relative overflow-hidden group"

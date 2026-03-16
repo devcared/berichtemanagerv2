@@ -2,6 +2,8 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
+import type { User } from '@supabase/supabase-js'
 
 interface AuthState {
   isAuthenticated: boolean
@@ -9,11 +11,12 @@ interface AuthState {
 }
 
 interface AuthContextType extends AuthState {
-  login: () => void
-  register: () => void
-  completeSetup: () => void
-  logout: () => void
+  login: (email: string, password: string) => Promise<{ error?: string }>
+  register: (email: string, password: string) => Promise<{ error?: string }>
+  completeSetup: () => Promise<void>
+  logout: () => Promise<void>
   isLoading: boolean
+  user: User | null
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -21,22 +24,50 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
+  const supabase = createClient()
   
   const [authState, setAuthState] = useState<AuthState>({
     isAuthenticated: false,
     needsSetup: false,
   })
+  const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // Check localStorage on mount
-    const storedAuth = localStorage.getItem('azubihub_auth')
-    if (storedAuth) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setAuthState(JSON.parse(storedAuth))
+    let mounted = true
+
+    async function initializeAuth() {
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (mounted) {
+        setUser(session?.user ?? null)
+        setAuthState({
+          isAuthenticated: !!session,
+          // Wir lesen needsSetup aus den user_metadata (falls vorhanden) - Standardmäßig ist es false
+          needsSetup: session?.user?.user_metadata?.needsSetup === true,
+        })
+        setIsLoading(false)
+      }
     }
-    setIsLoading(false)
-  }, [])
+
+    initializeAuth()
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (!mounted) return
+        setUser(session?.user ?? null)
+        setAuthState({
+          isAuthenticated: !!session,
+          needsSetup: session?.user?.user_metadata?.needsSetup === true,
+        })
+      }
+    )
+
+    return () => {
+      mounted = false
+      subscription.unsubscribe()
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (isLoading) return
@@ -61,35 +92,49 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [authState.isAuthenticated, authState.needsSetup, isLoading, pathname, router])
 
-  const saveAuth = (state: AuthState) => {
-    localStorage.setItem('azubihub_auth', JSON.stringify(state))
-    setAuthState(state)
+  const login = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
+    if (error) return { error: error.message }
+    // Event listener wird state aktualisieren und useEffect wird router pushed
+    return {}
   }
 
-  const login = () => {
-    saveAuth({ isAuthenticated: true, needsSetup: false })
-    router.push('/')
+  const register = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          needsSetup: true, // Markiert den User, dass das Profil-Setup ansteht
+        }
+      }
+    })
+    if (error) return { error: error.message }
+    // Bei Erfolg meldet Supabase den User ggf. direkt an oder erwartet E-Mail Bestätigung (hier gehen wir von auto-login aus)
+    return {}
   }
 
-  const register = () => {
-    saveAuth({ isAuthenticated: true, needsSetup: true })
-    router.push('/berichtsheft/profil/setup')
+  const completeSetup = async () => {
+    // Profil Setup als "Erledigt" markieren
+    await supabase.auth.updateUser({
+      data: { needsSetup: false }
+    })
+    
+    // Lokalen State manuell updaten, damit der Guard sofort anspringt 
+    // (obwohl update_user auch ein onAuthStateChange Triggert)
+    setAuthState(prev => ({ ...prev, needsSetup: false }))
   }
 
-  const completeSetup = () => {
-    saveAuth({ isAuthenticated: true, needsSetup: false })
-    router.push('/')
-  }
-
-  const logout = () => {
-    localStorage.removeItem('azubihub_auth')
-    setAuthState({ isAuthenticated: false, needsSetup: false })
-    router.push('/auth/login')
+  const logout = async () => {
+    await supabase.auth.signOut()
+    // Event listener kümmert sich um den Rest
   }
 
   return (
-    <AuthContext.Provider value={{ ...authState, login, register, completeSetup, logout, isLoading }}>
-      {/* While initial load happens, we can just show nothing or a full screen loader to prevent flash of content */}
+    <AuthContext.Provider value={{ ...authState, login, register, completeSetup, logout, isLoading, user }}>
       {isLoading ? (
         <div className="min-h-screen flex items-center justify-center bg-[hsl(var(--background))]">
            <span className="size-8 rounded-full border-4 border-primary/30 border-t-primary animate-spin" />

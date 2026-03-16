@@ -14,15 +14,24 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [errorMsg, setErrorMsg] = useState('')
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (password !== confirmPassword) {
+      setErrorMsg('Die Passwörter stimmen nicht überein.')
+      return
+    }
+    
     setIsLoading(true)
-    // Simuliere einen Registrierungs-Vorgang
-    setTimeout(() => {
+    setErrorMsg('')
+    
+    const { error } = await register(email, password)
+    if (error) {
+      setErrorMsg(error)
       setIsLoading(false)
-      register() // ruft setAuth mit needsSetup: true auf und leitet zu /auth/setup weiter
-    }, 1500)
+    }
+    // Bei Erfolg greift das Routing aus dem AuthContext
   }
 
   return (
@@ -41,7 +50,7 @@ export default function RegisterPage() {
 
         {/* Register Card */}
         <Card className="border border-border bg-card shadow-lg shadow-primary/5 relative overflow-hidden transition-all duration-300">
-          <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary/30 via-primary to-primary/30" />
+          <div className="absolute inset-x-0 top-0 h-1 bg-primary" />
           
           <CardHeader className="space-y-2 pb-6 pt-8 text-center">
             <CardTitle className="text-2xl font-bold">Konto erstellen</CardTitle>
@@ -97,6 +106,11 @@ export default function RegisterPage() {
             </CardContent>
             
             <CardFooter className="flex flex-col gap-5 pt-2 pb-8">
+              {errorMsg && (
+                <div className="w-full p-3 bg-destructive/15 text-destructive border border-destructive/20 rounded-md text-sm text-center mb-2">
+                  {errorMsg}
+                </div>
+              )}
               <Button
                 type="submit"
                 className="w-full h-11 text-base font-medium relative overflow-hidden group"
