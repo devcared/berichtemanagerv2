@@ -460,12 +460,13 @@ export default function EditorPage() {
                   <p className="text-muted-foreground text-sm mb-6 leading-relaxed">
                     Statt das Dashboard zu nutzen, kannst du hier deinen eigenen Bericht als PDF hochladen.
                   </p>
-                  <Button asChild className="relative overflow-hidden cursor-pointer h-12 w-full text-base font-medium">
-                    <Label htmlFor="pdf-upload" className="cursor-pointer">
-                      <HugeiconsIcon icon={FileUploadIcon} size={20} className="mr-2" />
-                      PDF Auswählen
-                    </Label>
-                  </Button>
+                  <label 
+                    htmlFor="pdf-upload" 
+                    className="relative overflow-hidden cursor-pointer h-12 w-full text-base font-medium flex items-center justify-center bg-primary text-primary-foreground hover:bg-primary/90 rounded-md transition-colors"
+                  >
+                    <HugeiconsIcon icon={FileUploadIcon} size={20} className="mr-2" />
+                    PDF Auswählen
+                  </label>
                   <input
                     type="file"
                     id="pdf-upload"

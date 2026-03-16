@@ -35,6 +35,8 @@ CREATE TABLE weekly_reports (
   training_year INTEGER NOT NULL,
   status TEXT NOT NULL CHECK (status IN ('draft', 'completed', 'exported')) DEFAULT 'draft',
   total_hours NUMERIC NOT NULL DEFAULT 0,
+  is_pdf_report BOOLEAN NOT NULL DEFAULT false,
+  pdf_data TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   exported_at TIMESTAMPTZ,
