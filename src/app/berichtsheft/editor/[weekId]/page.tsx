@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Progress } from '@/components/ui/progress'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tabs, TabsContent } from '@/components/ui/tabs'
 import { WeekSelector } from '@/components/berichtsheft/week-selector'
 import { useReports } from '@/hooks/use-reports'
 import { useProfile } from '@/hooks/use-profile'
@@ -83,6 +83,8 @@ export default function EditorPage() {
   const [isPdfReport, setIsPdfReport] = useState(false)
   const [pdfData, setPdfData] = useState<string | undefined>(undefined)
 
+  const [isNewReport, setIsNewReport] = useState(false)
+
   const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const targetHours = profile?.weeklyHours ?? 40
 
@@ -90,15 +92,17 @@ export default function EditorPage() {
     r => r.calendarWeek === week && r.year === year
   )
 
-  useEffect(() => {
+    useEffect(() => {
     setIsLoaded(false)
     if (currentReport) {
       setEntries(currentReport.entries)
       setStatus(currentReport.status)
       setIsPdfReport(currentReport.isPdfReport ?? false)
       setPdfData(currentReport.pdfData)
+      setIsNewReport(false)
       setIsLoaded(true)
     } else {
+      setIsNewReport(true)
       const weekStart = getWeekStart(year, week)
       const newReportId = generateId()
       const defaultEntries = createDefaultEntries(newReportId, weekStart)
@@ -152,7 +156,7 @@ export default function EditorPage() {
 
   // Auto-save
   useEffect(() => {
-    if (!isLoaded) return
+    if (!isLoaded || isNewReport) return
     if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current)
     autoSaveTimer.current = setTimeout(() => {
       handleSave('draft')
@@ -191,6 +195,65 @@ export default function EditorPage() {
 
   const handleExport = () => {
     window.print()
+  }
+
+  const handleChooseType = (isPdf: boolean) => {
+    setIsPdfReport(isPdf)
+    setIsNewReport(false)
+    handleSave('draft')
+  }
+
+  if (isLoaded && isNewReport) {
+    return (
+      <div className="flex flex-col min-h-[calc(100vh-80px)] items-center justify-center p-6 bg-background">
+        <div className="max-w-md w-full space-y-8 animate-in fade-in zoom-in duration-500">
+          <div className="text-center space-y-3">
+            <h1 className="text-3xl font-extrabold tracking-tight">Nachweis erstellen</h1>
+            <p className="text-muted-foreground text-sm">
+              Wie möchtest du deinen Bericht für KW {week} / {year} erstellen?
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 gap-4 mt-8">
+            <button
+              onClick={() => handleChooseType(false)}
+              className="relative group flex p-6 flex-col items-center justify-center gap-4 rounded-3xl border-2 border-border/60 bg-card hover:bg-muted/30 hover:border-primary/50 transition-all text-center"
+            >
+              <div className="size-16 rounded-2xl bg-primary/10 text-primary flex items-center justify-center group-hover:scale-110 transition-transform">
+                <HugeiconsIcon icon={Edit02Icon} size={32} />
+              </div>
+              <div>
+                <h3 className="font-semibold text-lg text-foreground">Im Editor schreiben</h3>
+                <p className="text-sm border-t border-border mt-3 pt-3 text-muted-foreground">
+                  Schreibe den Bericht bequem direkt hier im System Tag für Tag.
+                </p>
+              </div>
+            </button>
+
+            <button
+              onClick={() => handleChooseType(true)}
+              className="relative group flex p-6 flex-col items-center justify-center gap-4 rounded-3xl border-2 border-border/60 bg-card hover:bg-muted/30 hover:border-primary/50 transition-all text-center"
+            >
+              <div className="size-16 rounded-2xl bg-primary/10 text-primary flex items-center justify-center group-hover:scale-110 transition-transform">
+                <HugeiconsIcon icon={FileUploadIcon} size={32} />
+              </div>
+              <div>
+                <h3 className="font-semibold text-lg text-foreground">PDF hochladen</h3>
+                <p className="text-sm border-t border-border mt-3 pt-3 text-muted-foreground">
+                  Lade einen extern erstellten Bericht (Word, Excel, etc.) als Datei hoch.
+                </p>
+              </div>
+            </button>
+          </div>
+
+          <div className="text-center mt-6">
+            <Button variant="ghost" onClick={() => router.push('/berichtsheft')}>
+              Abbrechen
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -241,34 +304,7 @@ export default function EditorPage() {
 
       {/* Main Content Area */}
       <div className="flex-1 w-full max-w-5xl mx-auto p-6 flex flex-col gap-6 print:p-0 print:max-w-full">
-        <Tabs value={isPdfReport ? "pdf" : "text"} onValueChange={(v) => setIsPdfReport(v === "pdf")} className="w-full">
-          <div className="mb-10 flex justify-center print:hidden">
-            <TabsList className="grid w-full grid-cols-2 max-w-md h-auto bg-muted/40 p-1.5 rounded-[1.25rem] border border-border/60 shadow-inner">
-              <TabsTrigger 
-                value="text" 
-                className="rounded-xl py-3 px-2 data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm data-[state=active]:border-border/50 transition-all border border-transparent font-medium"
-              >
-                <div className="flex items-center gap-2.5">
-                  <div className={cn("p-1.5 rounded-lg transition-colors", !isPdfReport ? "bg-primary/15 text-primary" : "text-muted-foreground")}>
-                    <HugeiconsIcon icon={Edit02Icon} size={18} />
-                  </div>
-                  Text-Editor
-                </div>
-              </TabsTrigger>
-              <TabsTrigger 
-                value="pdf" 
-                className="rounded-xl py-3 px-2 data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm data-[state=active]:border-border/50 transition-all border border-transparent font-medium"
-              >
-                <div className="flex items-center gap-2.5">
-                  <div className={cn("p-1.5 rounded-lg transition-colors", isPdfReport ? "bg-primary/15 text-primary" : "text-muted-foreground")}>
-                    <HugeiconsIcon icon={FileUploadIcon} size={18} />
-                  </div>
-                  PDF anhängen
-                </div>
-              </TabsTrigger>
-            </TabsList>
-          </div>
-
+        <Tabs value={isPdfReport ? "pdf" : "text"} className="w-full">
           {/* TEXT EDITOR TAB */}
           <TabsContent value="text" className="space-y-6 m-0 print:block">
             
