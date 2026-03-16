@@ -13,6 +13,8 @@ interface AuthState {
 interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<{ error?: string }>
   register: (email: string, password: string) => Promise<{ error?: string, needsEmailVerification?: boolean }>
+  resetPassword: (email: string) => Promise<{ error?: string }>
+  updatePassword: (password: string) => Promise<{ error?: string }>
   completeSetup: () => Promise<void>
   logout: () => Promise<void>
   isLoading: boolean
@@ -72,7 +74,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (isLoading) return
 
-    const isAuthRoute = pathname.startsWith('/auth/login') || pathname.startsWith('/auth/register')
+    const isAuthRoute = pathname.startsWith('/auth/login') || pathname.startsWith('/auth/register') || pathname.startsWith('/auth/forgot-password') || pathname.startsWith('/auth/update-password') || pathname.startsWith('/auth/success')
     const isSetupRoute = pathname.startsWith('/setup')
 
     if (!authState.isAuthenticated) {
@@ -146,13 +148,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setAuthState(prev => ({ ...prev, needsSetup: false }))
   }
 
+  const resetPassword = async (email: string) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth/callback?next=/auth/update-password`,
+    })
+    if (error) return { error: error.message }
+    return {}
+  }
+
+  const updatePassword = async (password: string) => {
+    const { error } = await supabase.auth.updateUser({ password })
+    if (error) return { error: error.message }
+    return {}
+  }
+
   const logout = async () => {
     await supabase.auth.signOut()
     // Event listener kümmert sich um den Rest
   }
 
   return (
-    <AuthContext.Provider value={{ ...authState, login, register, completeSetup, logout, isLoading, user }}>
+    <AuthContext.Provider value={{ 
+      ...authState, 
+      login, 
+      register, 
+      resetPassword, 
+      updatePassword, 
+      completeSetup, 
+      logout, 
+      isLoading, 
+      user 
+    }}>
       {isLoading ? (
         <div className="min-h-screen flex items-center justify-center bg-[hsl(var(--background))]">
            <span className="size-8 rounded-full border-4 border-primary/30 border-t-primary animate-spin" />

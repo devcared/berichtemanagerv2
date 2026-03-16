@@ -1,32 +1,40 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-
 import { useAuth } from '@/contexts/AuthContext'
+import { useRouter } from 'next/navigation'
 
-export default function LoginPage() {
-  const { login } = useAuth()
-  const [email, setEmail] = useState('')
+export default function UpdatePasswordPage() {
+  const { updatePassword } = useAuth()
+  const router = useRouter()
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    if (password !== confirmPassword) {
+      setErrorMsg('Die Passwörter stimmen nicht überein.')
+      return
+    }
+    
     setIsLoading(true)
     setErrorMsg('')
     
-    const { error } = await login(email, password)
+    const { error } = await updatePassword(password)
+    
     if (error) {
       setErrorMsg(error)
       setIsLoading(false)
+    } else {
+      router.push('/auth/success?type=password-updated')
     }
-    // Bei Erfolg greift der useEffect im AuthContext und leitet automatisch weiter
   }
 
   return (
@@ -39,49 +47,27 @@ export default function LoginPage() {
           </div>
           <div className="text-center">
             <span className="text-foreground text-xl font-bold tracking-wider uppercase">AzubiHub</span>
-            <p className="text-sm text-muted-foreground mt-1">Dein Ausbildungsassistent</p>
+            <p className="text-sm text-muted-foreground mt-1">Sicherheit</p>
           </div>
         </div>
 
-        {/* Login Card */}
+        {/* Update Card */}
         <Card className="border border-border bg-card shadow-lg shadow-primary/5 relative overflow-hidden transition-all duration-300">
           <div className="absolute inset-x-0 top-0 h-1 bg-primary" />
           
           <CardHeader className="space-y-2 pb-6 pt-8 text-center">
-            <CardTitle className="text-2xl font-bold">Willkommen zurück</CardTitle>
+            <CardTitle className="text-2xl font-bold">Neues Passwort setzen</CardTitle>
             <CardDescription className="text-sm">
-              Bitte melde dich an, um fortzufahren.
+              Gib bitte ein neues, sicheres Passwort ein.
             </CardDescription>
           </CardHeader>
           
-          <form onSubmit={handleLogin}>
+          <form onSubmit={handleUpdate}>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
-                  E-Mail Adresse
+                <Label htmlFor="password" className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
+                  Neues Passwort
                 </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="name@beispiel.de"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="bg-background h-11 transition-shadow hover:border-primary/50 focus-visible:ring-primary/20"
-                />
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="password" className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
-                    Passwort
-                  </Label>
-                  <Link
-                    href="/auth/forgot-password"
-                    className="text-xs text-primary hover:text-primary/80 transition-colors font-medium"
-                  >
-                    Vergessen?
-                  </Link>
-                </div>
                 <Input
                   id="password"
                   type="password"
@@ -92,51 +78,48 @@ export default function LoginPage() {
                   className="bg-background h-11 transition-shadow hover:border-primary/50 focus-visible:ring-primary/20"
                 />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword" className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
+                  Passwort bestätigen
+                </Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  placeholder="••••••••"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  className="bg-background h-11 transition-shadow hover:border-primary/50 focus-visible:ring-primary/20"
+                />
+              </div>
             </CardContent>
             
             <CardFooter className="flex flex-col gap-5 pt-2 pb-8">
               {errorMsg && (
-                <div className="w-full p-3 bg-destructive/15 text-destructive border border-destructive/20 rounded-md text-sm text-center">
+                <div className="w-full p-3 bg-destructive/15 text-destructive border border-destructive/20 rounded-md text-sm text-center mb-2">
                   {errorMsg}
                 </div>
               )}
               <Button
                 type="submit"
                 className="w-full h-11 text-base font-medium relative overflow-hidden group"
-                disabled={isLoading}
+                disabled={isLoading || !password || password !== confirmPassword}
               >
                 {isLoading ? (
                   <div className="flex items-center gap-2">
                     <span className="size-5 rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground animate-spin" />
-                    <span>Anmelden...</span>
+                    <span>Aktualisieren...</span>
                   </div>
                 ) : (
                   <span className="relative z-10 flex items-center justify-center gap-2">
-                    Anmelden
+                    Passwort speichern
                   </span>
                 )}
                 <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out" />
               </Button>
-              
-              <div className="text-center text-sm">
-                <span className="text-muted-foreground">Noch keinen Account? </span>
-                <Link
-                  href="/auth/register"
-                  className="text-primary hover:underline font-medium transition-colors"
-                >
-                  Registrieren
-                </Link>
-              </div>
             </CardFooter>
           </form>
         </Card>
-
-        {/* Footer */}
-        <div className="mt-12 text-center opacity-60 hover:opacity-100 transition-opacity">
-          <p className="text-xs text-muted-foreground">
-            &copy; {new Date().getFullYear()} AzubiHub. Alle Rechte vorbehalten.
-          </p>
-        </div>
       </div>
     </div>
   )
