@@ -43,6 +43,8 @@ export interface WeeklyReport {
   status: ReportStatus
   entries: DailyEntry[]
   totalHours: number
+  isPdfReport?: boolean
+  pdfData?: string
   createdAt: string
   updatedAt: string
   exportedAt?: string
