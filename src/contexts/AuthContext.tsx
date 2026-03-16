@@ -103,18 +103,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const register = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          needsSetup: true, // Markiert den User, dass das Profil-Setup ansteht
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            needsSetup: true,
+          }
         }
+      })
+      
+      if (error) {
+        return { error: error.message }
       }
-    })
-    if (error) return { error: error.message }
-    // Bei Erfolg meldet Supabase den User ggf. direkt an oder erwartet E-Mail Bestätigung (hier gehen wir von auto-login aus)
-    return {}
+      
+      return {}
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        return { error: e.message }
+      }
+      return { error: 'Ein unerwarteter Fehler ist aufgetreten' }
+    }
   }
 
   const completeSetup = async () => {
