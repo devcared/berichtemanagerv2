@@ -53,7 +53,7 @@ const CATEGORY_OPTIONS: { value: ActivityCategory; label: string }[] = [
 ]
 
 function generateId(): string {
-  return `tpl-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
+  return crypto.randomUUID()
 }
 
 const emptyForm = (): Omit<ActivityTemplate, 'id' | 'createdAt' | 'usageCount'> => ({
