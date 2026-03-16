@@ -200,7 +200,7 @@ export default function EditorPage() {
   const handleChooseType = (isPdf: boolean) => {
     setIsPdfReport(isPdf)
     setIsNewReport(false)
-    handleSave('draft')
+    // we let the useEffect auto-save handle saving after state update to prevent saving old false value.
   }
 
   if (isLoaded && isNewReport) {
