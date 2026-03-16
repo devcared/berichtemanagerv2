@@ -153,3 +153,19 @@ CREATE POLICY "Users can update their own templates"
 
 CREATE POLICY "Users can delete their own templates"
   ON activity_templates FOR DELETE USING (profile_id = auth.uid());
+
+-- 4. Supabase Storage (Buckets) einrichten
+-- Erstellt den Bucket "berichtsheft-pdfs", falls er noch nicht existiert (die Funktion ist in Supabase Standard)
+INSERT INTO storage.buckets (id, name, public) 
+VALUES ('berichtsheft-pdfs', 'berichtsheft-pdfs', true)
+ON CONFLICT (id) DO NOTHING;
+
+-- Storage Policies
+CREATE POLICY "Jedermann kann PDFs lesen" 
+ON storage.objects FOR SELECT USING (bucket_id = 'berichtsheft-pdfs');
+
+CREATE POLICY "Nutzer können ihre eigenen PDFs hochladen" 
+ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'berichtsheft-pdfs' AND auth.role() = 'authenticated');
+
+CREATE POLICY "Nutzer können ihre eigenen PDFs löschen" 
+ON storage.objects FOR DELETE USING (bucket_id = 'berichtsheft-pdfs' AND auth.role() = 'authenticated');

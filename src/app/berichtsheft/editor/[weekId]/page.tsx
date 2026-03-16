@@ -15,6 +15,7 @@ import { Tabs, TabsContent } from '@/components/ui/tabs'
 import { WeekSelector } from '@/components/berichtsheft/week-selector'
 import { useReports } from '@/hooks/use-reports'
 import { useProfile } from '@/hooks/use-profile'
+import { createClient } from '@/lib/supabase/client'
 import { parseWeekId, formatWeekId, getWeekStart } from '@/lib/week-utils'
 import type { WeeklyReport, DailyEntry, ActivityCategory, ReportStatus } from '@/types'
 import { cn } from '@/lib/utils'
@@ -82,6 +83,8 @@ export default function EditorPage() {
   // PDF Features
   const [isPdfReport, setIsPdfReport] = useState(false)
   const [pdfData, setPdfData] = useState<string | undefined>(undefined)
+  const [isUploadingPdf, setIsUploadingPdf] = useState(false)
+  const supabase = createClient()
 
   const [isNewReport, setIsNewReport] = useState(false)
 
@@ -179,15 +182,33 @@ export default function EditorPage() {
 
   const weekStart = getWeekStart(year, week)
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file && file.type === 'application/pdf') {
-      const reader = new FileReader()
-      reader.onload = (event) => {
-        setPdfData(event.target?.result as string)
+      setIsUploadingPdf(true)
+      try {
+        const fileExt = file.name.split('.').pop()
+        const fileName = `${profile?.id ?? 'user'}-${year}-${week}-${Date.now()}.${fileExt}`
+        const filePath = `reports/${fileName}`
+        
+        const { error: uploadError } = await supabase.storage
+          .from('berichtsheft-pdfs')
+          .upload(filePath, file)
+          
+        if (uploadError) throw uploadError
+
+        const { data } = supabase.storage
+          .from('berichtsheft-pdfs')
+          .getPublicUrl(filePath)
+          
+        setPdfData(data.publicUrl)
         setIsPdfReport(true)
+      } catch (error) {
+        console.error("Upload error:", error)
+        alert("Fehler beim Hochladen der PDF.")
+      } finally {
+        setIsUploadingPdf(false)
       }
-      reader.readAsDataURL(file)
     } else {
       alert("Es sind nur PDF-Dateien erlaubt.")
     }
@@ -217,9 +238,9 @@ export default function EditorPage() {
           <div className="grid grid-cols-1 gap-4 mt-8">
             <button
               onClick={() => handleChooseType(false)}
-              className="relative group flex p-6 flex-col items-center justify-center gap-4 bg-card hover:bg-muted/30 hover:border-primary/50 transition-all text-center"
+              className="relative group flex p-6 flex-col items-center justify-center gap-4 bg-card hover:bg-muted/30 hover:border-primary/50 transition-all text-center rounded-3xl border-2 border-border/60"
             >
-              <div className="size-16 bg-primary/10 text-primary flex items-center justify-center group-hover:scale-110 transition-transform">
+              <div className="size-16 bg-primary/10 text-primary flex items-center justify-center group-hover:scale-110 transition-transform rounded-2xl">
                 <HugeiconsIcon icon={Edit02Icon} size={32} />
               </div>
               <div>
@@ -232,9 +253,9 @@ export default function EditorPage() {
 
             <button
               onClick={() => handleChooseType(true)}
-              className="relative group flex p-6 flex-col items-center justify-center gap-4 bg-card hover:bg-muted/30 hover:border-primary/50 transition-all text-center"
+              className="relative group flex p-6 flex-col items-center justify-center gap-4 bg-card hover:bg-muted/30 hover:border-primary/50 transition-all text-center rounded-3xl border-2 border-border/60"
             >
-              <div className="size-16 bg-primary/10 text-primary flex items-center justify-center group-hover:scale-110 transition-transform">
+              <div className="size-16 bg-primary/10 text-primary flex items-center justify-center group-hover:scale-110 transition-transform rounded-2xl">
                 <HugeiconsIcon icon={FileUploadIcon} size={32} />
               </div>
               <div>
@@ -462,10 +483,19 @@ export default function EditorPage() {
                   </p>
                   <label 
                     htmlFor="pdf-upload" 
-                    className="relative overflow-hidden cursor-pointer h-12 w-full text-base font-medium flex items-center justify-center bg-primary text-primary-foreground hover:bg-primary/90 rounded-md transition-colors"
+                    className={cn("relative overflow-hidden h-12 w-full text-base font-medium flex items-center justify-center bg-primary text-primary-foreground rounded-md transition-colors", isUploadingPdf ? "opacity-70 cursor-not-allowed" : "cursor-pointer hover:bg-primary/90")}
                   >
-                    <HugeiconsIcon icon={FileUploadIcon} size={20} className="mr-2" />
-                    PDF Auswählen
+                    {isUploadingPdf ? (
+                      <span className="flex items-center gap-2">
+                        <span className="size-5 rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground animate-spin" />
+                        Lädt hoch...
+                      </span>
+                    ) : (
+                      <>
+                        <HugeiconsIcon icon={FileUploadIcon} size={20} className="mr-2" />
+                        PDF Auswählen
+                      </>
+                    )}
                   </label>
                   <input
                     type="file"
@@ -473,6 +503,7 @@ export default function EditorPage() {
                     accept="application/pdf"
                     className="hidden"
                     onChange={handleFileUpload}
+                    disabled={isUploadingPdf}
                   />
                 </div>
               )}
