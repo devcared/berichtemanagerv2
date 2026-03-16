@@ -217,7 +217,7 @@ export default function EditorPage() {
           <div className="grid grid-cols-1 gap-4 mt-8">
             <button
               onClick={() => handleChooseType(false)}
-              className="relative group flex p-6 flex-col items-center justify-center gap-4 rounded-3xl border-2 border-border/60 bg-card hover:bg-muted/30 hover:border-primary/50 transition-all text-center"
+              className="relative group flex p-6 flex-col items-center justify-center gap-4 border-2 border-border/60 bg-card hover:bg-muted/30 hover:border-primary/50 transition-all text-center"
             >
               <div className="size-16 bg-primary/10 text-primary flex items-center justify-center group-hover:scale-110 transition-transform">
                 <HugeiconsIcon icon={Edit02Icon} size={32} />
@@ -232,7 +232,7 @@ export default function EditorPage() {
 
             <button
               onClick={() => handleChooseType(true)}
-              className="relative group flex p-6 flex-col items-center justify-center gap-4 rounded-3xl border-2 border-border/60 bg-card hover:bg-muted/30 hover:border-primary/50 transition-all text-center"
+              className="relative group flex p-6 flex-col items-center justify-center gap-4 border-2 border-border/60 bg-card hover:bg-muted/30 hover:border-primary/50 transition-all text-center"
             >
               <div className="size-16 bg-primary/10 text-primary flex items-center justify-center group-hover:scale-110 transition-transform">
                 <HugeiconsIcon icon={FileUploadIcon} size={32} />
