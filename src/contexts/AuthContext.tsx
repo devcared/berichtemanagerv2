@@ -74,20 +74,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (isLoading) return
 
-    const isAuthRoute = pathname.startsWith('/auth/login') || pathname.startsWith('/auth/register') || pathname.startsWith('/auth/forgot-password') || pathname.startsWith('/auth/update-password') || pathname.startsWith('/auth/success')
+    const isLoginRegisterRoute = pathname.startsWith('/auth/login') || pathname.startsWith('/auth/register') || pathname.startsWith('/auth/forgot-password')
+    const isUpdatePasswordRoute = pathname.startsWith('/auth/update-password')
+    const isSuccessRoute = pathname.startsWith('/auth/success')
     const isSetupRoute = pathname.startsWith('/setup')
 
     if (!authState.isAuthenticated) {
-      if (!isAuthRoute) {
+      if (!isLoginRegisterRoute && !isSuccessRoute && !isUpdatePasswordRoute) {
         router.push('/auth/login')
       }
     } else {
+      // Immer erlauben auf Erfolgs- oder Passwort-Update-Seite zu bleiben (auch wenn eingeloggt!)
+      if (isUpdatePasswordRoute || isSuccessRoute) {
+        return
+      }
+
       if (authState.needsSetup) {
         if (!isSetupRoute) {
           router.push('/setup')
         }
       } else {
-        if (isAuthRoute || isSetupRoute) {
+        if (isLoginRegisterRoute || isSetupRoute) {
           router.push('/')
         }
       }
