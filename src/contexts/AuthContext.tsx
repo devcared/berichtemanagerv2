@@ -12,7 +12,7 @@ interface AuthState {
 
 interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<{ error?: string }>
-  register: (email: string, password: string) => Promise<{ error?: string }>
+  register: (email: string, password: string) => Promise<{ error?: string, needsEmailVerification?: boolean }>
   completeSetup: () => Promise<void>
   logout: () => Promise<void>
   isLoading: boolean
@@ -104,7 +104,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const register = async (email: string, password: string) => {
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -116,6 +116,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (error) {
         return { error: error.message }
+      }
+      
+      if (data?.user && data.user.identities && data.user.identities.length === 0) {
+        return { error: 'Diese E-Mail-Adresse wird bereits verwendet. Bitte melde dich an.' }
+      }
+
+      if (!data.session) {
+        return { needsEmailVerification: true }
       }
       
       return {}

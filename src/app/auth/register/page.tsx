@@ -15,6 +15,7 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
+  const [successMsg, setSuccessMsg] = useState('')
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -25,13 +26,19 @@ export default function RegisterPage() {
     
     setIsLoading(true)
     setErrorMsg('')
+    setSuccessMsg('')
     
-    const { error } = await register(email, password)
+    const { error, needsEmailVerification } = await register(email, password)
     if (error) {
       setErrorMsg(error)
       setIsLoading(false)
+    } else if (needsEmailVerification) {
+      setSuccessMsg('Erfolgreich! Bitte überprüfe deine E-Mails, um deinen Account zu aktivieren.')
+      setIsLoading(false)
+    } else {
+      // successful login -> redirect happens via AuthContext effect
+      setIsLoading(false)
     }
-    // Bei Erfolg greift das Routing aus dem AuthContext
   }
 
   return (
@@ -109,6 +116,11 @@ export default function RegisterPage() {
               {errorMsg && (
                 <div className="w-full p-3 bg-destructive/15 text-destructive border border-destructive/20 rounded-md text-sm text-center mb-2">
                   {errorMsg}
+                </div>
+              )}
+              {successMsg && (
+                <div className="w-full p-3 bg-emerald-500/15 text-emerald-600 border border-emerald-500/20 rounded-md text-sm text-center mb-2">
+                  {successMsg}
                 </div>
               )}
               <Button
