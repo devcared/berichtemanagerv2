@@ -1,0 +1,71 @@
+export type ReportStatus = 'draft' | 'completed' | 'exported'
+export type ActivityCategory = 'company' | 'vocationalSchool' | 'interCompany' | 'vacation' | 'sick' | 'holiday'
+export type ReportType = 'daily' | 'weekly'
+
+export interface TrainingProfile {
+  id: string
+  firstName: string
+  lastName: string
+  birthDate: string // ISO string
+  occupation: string
+  companyName: string
+  trainerName: string
+  department?: string
+  trainingStart: string
+  trainingEnd: string
+  currentYear: number
+  reportType: ReportType
+  weeklyHours: number
+  schoolDays: number[] // 1=Mo..5=Fr
+  schoolHoursPerDay: number
+  createdAt: string
+  updatedAt: string
+}
+
+export interface DailyEntry {
+  id: string
+  reportId: string
+  date: string
+  category: ActivityCategory
+  activities: string
+  schoolContent?: string
+  hours: number
+  notes?: string
+}
+
+export interface WeeklyReport {
+  id: string
+  calendarWeek: number
+  year: number
+  weekStart: string
+  weekEnd: string
+  trainingYear: number
+  status: ReportStatus
+  entries: DailyEntry[]
+  totalHours: number
+  createdAt: string
+  updatedAt: string
+  exportedAt?: string
+}
+
+export interface ActivityTemplate {
+  id: string
+  profileId: string
+  title: string
+  content: string
+  category: ActivityCategory
+  isFavorite: boolean
+  usageCount: number
+  createdAt: string
+}
+
+export interface AppModule {
+  id: string
+  title: string
+  description: string
+  icon: string
+  accentColor: string
+  routePath: string
+  isEnabled: boolean
+  lastUsed?: string
+}
