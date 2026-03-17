@@ -75,8 +75,12 @@ export default function KalenderPage() {
   function getDotStyle(date: Date): { className: string; show: boolean } {
     const report = getDayReport(date)
     if (!report) return { className: '', show: false }
-    if (report.status === 'completed' || report.status === 'exported')
+    if (report.status === 'approved')
       return { className: 'bg-green-500', show: true }
+    if (report.status === 'submitted' || report.status === 'in_review')
+      return { className: 'bg-blue-500', show: true }
+    if (report.status === 'needs_revision')
+      return { className: 'bg-red-500', show: true }
     if (report.status === 'draft')
       return { className: 'bg-yellow-500', show: true }
     return { className: '', show: false }

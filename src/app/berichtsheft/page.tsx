@@ -48,7 +48,7 @@ export default function BerichtsheftDashboard() {
   const vacationTotal = 25
   const sickTotal = 15
 
-  const completedReports = reports.filter(r => r.status === 'completed' || r.status === 'exported').length
+  const completedReports = reports.filter(r => r.status === 'submitted' || r.status === 'in_review' || r.status === 'approved').length
   const totalReports = reports.length
   const completionPct = totalReports > 0 ? Math.round((completedReports / totalReports) * 100) : 0
 
@@ -86,7 +86,9 @@ export default function BerichtsheftDashboard() {
   function getDayDotColor(date: Date): string | null {
     const report = getDayReport(date)
     if (!report) return null
-    if (report.status === 'completed' || report.status === 'exported') return 'bg-green-500'
+    if (report.status === 'approved') return 'bg-green-500'
+    if (report.status === 'submitted' || report.status === 'in_review') return 'bg-blue-500'
+    if (report.status === 'needs_revision') return 'bg-red-500'
     if (report.status === 'draft') return 'bg-yellow-500'
     return null
   }
@@ -221,8 +223,10 @@ export default function BerichtsheftDashboard() {
           {/* Current Week CTA */}
           <Card className={cn(
             "border",
-            currentReport?.status === 'completed' || currentReport?.status === 'exported'
+            currentReport?.status === 'approved'
               ? 'border-green-500/30 bg-green-500/5'
+              : currentReport?.status === 'submitted' || currentReport?.status === 'in_review'
+              ? 'border-blue-500/30 bg-blue-500/5'
               : 'border-yellow-500/30 bg-yellow-500/5'
           )}>
             <CardContent className="p-4">
@@ -247,10 +251,16 @@ export default function BerichtsheftDashboard() {
                   Jetzt ausfüllen
                 </Button>
               )}
-              {(currentReport?.status === 'completed' || currentReport?.status === 'exported') && (
+              {currentReport?.status === 'approved' && (
                 <div className="flex items-center gap-1.5 text-xs text-green-500 mt-1">
                   <HugeiconsIcon icon={CheckmarkCircle01Icon} size={14} />
-                  <span>Woche abgeschlossen</span>
+                  <span>Freigegeben</span>
+                </div>
+              )}
+              {(currentReport?.status === 'submitted' || currentReport?.status === 'in_review') && (
+                <div className="flex items-center gap-1.5 text-xs text-blue-500 mt-1">
+                  <HugeiconsIcon icon={CheckmarkCircle01Icon} size={14} />
+                  <span>Eingereicht – wartet auf Freigabe</span>
                 </div>
               )}
             </CardContent>

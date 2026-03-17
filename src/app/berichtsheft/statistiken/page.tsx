@@ -73,7 +73,7 @@ export default function StatistikenPage() {
   const { profile } = useProfile()
 
   const stats = useMemo(() => {
-    const completed = reports.filter(r => r.status === 'completed' || r.status === 'exported').length
+    const completed = reports.filter(r => r.status === 'submitted' || r.status === 'in_review' || r.status === 'approved').length
     const drafts = reports.filter(r => r.status === 'draft').length
     const total = reports.length
     const completionPct = total > 0 ? Math.round((completed / total) * 100) : 0

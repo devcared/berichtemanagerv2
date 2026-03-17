@@ -1,65 +1,91 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
-export async function POST(req: Request) {
+const CATEGORY_LABELS: Record<string, string> = {
+  company: 'Betrieb',
+  vocationalSchool: 'Berufsschule',
+  interCompany: 'Überbetriebliche Ausbildung',
+  vacation: 'Urlaub',
+  sick: 'Krankheit',
+  holiday: 'Feiertag',
+}
+
+export async function POST(req: NextRequest) {
   try {
-    const { prompt, length = 'normal', style = 'neutral' } = await req.json()
+    const { bulletPoints, length = 'normal', tone = 'neutral', dayName, category } = await req.json()
 
-    if (!prompt) {
-      return NextResponse.json({ error: 'Prompt is required' }, { status: 400 })
+    if (!bulletPoints?.trim()) {
+      return NextResponse.json({ error: 'Keine Stichpunkte angegeben.' }, { status: 400 })
     }
 
-    const apiKey = process.env.OPENAI_API_KEY
+    const apiKey = process.env.ANTHROPIC_API_KEY
     if (!apiKey) {
-      return NextResponse.json({ error: 'OpenAI API Key is missing in .env.local' }, { status: 500 })
+      return NextResponse.json({ error: 'KI-Dienst nicht konfiguriert. Bitte ANTHROPIC_API_KEY setzen.' }, { status: 500 })
     }
 
-    // Adjust length
-    let lengthInstruction = 'etwa 2-3 Sätze'
-    if (length === 'kurz') lengthInstruction = 'maximal 1-2 sehr kurze Sätze'
-    if (length === 'ausführlich') lengthInstruction = 'etwa 4-5 ausführliche Sätze'
+    const lengthMap = {
+      kurz: '1–2 kurze, prägnante Sätze.',
+      normal: '2–4 Sätze.',
+      ausführlich: '4–6 Sätze mit etwas mehr Kontext und Detail.',
+    }
 
-    // Adjust style
-    let styleInstruction = 'sachlich, professionell und neutral'
-    if (style === 'technisch') styleInstruction = 'mit starkem technischem Fokus, fachsprachlich, präzise'
-    if (style === 'einfach') styleInstruction = 'einfach formuliert, leicht verständlich, entspannt'
+    const toneMap = {
+      neutral: 'Schreibe neutral und sachlich.',
+      technisch: 'Verwende technische Fachsprache, wo sie sich aus den Stichpunkten ergibt.',
+      einfach: 'Schreibe in klarer, einfacher Sprache – gut verständlich.',
+    }
 
-    const systemPrompt = `Du bist ein Assistent für Auszubildende, der Stichpunkte in professionelle, IHK-konforme Fließtexte für das Berichtsheft umwandelt.
-Regeln:
-- Schreibe aus der Ich-Perspektive ("Ich habe...")
-- Schreibstil: ${styleInstruction}
-- Länge: ${lengthInstruction}
-- Verwende nur Inhalte, die im Input genannt oder sinnvoll direkt ableitbar sind. Erfinde absolut keine Fachbegriffe, Hardware oder Tätigkeiten, die nicht impliziert wurden!
-- Formuliere es als abgeschlossenen Ausbildungsnachweis-Eintrag. Keine Einleitung wie "Hier ist dein Text:". Gib nur den fertigen Text zurück.`
+    const categoryLabel = category ? CATEGORY_LABELS[category] ?? category : undefined
+    const contextHint = [
+      dayName ? `Tag: ${dayName}` : null,
+      categoryLabel ? `Bereich: ${categoryLabel}` : null,
+    ]
+      .filter(Boolean)
+      .join(', ')
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const prompt = `Du hilfst einem Auszubildenden dabei, seinen Ausbildungsnachweis (Berichtsheft) professionell zu formulieren.
+
+Kontext: ${contextHint || 'Arbeitstag im Betrieb'}
+
+Der Azubi hat folgende Stichpunkte eingegeben:
+"""
+${bulletPoints.trim()}
+"""
+
+Erstelle daraus einen professionellen Fließtext. Halte diese Regeln strikt ein:
+- Schreibe in der Ich-Form und Vergangenheitsform (z. B. "Ich nahm teil an …", "Ich führte durch …", "Ich bearbeitete …")
+- Sachlich, präzise, keine blumige oder werbliche Sprache
+- IHK-konform und geeignet für einen offiziellen Ausbildungsnachweis
+- Verwende ausschließlich Inhalte, die aus den Stichpunkten ableitbar sind – keine erfundenen Details
+- Schreibe ${lengthMap[length as keyof typeof lengthMap] ?? lengthMap.normal}
+- ${toneMap[tone as keyof typeof toneMap] ?? toneMap.neutral}
+- Gib NUR den fertigen Fließtext aus – keine Erklärungen, keine Anführungszeichen, keine Formatierung.`
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: prompt }
-        ],
-        temperature: 0.7,
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 512,
+        messages: [{ role: 'user', content: prompt }],
       }),
     })
 
     if (!response.ok) {
-      const errorData = await response.json()
-      console.error('OpenAI Error:', errorData)
-      return NextResponse.json({ error: 'OpenAI API Request failed' }, { status: response.status })
+      const errorText = await response.text()
+      console.error('Anthropic API error:', errorText)
+      return NextResponse.json({ error: 'KI-Anfrage fehlgeschlagen.' }, { status: 502 })
     }
 
     const data = await response.json()
-    const generatedText = data.choices?.[0]?.message?.content?.trim()
+    const text: string = data.content?.[0]?.text?.trim() ?? ''
 
-    return NextResponse.json({ text: generatedText })
-
+    return NextResponse.json({ text })
   } catch (error) {
-    console.error('AI Generation Error:', error)
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
+    console.error('generate-text error:', error)
+    return NextResponse.json({ error: 'Interner Fehler bei der Textgenerierung.' }, { status: 500 })
   }
 }

@@ -13,10 +13,12 @@ import { Progress } from '@/components/ui/progress'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent } from '@/components/ui/tabs'
 import { WeekSelector } from '@/components/berichtsheft/week-selector'
+import { AiTextHelper } from '@/components/berichtsheft/ai-text-helper'
 import { useReports } from '@/hooks/use-reports'
 import { useProfile } from '@/hooks/use-profile'
 import { createClient } from '@/lib/supabase/client'
 import { parseWeekId, formatWeekId, getWeekStart } from '@/lib/week-utils'
+import { generateWeeklySummary } from '@/lib/ai-service'
 import type { WeeklyReport, DailyEntry, ActivityCategory, ReportStatus } from '@/types'
 import { cn } from '@/lib/utils'
 import {
@@ -27,6 +29,7 @@ import {
   ViewIcon,
   PrinterIcon,
   Edit02Icon,
+  SparklesIcon,
 } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 
@@ -88,6 +91,11 @@ export default function EditorPage() {
 
   const [isNewReport, setIsNewReport] = useState(false)
 
+  // Weekly summary (AI Feature 1B)
+  const [summary, setSummary] = useState('')
+  const [isSummaryLoading, setIsSummaryLoading] = useState(false)
+  const [summaryError, setSummaryError] = useState('')
+
   const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const targetHours = profile?.weeklyHours ?? 40
 
@@ -141,7 +149,7 @@ export default function EditorPage() {
       pdfData,
       createdAt: currentReport?.createdAt ?? new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      ...(reportStatus === 'exported' ? { exportedAt: new Date().toISOString() } : {}),
+      ...(reportStatus === 'approved' ? { exportedAt: new Date().toISOString() } : {}),
     }
   }, [week, year, currentReport, reportId, profile, entries, totalHours, isPdfReport, pdfData, targetHours])
 
@@ -216,6 +224,33 @@ export default function EditorPage() {
 
   const handleExport = () => {
     window.print()
+  }
+
+  const handleGenerateSummary = async () => {
+    const relevantEntries = entries.filter(e => e.activities?.trim())
+    if (relevantEntries.length === 0) {
+      setSummaryError('Bitte zuerst Tätigkeiten eintragen.')
+      return
+    }
+    setIsSummaryLoading(true)
+    setSummaryError('')
+    setSummary('')
+    try {
+      const text = await generateWeeklySummary({
+        entries: relevantEntries.map(e => ({
+          activities: e.activities,
+          category: e.category,
+          date: e.date,
+        })),
+        calendarWeek: week,
+        year,
+      })
+      setSummary(text)
+    } catch (e) {
+      setSummaryError(e instanceof Error ? e.message : 'Fehler bei der Zusammenfassung.')
+    } finally {
+      setIsSummaryLoading(false)
+    }
   }
 
   const handleChooseType = (isPdf: boolean) => {
@@ -419,6 +454,11 @@ export default function EditorPage() {
                               placeholder={`Was hast du am ${dayName} gelernt oder gearbeitet?`}
                               className="min-h-[120px] bg-background border-border focus-visible:ring-primary resize-y leading-relaxed print:min-h-0 print:border-none print:p-0 print:text-black print:resize-none"
                             />
+                            <AiTextHelper
+                              dayName={dayName}
+                              category={entry.category}
+                              onApply={text => updateEntry({ ...entry, activities: text })}
+                            />
                           </div>
 
                           {/* Notes (Hidden while printing unless populated) */}
@@ -440,6 +480,67 @@ export default function EditorPage() {
                   </Card>
                 )
               })}
+            </div>
+
+            {/* KI-Wochenfazit (Feature 1B) */}
+            <div className="print:hidden">
+              <Card className="bg-card border-border overflow-hidden">
+                <div className="flex">
+                  <div className="w-1.5 bg-primary/40 shrink-0" />
+                  <div className="flex-1 p-5 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="size-8 bg-primary/10 text-primary flex items-center justify-center rounded-lg">
+                          <HugeiconsIcon icon={SparklesIcon} size={16} />
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-sm text-foreground">KI-Wochenfazit</h3>
+                          <p className="text-xs text-muted-foreground">Automatische Zusammenfassung der Woche</p>
+                        </div>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-8 gap-1.5 text-xs"
+                        onClick={handleGenerateSummary}
+                        disabled={isSummaryLoading}
+                      >
+                        {isSummaryLoading ? (
+                          <span className="size-3.5 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
+                        ) : (
+                          <HugeiconsIcon icon={SparklesIcon} size={13} />
+                        )}
+                        {isSummaryLoading ? 'Generiert…' : 'Fazit generieren'}
+                      </Button>
+                    </div>
+
+                    {summaryError && (
+                      <p className="text-xs text-destructive bg-destructive/10 rounded-lg px-3 py-2">{summaryError}</p>
+                    )}
+
+                    {summary && (
+                      <div className="space-y-2">
+                        <Label className="text-xs text-muted-foreground">Generiertes Fazit (bearbeitbar)</Label>
+                        <Textarea
+                          value={summary}
+                          onChange={e => setSummary(e.target.value)}
+                          className="min-h-[80px] text-sm bg-background border-border resize-y leading-relaxed"
+                        />
+                        <p className="text-[11px] text-muted-foreground">
+                          Du kannst diesen Text kopieren und in einen Tageseintrag übernehmen oder für dein Deckblatt verwenden.
+                        </p>
+                      </div>
+                    )}
+
+                    {!summary && !isSummaryLoading && !summaryError && (
+                      <p className="text-xs text-muted-foreground">
+                        Klicke auf „Fazit generieren", um aus deinen Wocheneinträgen automatisch eine kurze Zusammenfassung (2–3 Sätze) für dein Berichtsheft zu erstellen.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </Card>
             </div>
 
             {/* Signature Area Only visible on Print */}
@@ -532,11 +633,13 @@ export default function EditorPage() {
             <Button
               size="lg"
               className="px-8 font-semibold shadow-lg shadow-primary/20"
-              onClick={() => handleSave('completed')}
-              disabled={isSaving || status === 'completed'}
+              onClick={() => handleSave('submitted')}
+              disabled={isSaving || status === 'submitted' || status === 'approved' || status === 'in_review'}
             >
               <HugeiconsIcon icon={CheckmarkCircle01Icon} size={18} className="mr-2" />
-              {status === 'completed' ? 'Abgeschlossen' : 'Abschließen'}
+              {status === 'submitted' || status === 'in_review' || status === 'approved'
+                ? 'Eingereicht'
+                : 'Zur Prüfung einreichen'}
             </Button>
           </div>
         </div>

@@ -1,4 +1,9 @@
-export type ReportStatus = 'draft' | 'completed' | 'exported'
+export type ReportStatus =
+  | 'draft'           // Azubi schreibt noch
+  | 'submitted'       // Eingereicht zur Prüfung (ehem. 'completed')
+  | 'in_review'       // Ausbilder prüft gerade
+  | 'approved'        // Freigegeben (ehem. 'exported')
+  | 'needs_revision'  // Ausbilder schickt zurück
 export type ActivityCategory = 'company' | 'vocationalSchool' | 'interCompany' | 'vacation' | 'sick' | 'holiday'
 export type ReportType = 'daily' | 'weekly'
 
@@ -45,7 +50,6 @@ export interface WeeklyReport {
   totalHours: number
   isPdfReport?: boolean
   pdfData?: string
-  fazit?: string
   createdAt: string
   updatedAt: string
   exportedAt?: string

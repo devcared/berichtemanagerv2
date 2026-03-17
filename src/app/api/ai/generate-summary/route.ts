@@ -1,61 +1,79 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
-export async function POST(req: Request) {
+const CATEGORY_LABELS: Record<string, string> = {
+  company: 'Betrieb',
+  vocationalSchool: 'Berufsschule',
+  interCompany: 'Überbetriebliche Ausbildung',
+  vacation: 'Urlaub',
+  sick: 'Krankheit',
+  holiday: 'Feiertag',
+}
+
+export async function POST(req: NextRequest) {
   try {
-    const { entries } = await req.json()
+    const { entries, calendarWeek, year } = await req.json()
 
-    if (!entries || !Array.isArray(entries)) {
-      return NextResponse.json({ error: 'Entries are required' }, { status: 400 })
+    if (!entries || !Array.isArray(entries) || entries.length === 0) {
+      return NextResponse.json({ error: 'Keine Einträge übergeben.' }, { status: 400 })
     }
 
-    const apiKey = process.env.OPENAI_API_KEY
+    const apiKey = process.env.ANTHROPIC_API_KEY
     if (!apiKey) {
-      return NextResponse.json({ error: 'OpenAI API Key is missing in .env.local' }, { status: 500 })
+      return NextResponse.json({ error: 'KI-Dienst nicht konfiguriert. Bitte ANTHROPIC_API_KEY setzen.' }, { status: 500 })
     }
 
-    const summaryData = entries
-      .filter(e => e.activities && e.activities.trim().length > 0)
-      .map(e => `- ${e.activities}`)
+    // Build a concise summary of the week's entries for the prompt
+    const entryLines = entries
+      .filter((e: { activities?: string }) => e.activities?.trim())
+      .map((e: { date?: string; category?: string; activities?: string }) => {
+        const dateStr = e.date ? new Date(e.date).toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit' }) : ''
+        const catLabel = e.category ? (CATEGORY_LABELS[e.category] ?? e.category) : ''
+        return `- ${dateStr}${catLabel ? ` (${catLabel})` : ''}: ${e.activities?.trim()}`
+      })
       .join('\n')
 
-    if (!summaryData) {
-      return NextResponse.json({ error: 'Keine ausreichenden Daten für ein Fazit vorhanden.' }, { status: 400 })
+    if (!entryLines) {
+      return NextResponse.json({ error: 'Keine Aktivitäten eingetragen.' }, { status: 400 })
     }
 
-    const systemPrompt = `Du bist ein Assistent für Auszubildende, der ein wöchentliches Ausbildungsfazit (2-3 Sätze) auf Basis der Täglichen Einträge verfasst.
-Regeln:
-- Schreibe aus der Ich-Perspektive ("In dieser Woche lag mein Schwerpunkt auf...")
-- Der Text soll sachlich, professionell und für das IHK-Berichtsheft geeignet sein.
-- Fasse die großen Themen der Woche intelligent zusammen, aber erfinde keine Fachbegriffe, Hardware oder Tätigkeiten, die nicht impliziert wurden!
-- Gib nur den finalen Text zurück.`
+    const prompt = `Du hilfst einem Auszubildenden dabei, sein Berichtsheft professionell zu führen.
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+Der Azubi hat folgende Tätigkeiten in KW ${calendarWeek}/${year} eingetragen:
+${entryLines}
+
+Erstelle daraus ein kompaktes Wochenfazit mit genau 2–3 Sätzen. Halte diese Regeln ein:
+- Schreibe in der Ich-Form (z. B. "In dieser Woche lag mein Schwerpunkt auf …")
+- Fasse thematisch zusammen – nenne keine einzelnen Tage oder Daten
+- Sachlich, professionell, IHK-konform
+- Schließe mit einem Satz ab, der den Lerneffekt oder den Bezug zu betrieblichen Abläufen betont
+- Gib NUR das fertige Fazit aus – keine Erklärungen, keine Formatierung.`
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: summaryData }
-        ],
-        temperature: 0.7,
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 256,
+        messages: [{ role: 'user', content: prompt }],
       }),
     })
 
     if (!response.ok) {
-      return NextResponse.json({ error: 'OpenAI API Request failed' }, { status: response.status })
+      const errorText = await response.text()
+      console.error('Anthropic API error:', errorText)
+      return NextResponse.json({ error: 'KI-Anfrage fehlgeschlagen.' }, { status: 502 })
     }
 
     const data = await response.json()
-    const generatedText = data.choices?.[0]?.message?.content?.trim()
+    const text: string = data.content?.[0]?.text?.trim() ?? ''
 
-    return NextResponse.json({ text: generatedText })
-
+    return NextResponse.json({ text })
   } catch (error) {
-    console.error('AI Summary Error:', error)
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
+    console.error('generate-summary error:', error)
+    return NextResponse.json({ error: 'Interner Fehler bei der Zusammenfassung.' }, { status: 500 })
   }
 }
