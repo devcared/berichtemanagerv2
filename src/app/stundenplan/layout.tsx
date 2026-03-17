@@ -2,6 +2,7 @@
 
 import * as React from 'react'
 import { useRouter, usePathname } from 'next/navigation'
+
 import {
   Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent,
   SidebarGroupLabel, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuButton,
@@ -12,11 +13,12 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { useProfile } from '@/hooks/use-profile'
 import { useAuth } from '@/contexts/AuthContext'
-import { CalendarIcon, GridViewIcon, Logout01Icon } from '@hugeicons/core-free-icons'
+import { CalendarIcon, GridViewIcon, Logout01Icon, CheckmarkBadge01Icon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 
 function AppSidebar() {
   const router = useRouter()
+  const pathname = usePathname()
   const { profile } = useProfile()
   const { logout } = useAuth()
 
@@ -50,7 +52,7 @@ function AppSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton
                   onClick={() => router.push('/stundenplan')}
-                  isActive
+                  isActive={pathname === '/stundenplan'}
                   tooltip="Wochenplan"
                   className="cursor-pointer"
                 >
@@ -58,6 +60,19 @@ function AppSidebar() {
                   <span>Wochenplan</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+              {profile?.role === 'trainer' && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    onClick={() => router.push('/stundenplan/ausbilder')}
+                    isActive={pathname.startsWith('/stundenplan/ausbilder')}
+                    tooltip="Ausbilder-Bereich"
+                    className="cursor-pointer text-primary"
+                  >
+                    <HugeiconsIcon icon={CheckmarkBadge01Icon} size={16} />
+                    <span>Ausbilder-Bereich</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
