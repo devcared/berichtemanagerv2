@@ -79,3 +79,25 @@ export interface AppModule {
   isEnabled: boolean
   lastUsed?: string
 }
+
+/* ─── STUNDENPLAN ─── */
+
+export type ScheduleCategory = 'arbeit' | 'schule' | 'lernen' | 'sport' | 'freizeit' | 'sonstiges'
+
+export interface ScheduleBlock {
+  id: string
+  profileId: string
+  title: string
+  description?: string
+  category: ScheduleCategory
+  color: string
+  /** 0 = Mon … 6 = Sun — only set when isRecurring = true */
+  dayOfWeek?: number
+  startTime: string   // "HH:MM"
+  endTime: string     // "HH:MM"
+  isRecurring: boolean
+  /** ISO date string — only set when isRecurring = false */
+  specificDate?: string
+  createdAt: string
+  updatedAt: string
+}
