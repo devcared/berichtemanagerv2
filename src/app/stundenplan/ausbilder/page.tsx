@@ -57,11 +57,6 @@ interface TrainerDocument {
 
 /* ─── CONSTANTS ─── */
 
-const HOUR_START = 6
-const HOUR_END   = 22
-const SLOTS      = (HOUR_END - HOUR_START) * 2
-const SLOT_H     = 44
-const TOTAL_H    = SLOTS * SLOT_H
 const DAY_LABELS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So']
 
 const CAT_META: Record<ScheduleCategory, { label: string; color: string }> = {
@@ -194,85 +189,6 @@ function calcAvgBlockDuration(blocks: RawBlock[], profileId: string, weekDates: 
   return total / wb.length / 60
 }
 
-/* ─── READ-ONLY WEEK GRID ─── */
-
-function ReadonlyGrid({ blocks, profileId, weekDates }: {
-  blocks: RawBlock[]; profileId: string; weekDates: Date[]
-}) {
-  const nowY = useMemo(() => {
-    const n = new Date()
-    return ((n.getHours() * 60 + n.getMinutes() - HOUR_START * 60) / 30) * SLOT_H
-  }, [])
-
-  return (
-    <div className="flex border border-border/40 rounded-xl overflow-hidden">
-      <div className="w-[46px] shrink-0 border-r border-border/30">
-        <div className="h-9 border-b border-border/20" />
-        <div style={{ height: TOTAL_H, position: 'relative' }}>
-          {Array.from({ length: HOUR_END - HOUR_START + 1 }, (_, i) => (
-            <div key={i} style={{ position: 'absolute', top: i * SLOT_H * 2 - 8, right: 4 }}>
-              <span className="text-[9px] font-mono text-muted-foreground/40">
-                {String(HOUR_START + i).padStart(2, '0')}:00
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-      <div className="flex-1 overflow-y-auto">
-        <div className="grid border-b border-border/20 sticky top-0 bg-card z-10"
-          style={{ gridTemplateColumns: 'repeat(7,1fr)' }}>
-          {weekDates.map((d, i) => (
-            <div key={i} className={cn(
-              'h-9 flex flex-col items-center justify-center border-r border-border/20 last:border-r-0',
-              isToday(d) && 'bg-primary/5'
-            )}>
-              <span className={cn('text-[9px] font-bold uppercase tracking-wider',
-                isToday(d) ? 'text-primary' : 'text-muted-foreground/50')}>{DAY_LABELS[i]}</span>
-              <span className={cn('text-xs font-black leading-none',
-                isToday(d) ? 'text-primary' : 'text-foreground/60')}>{format(d, 'd')}</span>
-            </div>
-          ))}
-        </div>
-        <div className="grid" style={{ gridTemplateColumns: 'repeat(7,1fr)', height: TOTAL_H }}>
-          {weekDates.map((date, dayIdx) => {
-            const dayBlocks = getDayBlocks(blocks, profileId, dayIdx, weekDates)
-            return (
-              <div key={dayIdx}
-                className={cn('relative border-r border-border/20 last:border-r-0', isToday(date) && 'bg-primary/[0.02]')}
-                style={{ height: TOTAL_H }}>
-                {Array.from({ length: SLOTS }, (_, si) => (
-                  <div key={si} style={{ position: 'absolute', top: si * SLOT_H, height: SLOT_H, width: '100%' }}
-                    className={cn('border-b', si % 2 === 0 ? 'border-border/20' : 'border-border/[0.07]')} />
-                ))}
-                {dayBlocks.map(b => {
-                  const top = ((timeToMin(b.start_time) - HOUR_START * 60) / 30) * SLOT_H
-                  const h   = Math.max(((timeToMin(b.end_time) - timeToMin(b.start_time)) / 30) * SLOT_H - 2, 20)
-                  const cat = CAT_META[b.category]
-                  return (
-                    <div key={b.id} style={{
-                      position: 'absolute', top: top + 1, left: 3, right: 3, height: h,
-                      backgroundColor: `${cat.color}1a`, borderLeft: `3px solid ${cat.color}`,
-                    }} className="rounded-r-md overflow-hidden">
-                      <p className="text-[10px] font-semibold px-1.5 py-1 truncate" style={{ color: cat.color }}>{b.title}</p>
-                    </div>
-                  )
-                })}
-                {isToday(date) && nowY >= 0 && nowY <= TOTAL_H && (
-                  <div style={{ position: 'absolute', top: nowY, left: 0, right: 0, zIndex: 20 }}
-                    className="pointer-events-none flex items-center">
-                    <div className="size-2 rounded-full bg-primary -ml-1 shrink-0" />
-                    <div className="flex-1 h-px bg-primary/80" />
-                  </div>
-                )}
-              </div>
-            )
-          })}
-        </div>
-      </div>
-    </div>
-  )
-}
-
 /* ─── MAIN PAGE ─── */
 
 export default function AusbilderStundenplanPage() {
@@ -290,7 +206,6 @@ export default function AusbilderStundenplanPage() {
   const [sortDir, setSortDir]           = useState<'asc' | 'desc'>('asc')
   const [catFilter, setCatFilter]       = useState<ScheduleCategory | null>(null)
   const [sheetProfile, setSheetProfile] = useState<Apprentice | null>(null)
-  const [sheetTab, setSheetTab]         = useState<'plan' | 'analyse'>('plan')
 
   /* ── Document management state ── */
   const [docsSheetOpen, setDocsSheetOpen]     = useState(false)
@@ -866,7 +781,7 @@ export default function AusbilderStundenplanPage() {
 
                   return (
                     <button key={ap.id}
-                      onClick={() => { setSheetTab('plan'); setSheetProfile(ap) }}
+                      onClick={() => setSheetProfile(ap)}
                       className="w-full flex items-center gap-4 px-5 py-4 hover:bg-muted/30 transition-colors text-left group">
 
                       {/* Avatar + active dot */}
@@ -1214,16 +1129,10 @@ export default function AusbilderStundenplanPage() {
                   </SheetTitle>
 
                   <div className="flex items-center gap-1 mt-1">
-                    {(['plan', 'analyse'] as const).map(t => (
-                      <button key={t} onClick={() => setSheetTab(t)}
-                        className={cn(
-                          'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all',
-                          sheetTab === t ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted/40'
-                        )}>
-                        <HugeiconsIcon icon={t === 'plan' ? CalendarIcon : AnalyticsUpIcon} size={12} />
-                        {t === 'plan' ? 'Zeitplan' : 'Analyse'}
-                      </button>
-                    ))}
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-primary/10 text-primary">
+                      <HugeiconsIcon icon={AnalyticsUpIcon} size={12} />
+                      Analyse
+                    </div>
                     {/* Week nav in sheet */}
                     <div className="ml-auto flex items-center gap-1">
                       <button onClick={() => setWeekStart(d => addDays(d, -7))}
@@ -1249,11 +1158,7 @@ export default function AusbilderStundenplanPage() {
                 </SheetHeader>
 
                 <div className="flex-1 overflow-y-auto px-6 py-5">
-                  {sheetTab === 'plan' && (
-                    <ReadonlyGrid blocks={blocks} profileId={sheetProfile.id} weekDates={weekDates} />
-                  )}
-
-                  {sheetTab === 'analyse' && sheetStats && (
+                  {sheetStats && (
                     <div className="space-y-4">
 
                       {/* Summary pills */}
