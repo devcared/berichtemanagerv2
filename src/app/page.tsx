@@ -184,25 +184,50 @@ function LandingNav() {
     return () => window.removeEventListener('scroll', fn)
   }, [])
   return (
-    <nav className={cn('fixed top-0 inset-x-0 z-50 transition-all duration-300',
-      scrolled ? 'border-b border-border/60 bg-[hsl(var(--background))]/90 backdrop-blur-2xl shadow-2xl shadow-black/20' : 'bg-transparent')}>
-      <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-        <Link href="/"><Logo /></Link>
-        <div className="hidden sm:flex items-center gap-7 text-sm text-muted-foreground">
+    <nav className={cn('fixed top-0 inset-x-0 z-50 transition-all duration-500',
+      scrolled
+        ? 'border-b border-border/40 bg-[hsl(var(--background))]/80 backdrop-blur-3xl shadow-[0_1px_0_0_hsl(var(--border)/0.4)]'
+        : 'bg-transparent')}>
+      <div className="max-w-6xl mx-auto px-6 h-[68px] flex items-center justify-between gap-8">
+
+        {/* Logo */}
+        <Link href="/" className="shrink-0 transition-opacity hover:opacity-80"><Logo /></Link>
+
+        {/* Nav links */}
+        <div className="hidden md:flex items-center gap-0.5 text-sm">
           {[['#features','Features'],['#how-it-works','So funktionierts'],['#pricing','Preise'],['#faq','FAQ']].map(([href,label]) => (
-            <a key={href} href={href} className="hover:text-foreground transition-colors">{label}</a>
+            <a key={href} href={href}
+              className="px-3.5 py-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-white/5 transition-all duration-150 font-medium">
+              {label}
+            </a>
           ))}
         </div>
-        <div className="flex items-center gap-2">
-          <Link href="/auth/login">
-            <Button variant="ghost" size="sm" className="text-sm text-muted-foreground hover:text-foreground hidden sm:flex">Anmelden</Button>
+
+        {/* Buttons */}
+        <div className="flex items-center gap-2 shrink-0">
+          {/* Login — subtle, minimal */}
+          <Link href="/auth/login" className="hidden sm:block">
+            <span className="group flex items-center gap-1 px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground rounded-xl hover:bg-white/[0.06] transition-all duration-150 cursor-pointer select-none">
+              Anmelden
+            </span>
           </Link>
+
+          {/* Register — premium CTA */}
           <Link href="/auth/register">
-            <Button size="sm" className="text-sm gap-1.5 shadow-lg shadow-primary/30 bg-primary hover:bg-primary/90">
-              Kostenlos starten <HugeiconsIcon icon={ArrowRight01Icon} size={13} />
-            </Button>
+            <span className="group relative flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white overflow-hidden cursor-pointer select-none
+              bg-primary shadow-lg shadow-primary/30
+              hover:shadow-primary/50 hover:shadow-xl
+              transition-all duration-200 hover:scale-[1.03] active:scale-[0.97]">
+              {/* shimmer sweep */}
+              <span className="pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent
+                -translate-x-full group-hover:translate-x-full transition-transform duration-500 ease-in-out" />
+              Kostenlos starten
+              <HugeiconsIcon icon={ArrowRight01Icon} size={13}
+                className="transition-transform duration-200 group-hover:translate-x-0.5" />
+            </span>
           </Link>
         </div>
+
       </div>
     </nav>
   )
