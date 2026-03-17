@@ -92,7 +92,7 @@ export async function GET() {
   }
 }
 
-/** PATCH /api/admin/profiles – Rolle eines Nutzers ändern */
+/** PATCH /api/admin/profiles – Rolle oder Profilfelder eines Nutzers ändern */
 export async function PATCH(req: NextRequest) {
   try {
     const trainer = await verifyTrainer()
@@ -100,26 +100,75 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: 'Kein Zugriff.' }, { status: 403 })
     }
 
-    const { userId, role } = await req.json()
-    if (!userId || !['apprentice', 'trainer'].includes(role)) {
-      return NextResponse.json({ error: 'Ungültige Parameter.' }, { status: 400 })
-    }
-    // Trainer darf sich nicht selbst degradieren
-    if (userId === trainer.userId && role === 'apprentice') {
-      return NextResponse.json({ error: 'Du kannst deine eigene Rolle nicht ändern.' }, { status: 400 })
+    const body = await req.json()
+    const { userId } = body
+    if (!userId) {
+      return NextResponse.json({ error: 'userId fehlt.' }, { status: 400 })
     }
 
     const admin = createAdminClient()
-    const { error } = await admin
-      .from('profiles')
-      .update({ role, updated_at: new Date().toISOString() })
-      .eq('id', userId)
 
-    if (error) throw error
+    // Rollenänderung
+    if (body.role !== undefined) {
+      if (!['apprentice', 'trainer'].includes(body.role)) {
+        return NextResponse.json({ error: 'Ungültige Rolle.' }, { status: 400 })
+      }
+      if (userId === trainer.userId && body.role === 'apprentice') {
+        return NextResponse.json({ error: 'Du kannst deine eigene Rolle nicht ändern.' }, { status: 400 })
+      }
+      const { error } = await admin
+        .from('profiles')
+        .update({ role: body.role, updated_at: new Date().toISOString() })
+        .eq('id', userId)
+      if (error) throw error
+    }
+
+    // Profilfelder bearbeiten
+    if (body.profileUpdate) {
+      const { firstName, lastName, occupation, companyName } = body.profileUpdate
+      const updates: Record<string, string> = { updated_at: new Date().toISOString() }
+      if (firstName !== undefined) updates.first_name = firstName
+      if (lastName !== undefined) updates.last_name = lastName
+      if (occupation !== undefined) updates.occupation = occupation
+      if (companyName !== undefined) updates.company_name = companyName
+
+      const { error } = await admin
+        .from('profiles')
+        .update(updates)
+        .eq('id', userId)
+      if (error) throw error
+    }
 
     return NextResponse.json({ success: true })
   } catch (err) {
     console.error('PATCH /api/admin/profiles:', err)
+    return NextResponse.json({ error: 'Interner Fehler.' }, { status: 500 })
+  }
+}
+
+/** DELETE /api/admin/profiles – Nutzer vollständig löschen */
+export async function DELETE(req: NextRequest) {
+  try {
+    const trainer = await verifyTrainer()
+    if (!trainer) {
+      return NextResponse.json({ error: 'Kein Zugriff.' }, { status: 403 })
+    }
+
+    const { userId } = await req.json()
+    if (!userId) {
+      return NextResponse.json({ error: 'userId fehlt.' }, { status: 400 })
+    }
+    if (userId === trainer.userId) {
+      return NextResponse.json({ error: 'Du kannst dich selbst nicht löschen.' }, { status: 400 })
+    }
+
+    const admin = createAdminClient()
+    const { error } = await admin.auth.admin.deleteUser(userId)
+    if (error) throw error
+
+    return NextResponse.json({ success: true })
+  } catch (err) {
+    console.error('DELETE /api/admin/profiles:', err)
     return NextResponse.json({ error: 'Interner Fehler.' }, { status: 500 })
   }
 }
