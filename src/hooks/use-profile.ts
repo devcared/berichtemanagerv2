@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import type { TrainingProfile } from '@/types'
+import type { TrainingProfile, UserRole } from '@/types'
 import { useAuth } from '@/contexts/AuthContext'
 
 export function useProfile() {
@@ -48,6 +48,7 @@ export function useProfile() {
               weeklyHours: data.weekly_hours,
               schoolDays: data.school_days,
               schoolHoursPerDay: data.school_hours_per_day,
+              role: (data.role as UserRole) ?? 'apprentice',
               createdAt: data.created_at,
               updatedAt: data.updated_at,
             })

@@ -1,3 +1,5 @@
+export type UserRole = 'apprentice' | 'trainer'
+
 export type ReportStatus =
   | 'draft'           // Azubi schreibt noch
   | 'submitted'       // Eingereicht zur Prüfung (ehem. 'completed')
@@ -23,6 +25,7 @@ export interface TrainingProfile {
   weeklyHours: number
   schoolDays: number[] // 1=Mo..5=Fr
   schoolHoursPerDay: number
+  role: UserRole
   createdAt: string
   updatedAt: string
 }

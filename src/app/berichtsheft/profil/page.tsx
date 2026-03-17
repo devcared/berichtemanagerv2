@@ -105,6 +105,7 @@ export default function ProfilPage() {
         weeklyHours: parseFloat(weeklyHours) || 40,
         schoolDays,
         schoolHoursPerDay: parseFloat(schoolHoursPerDay) || 8,
+        role: profile?.role ?? 'apprentice',
         createdAt: profile?.createdAt ?? now,
         updatedAt: now,
       }

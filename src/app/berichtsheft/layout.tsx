@@ -30,6 +30,7 @@ import {
   GridViewIcon,
   BookOpenIcon,
   Logout01Icon,
+  CheckmarkBadge01Icon,
 } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { cn } from '@/lib/utils'
@@ -107,6 +108,19 @@ function AppSidebar() {
                   </SidebarMenuItem>
                 )
               })}
+              {profile?.role === 'trainer' && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    onClick={() => router.push('/berichtsheft/ausbilder')}
+                    isActive={pathname.startsWith('/berichtsheft/ausbilder')}
+                    tooltip="Ausbilder-Bereich"
+                    className="cursor-pointer text-primary"
+                  >
+                    <HugeiconsIcon icon={CheckmarkBadge01Icon} size={16} />
+                    <span>Ausbilder-Bereich</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
