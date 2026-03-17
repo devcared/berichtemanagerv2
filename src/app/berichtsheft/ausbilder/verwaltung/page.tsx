@@ -193,7 +193,7 @@ export default function VerwaltungPage() {
               onClick={() => router.push('/berichtsheft/ausbilder')}
             >
               <HugeiconsIcon icon={ArrowLeft01Icon} size={14} />
-              Berichte-Übersicht2
+              Berichte-Übersicht
             </Button>
           </div>
 
