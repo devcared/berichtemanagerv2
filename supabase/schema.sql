@@ -37,6 +37,7 @@ CREATE TABLE weekly_reports (
   total_hours NUMERIC NOT NULL DEFAULT 0,
   is_pdf_report BOOLEAN NOT NULL DEFAULT false,
   pdf_data TEXT,
+  fazit TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   exported_at TIMESTAMPTZ,

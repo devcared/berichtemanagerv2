@@ -45,6 +45,7 @@ export interface WeeklyReport {
   totalHours: number
   isPdfReport?: boolean
   pdfData?: string
+  fazit?: string
   createdAt: string
   updatedAt: string
   exportedAt?: string

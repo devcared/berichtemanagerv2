@@ -59,6 +59,7 @@ export function useReports() {
           totalHours: Number(r.total_hours),
           isPdfReport: r.is_pdf_report,
           pdfData: r.pdf_data,
+          fazit: r.fazit,
           createdAt: r.created_at,
           updatedAt: r.updated_at,
           exportedAt: r.exported_at,
