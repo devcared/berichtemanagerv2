@@ -64,6 +64,7 @@ export default function VerwaltungPage() {
 
   const [profiles, setProfiles] = useState<ProfileWithStats[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState('')
   const [activeTab, setActiveTab] = useState<ActiveTab>('apprentices')
   const [search, setSearch] = useState('')
 
@@ -84,13 +85,14 @@ export default function VerwaltungPage() {
 
   const loadProfiles = useCallback(async () => {
     setLoading(true)
+    setLoadError('')
     try {
       const res = await fetch('/api/admin/profiles')
-      if (!res.ok) throw new Error('Fehler beim Laden')
-      const { profiles: data } = await res.json()
-      setProfiles(data)
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error ?? 'Fehler beim Laden')
+      setProfiles(json.profiles)
     } catch (err) {
-      console.error(err)
+      setLoadError(err instanceof Error ? err.message : 'Unbekannter Fehler')
     } finally {
       setLoading(false)
     }
@@ -243,6 +245,14 @@ export default function VerwaltungPage() {
 
       {/* Main */}
       <div className="flex-1 px-6 py-6 max-w-5xl mx-auto w-full">
+
+        {/* Load Error */}
+        {loadError && (
+          <div className="flex items-start gap-2 rounded-xl bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive mb-5">
+            <HugeiconsIcon icon={Alert01Icon} size={15} className="shrink-0 mt-0.5" />
+            <span><strong>Fehler beim Laden:</strong> {loadError}</span>
+          </div>
+        )}
 
         {/* Tab Navigation */}
         <div className="flex items-center gap-1 mb-6 border-b border-border">
