@@ -22,6 +22,7 @@ import {
   SortByUp01Icon,
   Notification01Icon,
   FilterHorizontalIcon,
+  UserMultiple02Icon,
 } from '@hugeicons/core-free-icons'
 import type { ReportStatus } from '@/types'
 import { cn } from '@/lib/utils'
@@ -211,9 +212,16 @@ export default function AusbilderPage() {
                 </p>
               </div>
             </div>
-            <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs shrink-0" onClick={loadReports}>
-              Aktualisieren
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs shrink-0"
+                onClick={() => router.push('/berichtsheft/ausbilder/verwaltung')}>
+                <HugeiconsIcon icon={UserMultiple02Icon} size={14} />
+                Verwaltung
+              </Button>
+              <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs shrink-0" onClick={loadReports}>
+                Aktualisieren
+              </Button>
+            </div>
           </div>
 
           {/* Urgent Banner */}
