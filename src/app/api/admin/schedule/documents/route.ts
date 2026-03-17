@@ -19,6 +19,19 @@ async function verifyTrainer(): Promise<{ userId: string } | null> {
   return { userId: user.id }
 }
 
+/** Ensures the storage bucket exists, creating it if necessary. */
+async function ensureBucket(admin: ReturnType<typeof createAdminClient>) {
+  const { data: bucket } = await admin.storage.getBucket('schedule-documents')
+  if (!bucket) {
+    const { error } = await admin.storage.createBucket('schedule-documents', {
+      public: false,
+      fileSizeLimit: 26214400, // 25 MB
+      allowedMimeTypes: ['application/pdf'],
+    })
+    if (error) throw new Error(`Bucket konnte nicht erstellt werden: ${error.message}`)
+  }
+}
+
 /** GET /api/admin/schedule/documents — list all documents uploaded by this trainer */
 export async function GET() {
   try {
@@ -35,8 +48,9 @@ export async function GET() {
     if (error) throw error
     return NextResponse.json({ documents: data ?? [] })
   } catch (err) {
-    console.error('GET /api/admin/schedule/documents:', err)
-    return NextResponse.json({ error: 'Interner Fehler.' }, { status: 500 })
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error('GET /api/admin/schedule/documents:', msg)
+    return NextResponse.json({ error: msg }, { status: 500 })
   }
 }
 
@@ -58,8 +72,12 @@ export async function POST(req: NextRequest) {
     if (file.size > 25 * 1024 * 1024)
       return NextResponse.json({ error: 'Datei zu groß (max. 25 MB).' }, { status: 400 })
 
-    const admin   = createAdminClient()
-    const docId   = crypto.randomUUID()
+    const admin = createAdminClient()
+
+    /* ensure bucket exists */
+    await ensureBucket(admin)
+
+    const docId    = crypto.randomUUID()
     const filePath = `${trainer.userId}/${docId}.pdf`
 
     /* upload to storage */
@@ -67,7 +85,7 @@ export async function POST(req: NextRequest) {
     const { error: uploadErr } = await admin.storage
       .from('schedule-documents')
       .upload(filePath, buffer, { contentType: 'application/pdf' })
-    if (uploadErr) throw uploadErr
+    if (uploadErr) throw new Error(`Speicherfehler: ${uploadErr.message}`)
 
     /* create DB record */
     const { error: dbErr } = await admin.from('schedule_documents').insert({
@@ -80,7 +98,7 @@ export async function POST(req: NextRequest) {
     })
     if (dbErr) {
       await admin.storage.from('schedule-documents').remove([filePath])
-      throw dbErr
+      throw new Error(`Datenbankfehler: ${dbErr.message}`)
     }
 
     /* create assignments */
@@ -88,12 +106,13 @@ export async function POST(req: NextRequest) {
       const { error: assignErr } = await admin
         .from('schedule_document_assignments')
         .insert(assigneeIds.map(profileId => ({ document_id: docId, profile_id: profileId })))
-      if (assignErr) throw assignErr
+      if (assignErr) throw new Error(`Zuweisung fehlgeschlagen: ${assignErr.message}`)
     }
 
     return NextResponse.json({ success: true, docId })
   } catch (err) {
-    console.error('POST /api/admin/schedule/documents:', err)
-    return NextResponse.json({ error: 'Fehler beim Hochladen.' }, { status: 500 })
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error('POST /api/admin/schedule/documents:', msg)
+    return NextResponse.json({ error: msg }, { status: 500 })
   }
 }

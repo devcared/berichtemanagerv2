@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { cn } from '@/lib/utils'
 import { useProfile } from '@/hooks/use-profile'
 import type { ScheduleCategory } from '@/types'
@@ -950,6 +950,7 @@ export default function AusbilderStundenplanPage() {
       <Sheet open={docsSheetOpen} onOpenChange={setDocsSheetOpen}>
         <SheetContent side="left" className="w-full sm:max-w-lg p-0 flex flex-col overflow-hidden">
           <SheetHeader className="px-6 pt-6 pb-4 border-b border-border/40 shrink-0 bg-card">
+            <SheetDescription className="sr-only">PDFs verwalten und Auszubildenden zuweisen</SheetDescription>
             <SheetTitle className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="size-9 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -1182,6 +1183,7 @@ export default function AusbilderStundenplanPage() {
             return (
               <>
                 <SheetHeader className="px-6 pt-6 pb-4 border-b border-border/40 shrink-0 bg-card">
+                  <SheetDescription className="sr-only">Stundenplan und Analyse für {sheetProfile.first_name} {sheetProfile.last_name}</SheetDescription>
                   <SheetTitle className="flex items-center gap-3">
                     {/* Prev / Next */}
                     <button onClick={() => goSheet(-1)} disabled={!canPrev}

@@ -16,7 +16,7 @@ import {
   Delete02Icon, Time01Icon, File01Icon, ArrowRight02Icon,
 } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 
 /* ─── CONSTANTS ─── */
 
@@ -206,7 +206,7 @@ function BlockDialog({
 
   return (
     <Dialog open={open} onOpenChange={v => !v && onClose()}>
-      <DialogContent className="max-w-[440px]">
+      <DialogContent className="max-w-[440px]" aria-describedby={undefined}>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
@@ -662,6 +662,7 @@ export default function StundenplanPage() {
       <Sheet open={docsOpen} onOpenChange={v => { setDocsOpen(v); if (!v) setActiveDoc(null) }}>
         <SheetContent side="right" className="w-full sm:max-w-2xl p-0 flex flex-col overflow-hidden">
           <SheetHeader className="px-6 pt-6 pb-4 border-b border-border/40 shrink-0 bg-card">
+            <SheetDescription className="sr-only">Vom Ausbilder bereitgestellte Dokumente</SheetDescription>
             <SheetTitle className="flex items-center gap-3">
               {activeDoc ? (
                 <>
