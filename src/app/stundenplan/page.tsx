@@ -13,9 +13,10 @@ import { useSchedule } from '@/hooks/use-schedule'
 import type { ScheduleBlock, ScheduleCategory } from '@/types'
 import {
   Add01Icon, ArrowLeft01Icon, ArrowRight01Icon,
-  Delete02Icon, Time01Icon,
+  Delete02Icon, Time01Icon, File01Icon, ArrowRight02Icon,
 } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 
 /* ─── CONSTANTS ─── */
 
@@ -354,6 +355,15 @@ function BlockDialog({
 
 /* ─── MAIN PAGE ─── */
 
+interface AssignedDoc {
+  id: string
+  title: string
+  fileName: string
+  fileSize: number
+  createdAt: string
+  url: string | null
+}
+
 export default function StundenplanPage() {
   const [weekStart, setWeekStart] = useState(() =>
     startOfWeek(new Date(), { weekStartsOn: 1 })
@@ -364,6 +374,18 @@ export default function StundenplanPage() {
   const [form, setForm]               = useState<BlockForm>(emptyForm())
   const [isSaving, setIsSaving]       = useState(false)
   const { blocks, createBlock, updateBlock, deleteBlock, isLoading } = useSchedule()
+
+  /* ── Assigned documents ── */
+  const [docs, setDocs]               = useState<AssignedDoc[]>([])
+  const [docsOpen, setDocsOpen]       = useState(false)
+  const [activeDoc, setActiveDoc]     = useState<AssignedDoc | null>(null)
+
+  useEffect(() => {
+    fetch('/api/schedule/documents')
+      .then(r => r.json())
+      .then(data => setDocs(data.documents ?? []))
+      .catch(() => {})
+  }, [])
 
   const weekDates = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i))
   const isCurrentWeek = weekDates.some(d => isToday(d))
@@ -473,11 +495,23 @@ export default function StundenplanPage() {
           )}
         </div>
 
-        <Button size="sm" className="h-8 gap-1.5 text-xs shrink-0"
-          onClick={() => { setForm(emptyForm()); setCreateOpen(true) }}>
-          <HugeiconsIcon icon={Add01Icon} size={13} />
-          Neuer Block
-        </Button>
+        <div className="flex items-center gap-2">
+          {docs.length > 0 && (
+            <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs relative shrink-0"
+              onClick={() => { setActiveDoc(null); setDocsOpen(true) }}>
+              <HugeiconsIcon icon={File01Icon} size={13} />
+              Dokumente
+              <span className="absolute -top-1.5 -right-1.5 size-4 rounded-full bg-primary text-primary-foreground text-[9px] font-bold flex items-center justify-center">
+                {docs.length}
+              </span>
+            </Button>
+          )}
+          <Button size="sm" className="h-8 gap-1.5 text-xs shrink-0"
+            onClick={() => { setForm(emptyForm()); setCreateOpen(true) }}>
+            <HugeiconsIcon icon={Add01Icon} size={13} />
+            Neuer Block
+          </Button>
+        </div>
       </div>
 
       {/* ── Grid ── */}
@@ -623,6 +657,88 @@ export default function StundenplanPage() {
           <span className="size-8 rounded-full border-4 border-primary/30 border-t-primary animate-spin" />
         </div>
       )}
+
+      {/* ── Documents Sheet ── */}
+      <Sheet open={docsOpen} onOpenChange={v => { setDocsOpen(v); if (!v) setActiveDoc(null) }}>
+        <SheetContent side="right" className="w-full sm:max-w-2xl p-0 flex flex-col overflow-hidden">
+          <SheetHeader className="px-6 pt-6 pb-4 border-b border-border/40 shrink-0 bg-card">
+            <SheetTitle className="flex items-center gap-3">
+              {activeDoc ? (
+                <>
+                  <button onClick={() => setActiveDoc(null)}
+                    className="size-8 rounded-lg border border-border flex items-center justify-center hover:bg-muted transition-colors shrink-0">
+                    <HugeiconsIcon icon={ArrowLeft01Icon} size={13} className="text-muted-foreground" />
+                  </button>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-base truncate">{activeDoc.title}</p>
+                    <p className="text-xs text-muted-foreground font-normal truncate">{activeDoc.fileName}</p>
+                  </div>
+                  {activeDoc.url && (
+                    <a href={activeDoc.url} target="_blank" rel="noopener noreferrer">
+                      <Button variant="outline" size="sm" className="h-7 text-xs gap-1.5 shrink-0">
+                        <HugeiconsIcon icon={ArrowRight02Icon} size={11} />
+                        Neuer Tab
+                      </Button>
+                    </a>
+                  )}
+                </>
+              ) : (
+                <>
+                  <div className="size-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                    <HugeiconsIcon icon={File01Icon} size={18} className="text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-bold text-base">Dokumente vom Ausbilder</p>
+                    <p className="text-xs text-muted-foreground font-normal">{docs.length} {docs.length === 1 ? 'Dokument' : 'Dokumente'} verfügbar</p>
+                  </div>
+                </>
+              )}
+            </SheetTitle>
+          </SheetHeader>
+
+          <div className="flex-1 overflow-hidden flex flex-col">
+            {activeDoc ? (
+              /* PDF viewer */
+              activeDoc.url ? (
+                <iframe
+                  src={activeDoc.url}
+                  className="flex-1 w-full border-0"
+                  title={activeDoc.title}
+                />
+              ) : (
+                <div className="flex-1 flex items-center justify-center">
+                  <p className="text-sm text-muted-foreground">PDF-Link nicht verfügbar.</p>
+                </div>
+              )
+            ) : (
+              /* Document list */
+              <div className="flex-1 overflow-y-auto px-6 py-5 space-y-3">
+                {docs.map(doc => (
+                  <button key={doc.id}
+                    onClick={() => setActiveDoc(doc)}
+                    className="w-full flex items-center gap-4 rounded-2xl border border-border/50 bg-card p-4 hover:border-primary/30 hover:bg-primary/[0.02] transition-all text-left group">
+                    <div className="size-11 rounded-xl bg-red-500/10 flex items-center justify-center shrink-0">
+                      <HugeiconsIcon icon={File01Icon} size={20} className="text-red-400" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-sm truncate">{doc.title}</p>
+                      <p className="text-xs text-muted-foreground truncate">{doc.fileName}</p>
+                      <p className="text-xs text-muted-foreground/60 mt-0.5">
+                        {format(new Date(doc.createdAt), 'dd. MMMM yyyy', { locale: de })}
+                        {doc.fileSize ? ` · ${doc.fileSize < 1024 * 1024
+                          ? `${(doc.fileSize / 1024).toFixed(0)} KB`
+                          : `${(doc.fileSize / 1024 / 1024).toFixed(1)} MB`}` : ''}
+                      </p>
+                    </div>
+                    <HugeiconsIcon icon={ArrowRight02Icon} size={16}
+                      className="text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   )
 }

@@ -17,6 +17,7 @@ import {
   SortByDown01Icon, SortByUp01Icon, Time01Icon,
   CheckmarkCircle01Icon, ArrowLeft01Icon, ArrowRight02Icon,
   AnalyticsUpIcon, Notification01Icon, Download01Icon, Target01Icon,
+  File01Icon, Upload01Icon, Delete02Icon,
 } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 
@@ -43,6 +44,15 @@ interface RawBlock {
   is_recurring: boolean
   specific_date?: string
   description?: string
+}
+
+interface TrainerDocument {
+  id: string
+  title: string
+  file_name: string
+  file_size: number
+  created_at: string
+  schedule_document_assignments: { profile_id: string }[]
 }
 
 /* ─── CONSTANTS ─── */
@@ -282,6 +292,17 @@ export default function AusbilderStundenplanPage() {
   const [sheetProfile, setSheetProfile] = useState<Apprentice | null>(null)
   const [sheetTab, setSheetTab]         = useState<'plan' | 'analyse'>('plan')
 
+  /* ── Document management state ── */
+  const [docsSheetOpen, setDocsSheetOpen]     = useState(false)
+  const [documents, setDocuments]             = useState<TrainerDocument[]>([])
+  const [docsLoading, setDocsLoading]         = useState(false)
+  const [uploadOpen, setUploadOpen]           = useState(false)
+  const [uploadFile, setUploadFile]           = useState<File | null>(null)
+  const [uploadTitle, setUploadTitle]         = useState('')
+  const [uploadAssignees, setUploadAssignees] = useState<Set<string>>(new Set())
+  const [uploading, setUploading]             = useState(false)
+  const [uploadError, setUploadError]         = useState<string | null>(null)
+
   const weekDates     = useMemo(() => Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)), [weekStart])
   const isCurrentWeek = weekDates.some(d => isToday(d))
 
@@ -305,6 +326,51 @@ export default function AusbilderStundenplanPage() {
     if (trainerProfile?.role !== 'trainer') { router.push('/stundenplan'); return }
     load()
   }, [profileLoading, trainerProfile, router, load])
+
+  /* ── Document functions ── */
+  function loadDocs() {
+    setDocsLoading(true)
+    fetch('/api/admin/schedule/documents')
+      .then(r => r.json())
+      .then(data => setDocuments(data.documents ?? []))
+      .catch(() => {})
+      .finally(() => setDocsLoading(false))
+  }
+
+  async function handleUpload() {
+    if (!uploadFile || !uploadTitle.trim()) return
+    setUploading(true)
+    setUploadError(null)
+    try {
+      const fd = new FormData()
+      fd.append('file', uploadFile)
+      fd.append('title', uploadTitle.trim())
+      fd.append('assigneeIds', JSON.stringify([...uploadAssignees]))
+      const res  = await fetch('/api/admin/schedule/documents', { method: 'POST', body: fd })
+      const data = await res.json()
+      if (!res.ok) { setUploadError(data.error ?? 'Fehler.'); return }
+      setUploadOpen(false)
+      setUploadFile(null)
+      setUploadTitle('')
+      setUploadAssignees(new Set())
+      loadDocs()
+    } catch {
+      setUploadError('Netzwerkfehler beim Hochladen.')
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  async function handleDeleteDoc(docId: string) {
+    await fetch(`/api/admin/schedule/documents/${docId}`, { method: 'DELETE' })
+    setDocuments(prev => prev.filter(d => d.id !== docId))
+  }
+
+  function fmtFileSize(bytes: number) {
+    if (bytes < 1024) return `${bytes} B`
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`
+    return `${(bytes / 1024 / 1024).toFixed(1)} MB`
+  }
 
   /* ── Active now ── */
   const activeNow = useMemo(() =>
@@ -531,6 +597,16 @@ export default function AusbilderStundenplanPage() {
                   CSV
                 </Button>
               )}
+              <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs"
+                onClick={() => { setDocsSheetOpen(true); loadDocs() }}>
+                <HugeiconsIcon icon={File01Icon} size={12} />
+                Dokumente
+                {documents.length > 0 && (
+                  <span className="size-4 rounded-full bg-primary text-primary-foreground text-[9px] font-bold flex items-center justify-center">
+                    {documents.length}
+                  </span>
+                )}
+              </Button>
             </div>
           </div>
 
@@ -869,6 +945,233 @@ export default function AusbilderStundenplanPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* ── Documents Sheet ── */}
+      <Sheet open={docsSheetOpen} onOpenChange={setDocsSheetOpen}>
+        <SheetContent side="left" className="w-full sm:max-w-lg p-0 flex flex-col overflow-hidden">
+          <SheetHeader className="px-6 pt-6 pb-4 border-b border-border/40 shrink-0 bg-card">
+            <SheetTitle className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="size-9 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <HugeiconsIcon icon={File01Icon} size={18} className="text-primary" />
+                </div>
+                <div>
+                  <p className="font-bold text-base">Dokumente</p>
+                  <p className="text-xs text-muted-foreground font-normal">PDFs für Auszubildende</p>
+                </div>
+              </div>
+              <Button size="sm" className="h-8 gap-1.5 text-xs"
+                onClick={() => { setUploadOpen(true); setUploadError(null) }}>
+                <HugeiconsIcon icon={Upload01Icon} size={12} />
+                Hochladen
+              </Button>
+            </SheetTitle>
+          </SheetHeader>
+
+          <div className="flex-1 overflow-y-auto px-6 py-5">
+            {docsLoading ? (
+              <div className="py-12 text-center">
+                <div className="size-5 rounded-full border-2 border-primary/30 border-t-primary animate-spin mx-auto mb-3" />
+                <p className="text-sm text-muted-foreground">Laden…</p>
+              </div>
+            ) : documents.length === 0 ? (
+              <div className="py-16 text-center">
+                <div className="size-14 rounded-2xl bg-muted/40 flex items-center justify-center mx-auto mb-4">
+                  <HugeiconsIcon icon={File01Icon} size={24} className="text-muted-foreground/50" />
+                </div>
+                <p className="text-sm font-semibold mb-1">Noch keine Dokumente</p>
+                <p className="text-xs text-muted-foreground mb-4">Lade ein PDF hoch, um es Auszubildenden bereitzustellen.</p>
+                <Button size="sm" className="gap-1.5 text-xs"
+                  onClick={() => { setUploadOpen(true); setUploadError(null) }}>
+                  <HugeiconsIcon icon={Upload01Icon} size={12} />
+                  Erstes Dokument hochladen
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {documents.map(doc => {
+                  const assignees = doc.schedule_document_assignments ?? []
+                  const assignedNames = assignees
+                    .map(a => apprentices.find(ap => ap.id === a.profile_id))
+                    .filter(Boolean)
+                  return (
+                    <div key={doc.id}
+                      className="rounded-2xl border border-border/50 bg-card p-4 flex items-start gap-3">
+                      <div className="size-10 rounded-xl bg-red-500/10 flex items-center justify-center shrink-0">
+                        <HugeiconsIcon icon={File01Icon} size={18} className="text-red-400" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-sm truncate">{doc.title}</p>
+                        <p className="text-xs text-muted-foreground truncate">{doc.file_name}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {fmtFileSize(doc.file_size)} · {format(new Date(doc.created_at), 'dd.MM.yyyy', { locale: de })}
+                        </p>
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {assignees.length === 0 ? (
+                            <span className="text-[10px] text-muted-foreground/50 italic">Noch niemand zugewiesen</span>
+                          ) : (
+                            assignedNames.map((ap, i) => ap ? (
+                              <span key={i} className="text-[10px] font-medium bg-muted/40 px-1.5 py-0.5 rounded-full text-foreground/70">
+                                {ap.first_name} {ap.last_name}
+                              </span>
+                            ) : null)
+                          )}
+                        </div>
+                      </div>
+                      <button onClick={() => handleDeleteDoc(doc.id)}
+                        className="size-7 rounded-lg hover:bg-destructive/10 flex items-center justify-center transition-colors shrink-0">
+                        <HugeiconsIcon icon={Delete02Icon} size={14} className="text-destructive/70" />
+                      </button>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      {/* ── Upload Dialog ── */}
+      {uploadOpen && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="w-full max-w-md bg-card border border-border rounded-2xl shadow-2xl overflow-hidden">
+            <div className="px-6 pt-6 pb-4 border-b border-border/40">
+              <div className="flex items-center justify-between">
+                <h2 className="font-bold text-base">PDF hochladen</h2>
+                <button onClick={() => setUploadOpen(false)}
+                  className="size-7 rounded-lg hover:bg-muted flex items-center justify-center text-muted-foreground transition-colors text-lg leading-none">
+                  ×
+                </button>
+              </div>
+            </div>
+            <div className="px-6 py-5 space-y-4 max-h-[70vh] overflow-y-auto">
+              {/* File picker */}
+              <div>
+                <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                  PDF-Datei *
+                </label>
+                <label className={cn(
+                  'flex flex-col items-center justify-center gap-2 border-2 border-dashed rounded-xl px-4 py-6 cursor-pointer transition-colors',
+                  uploadFile ? 'border-primary/40 bg-primary/5' : 'border-border/50 hover:border-border hover:bg-muted/20'
+                )}>
+                  <HugeiconsIcon icon={Upload01Icon} size={22}
+                    className={uploadFile ? 'text-primary' : 'text-muted-foreground/50'} />
+                  {uploadFile ? (
+                    <div className="text-center">
+                      <p className="text-sm font-semibold text-primary truncate max-w-[280px]">{uploadFile.name}</p>
+                      <p className="text-xs text-muted-foreground">{fmtFileSize(uploadFile.size)}</p>
+                    </div>
+                  ) : (
+                    <div className="text-center">
+                      <p className="text-sm text-muted-foreground">Klicken zum Auswählen</p>
+                      <p className="text-xs text-muted-foreground/60">PDF · max. 25 MB</p>
+                    </div>
+                  )}
+                  <input type="file" accept=".pdf,application/pdf" className="sr-only"
+                    onChange={e => setUploadFile(e.target.files?.[0] ?? null)} />
+                </label>
+              </div>
+
+              {/* Title */}
+              <div>
+                <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                  Titel *
+                </label>
+                <Input value={uploadTitle} onChange={e => setUploadTitle(e.target.value)}
+                  placeholder="z. B. Arbeitsplan KW 12, Ausbildungsrahmenplan…"
+                  className="h-9 text-sm" />
+              </div>
+
+              {/* Apprentice multi-select */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    Auszubildende
+                  </label>
+                  <button onClick={() => {
+                    if (uploadAssignees.size === apprentices.length) {
+                      setUploadAssignees(new Set())
+                    } else {
+                      setUploadAssignees(new Set(apprentices.map(a => a.id)))
+                    }
+                  }} className="text-[10px] text-primary hover:underline">
+                    {uploadAssignees.size === apprentices.length ? 'Alle abwählen' : 'Alle auswählen'}
+                  </button>
+                </div>
+                {apprentices.length === 0 ? (
+                  <p className="text-xs text-muted-foreground/50 italic">Keine Auszubildenden gefunden.</p>
+                ) : (
+                  <div className="space-y-1 max-h-48 overflow-y-auto rounded-xl border border-border/40 p-2">
+                    {apprentices.map((ap, idx) => {
+                      const checked = uploadAssignees.has(ap.id)
+                      return (
+                        <label key={ap.id}
+                          className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-muted/30 cursor-pointer transition-colors">
+                          <div className={cn(
+                            'size-5 rounded-md border flex items-center justify-center shrink-0 transition-colors',
+                            checked ? 'bg-primary border-primary' : 'border-border'
+                          )}>
+                            {checked && <HugeiconsIcon icon={CheckmarkCircle01Icon} size={12} className="text-primary-foreground" />}
+                          </div>
+                          <div className="size-7 rounded-lg text-white text-xs font-bold flex items-center justify-center shrink-0"
+                            style={{ backgroundColor: PERSON_COLORS[idx % PERSON_COLORS.length] }}>
+                            {ap.first_name[0]}{ap.last_name[0]}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">{ap.first_name} {ap.last_name}</p>
+                            <p className="text-xs text-muted-foreground truncate">{ap.occupation}</p>
+                          </div>
+                          <input type="checkbox" className="sr-only" checked={checked}
+                            onChange={e => {
+                              setUploadAssignees(prev => {
+                                const next = new Set(prev)
+                                e.target.checked ? next.add(ap.id) : next.delete(ap.id)
+                                return next
+                              })
+                            }} />
+                        </label>
+                      )
+                    })}
+                  </div>
+                )}
+                {uploadAssignees.size > 0 && (
+                  <p className="text-xs text-muted-foreground mt-1.5">
+                    {uploadAssignees.size} {uploadAssignees.size === 1 ? 'Person' : 'Personen'} ausgewählt
+                  </p>
+                )}
+              </div>
+
+              {uploadError && (
+                <div className="rounded-xl border border-destructive/30 bg-destructive/5 px-3 py-2.5 text-xs text-destructive">
+                  {uploadError}
+                </div>
+              )}
+            </div>
+
+            <div className="px-6 pb-6 flex gap-2 justify-end border-t border-border/40 pt-4">
+              <Button variant="outline" size="sm" onClick={() => setUploadOpen(false)}>
+                Abbrechen
+              </Button>
+              <Button size="sm" className="gap-1.5"
+                disabled={!uploadFile || !uploadTitle.trim() || uploading}
+                onClick={handleUpload}>
+                {uploading ? (
+                  <>
+                    <span className="size-3.5 rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground animate-spin" />
+                    Hochladen…
+                  </>
+                ) : (
+                  <>
+                    <HugeiconsIcon icon={Upload01Icon} size={13} />
+                    Hochladen
+                    {uploadAssignees.size > 0 && ` (${uploadAssignees.size})`}
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Detail Sheet ── */}
       <Sheet open={!!sheetProfile} onOpenChange={v => !v && setSheetProfile(null)}>
