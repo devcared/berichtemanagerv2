@@ -636,8 +636,7 @@ export default function AusbilderStundenplanPage() {
                     style={item.catColor ? { color: item.catColor } : {}} />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs font-bold leading-tight truncate"
-                    style={item.catColor ? { color: item.catColor } : {}}
+                  <p style={item.catColor ? { color: item.catColor } : {}}
                     className={cn('text-xs font-bold leading-tight truncate', !item.catColor && item.color)}>
                     {item.value}
                   </p>
@@ -1074,9 +1073,8 @@ export default function AusbilderStundenplanPage() {
                               <span className={cn('text-xs font-bold', has ? 'text-foreground' : 'text-muted-foreground/40')}>
                                 {DAY_LABELS[i]}
                               </span>
-                              <div className="size-1.5 rounded-full"
-                                style={has ? { backgroundColor: color } : { backgroundColor: 'transparent' }}
-                                className={cn('size-1.5 rounded-full', !has && 'bg-muted/40')} />
+                              <div className={cn('size-1.5 rounded-full', !has && 'bg-muted/40')}
+                                style={has ? { backgroundColor: color } : {}} />
                               <span className="text-[9px] text-muted-foreground/60">
                                 {fmtH(sheetStats.perDay[i])}
                               </span>
