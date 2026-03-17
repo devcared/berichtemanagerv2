@@ -35,7 +35,7 @@ export async function GET() {
     const [{ data: profiles, error: pErr }, { data: blocks, error: bErr }] = await Promise.all([
       admin
         .from('profiles')
-        .select('id, first_name, last_name, occupation, company_name')
+        .select('id, first_name, last_name, occupation, company_name, weekly_hours')
         .eq('role', 'apprentice')
         .order('last_name'),
       admin
