@@ -16,7 +16,7 @@ import {
   CalendarIcon, Search01Icon, ArrowRight01Icon,
   SortByDown01Icon, SortByUp01Icon, Time01Icon,
   CheckmarkCircle01Icon, ArrowLeft01Icon, ArrowRight02Icon,
-  AnalyticsUpIcon, Notification01Icon,
+  AnalyticsUpIcon, Notification01Icon, Download01Icon, Target01Icon,
 } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 
@@ -53,7 +53,6 @@ const SLOTS      = (HOUR_END - HOUR_START) * 2
 const SLOT_H     = 44
 const TOTAL_H    = SLOTS * SLOT_H
 const DAY_LABELS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So']
-const RANGE_MIN  = (HOUR_END - HOUR_START) * 60
 
 const CAT_META: Record<ScheduleCategory, { label: string; color: string }> = {
   arbeit:    { label: 'Arbeit',       color: '#3B82F6' },
@@ -71,14 +70,14 @@ const PERSON_COLORS = [
 ]
 
 const FILTER_TABS = [
-  { value: 'alle',        label: 'Alle' },
-  { value: 'mit_plan',   label: 'Mit Zeitplan' },
-  { value: 'ohne_plan',  label: 'Ohne Zeitplan' },
-  { value: 'konflikte',  label: 'Konflikte' },
+  { value: 'alle',       label: 'Alle' },
+  { value: 'mit_plan',  label: 'Mit Zeitplan' },
+  { value: 'ohne_plan', label: 'Ohne Zeitplan' },
+  { value: 'konflikte', label: 'Konflikte' },
 ] as const
 
 type FilterTab = typeof FILTER_TABS[number]['value']
-type SortKey   = 'name' | 'hours_desc' | 'hours_asc' | 'conflicts'
+type SortKey   = 'name' | 'hours_desc' | 'hours_asc' | 'conflicts' | 'target'
 
 /* ─── HELPERS ─── */
 
@@ -155,6 +154,34 @@ function calcHoursPerCat(blocks: RawBlock[], profileId: string, weekDates: Date[
     if (h > 0) result[cat] = h
   }
   return result
+}
+
+function isCurrentlyActive(blocks: RawBlock[], profileId: string): boolean {
+  const now = new Date()
+  const dow = (now.getDay() + 6) % 7
+  const cur = now.getHours() * 60 + now.getMinutes()
+  return blocks.some(b => {
+    if (b.profile_id !== profileId) return false
+    if (b.is_recurring) { if (b.day_of_week !== dow) return false }
+    else { if (!b.specific_date || !isSameDay(parseISO(b.specific_date), now)) return false }
+    return timeToMin(b.start_time) <= cur && cur < timeToMin(b.end_time)
+  })
+}
+
+function calcBusiestDay(blocks: RawBlock[], profileId: string, weekDates: Date[]): number | null {
+  const perDay = Array.from({ length: 7 }, (_, i) =>
+    getDayBlocks(blocks, profileId, i, weekDates)
+      .reduce((a, b) => a + (timeToMin(b.end_time) - timeToMin(b.start_time)) / 60, 0)
+  )
+  const max = Math.max(...perDay)
+  return max === 0 ? null : perDay.indexOf(max)
+}
+
+function calcAvgBlockDuration(blocks: RawBlock[], profileId: string, weekDates: Date[]): number {
+  const wb = getWeekBlocks(blocks, profileId, weekDates)
+  if (wb.length === 0) return 0
+  const total = wb.reduce((a, b) => a + (timeToMin(b.end_time) - timeToMin(b.start_time)), 0)
+  return total / wb.length / 60
 }
 
 /* ─── READ-ONLY WEEK GRID ─── */
@@ -251,6 +278,7 @@ export default function AusbilderStundenplanPage() {
   const [search, setSearch]             = useState('')
   const [sortKey, setSortKey]           = useState<SortKey>('name')
   const [sortDir, setSortDir]           = useState<'asc' | 'desc'>('asc')
+  const [catFilter, setCatFilter]       = useState<ScheduleCategory | null>(null)
   const [sheetProfile, setSheetProfile] = useState<Apprentice | null>(null)
   const [sheetTab, setSheetTab]         = useState<'plan' | 'analyse'>('plan')
 
@@ -278,6 +306,12 @@ export default function AusbilderStundenplanPage() {
     load()
   }, [profileLoading, trainerProfile, router, load])
 
+  /* ── Active now ── */
+  const activeNow = useMemo(() =>
+    new Set(apprentices.filter(ap => isCurrentlyActive(blocks, ap.id)).map(ap => ap.id)),
+    [apprentices, blocks]
+  )
+
   /* ── Per-apprentice stats ── */
   const stats = useMemo(() => apprentices.map((ap, idx) => ({
     ap,
@@ -287,18 +321,35 @@ export default function AusbilderStundenplanPage() {
     covered:   calcCoveredDays(blocks, ap.id, weekDates),
     cats:      calcHoursPerCat(blocks, ap.id, weekDates),
     hasBlocks: blocks.some(b => b.profile_id === ap.id),
-  })), [apprentices, blocks, weekDates])
+    isActive:  activeNow.has(ap.id),
+  })), [apprentices, blocks, weekDates, activeNow])
+
+  /* ── Team-wide stats ── */
+  const teamStats = useMemo(() => {
+    const totalHours   = stats.reduce((a, s) => a + s.hours, 0)
+    const avgCompletion = stats.length
+      ? stats.reduce((a, s) => a + Math.min(s.hours / (s.ap.weekly_hours || 40), 1), 0) / stats.length * 100
+      : 0
+    const catTotals: Partial<Record<ScheduleCategory, number>> = {}
+    stats.forEach(s => (Object.entries(s.cats) as [ScheduleCategory, number][]).forEach(([c, h]) => {
+      catTotals[c] = (catTotals[c] || 0) + h
+    }))
+    const topCat = (Object.entries(catTotals) as [ScheduleCategory, number][])
+      .sort((a, b) => b[1] - a[1])[0]?.[0] ?? null
+    return { totalHours, avgCompletion, topCat }
+  }, [stats])
 
   /* ── Summary counts ── */
   const counts = useMemo(() => ({
-    alle:       stats.length,
-    mit_plan:   stats.filter(s => s.hasBlocks).length,
-    ohne_plan:  stats.filter(s => !s.hasBlocks).length,
-    konflikte:  stats.filter(s => s.conflicts > 0).length,
+    alle:      stats.length,
+    mit_plan:  stats.filter(s => s.hasBlocks).length,
+    ohne_plan: stats.filter(s => !s.hasBlocks).length,
+    konflikte: stats.filter(s => s.conflicts > 0).length,
   }), [stats])
 
-  const avgHours = stats.length ? stats.reduce((a, s) => a + s.hours, 0) / stats.length : 0
+  const avgHours     = stats.length ? stats.reduce((a, s) => a + s.hours, 0) / stats.length : 0
   const conflictCount = counts.konflikte
+  const activeCount   = activeNow.size
 
   /* ── Filtered + sorted ── */
   const filtered = useMemo(() => {
@@ -308,44 +359,100 @@ export default function AusbilderStundenplanPage() {
       if (activeTab === 'konflikte') return s.conflicts > 0
       return true
     })
+    if (catFilter) {
+      list = list.filter(s => (s.cats[catFilter] ?? 0) > 0)
+    }
     if (search.trim()) {
       const q = search.toLowerCase()
       list = list.filter(s =>
         `${s.ap.first_name} ${s.ap.last_name}`.toLowerCase().includes(q) ||
-        s.ap.occupation.toLowerCase().includes(q)
+        s.ap.occupation.toLowerCase().includes(q) ||
+        s.ap.company_name.toLowerCase().includes(q)
       )
     }
     list = [...list].sort((a, b) => {
       let cmp = 0
-      if (sortKey === 'hours_desc' || sortKey === 'hours_asc') cmp = a.hours - b.hours
-      else if (sortKey === 'conflicts') cmp = a.conflicts - b.conflicts
-      else cmp = `${a.ap.last_name}${a.ap.first_name}`.localeCompare(`${b.ap.last_name}${b.ap.first_name}`)
-      const dir = (sortKey === 'hours_asc') ? 1 : (sortKey === 'name' && sortDir === 'asc') ? 1 : -1
+      if (sortKey === 'hours_desc' || sortKey === 'hours_asc') {
+        cmp = a.hours - b.hours
+      } else if (sortKey === 'conflicts') {
+        cmp = a.conflicts - b.conflicts
+      } else if (sortKey === 'target') {
+        const aPct = a.hours / (a.ap.weekly_hours || 40)
+        const bPct = b.hours / (b.ap.weekly_hours || 40)
+        cmp = aPct - bPct
+      } else {
+        cmp = `${a.ap.last_name}${a.ap.first_name}`.localeCompare(`${b.ap.last_name}${b.ap.first_name}`)
+      }
+      const dir = (sortKey === 'hours_asc') ? 1
+        : (sortKey === 'name' && sortDir === 'asc') ? 1
+        : -1
       return cmp * dir
     })
     return list
-  }, [stats, activeTab, search, sortKey, sortDir])
+  }, [stats, activeTab, catFilter, search, sortKey, sortDir])
 
   function toggleSort(key: SortKey) {
     if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc')
     else { setSortKey(key); setSortDir('desc') }
   }
 
+  /* ── Sheet prev / next ── */
+  const sheetIdx      = sheetProfile ? filtered.findIndex(s => s.ap.id === sheetProfile.id) : -1
+  const canPrev       = sheetIdx > 0
+  const canNext       = sheetIdx >= 0 && sheetIdx < filtered.length - 1
+  function goSheet(dir: 1 | -1) {
+    const next = sheetIdx + dir
+    if (next < 0 || next >= filtered.length) return
+    setSheetProfile(filtered[next].ap)
+  }
+
   /* ── Sheet data ── */
   const sheetStats = useMemo(() => {
     if (!sheetProfile) return null
-    const hours = calcHours(blocks, sheetProfile.id, weekDates)
+    const hours   = calcHours(blocks, sheetProfile.id, weekDates)
+    const target  = sheetProfile.weekly_hours || 40
+    const perDay  = Array.from({ length: 7 }, (_, i) =>
+      getDayBlocks(blocks, sheetProfile.id, i, weekDates)
+        .reduce((a, b) => a + (timeToMin(b.end_time) - timeToMin(b.start_time)) / 60, 0)
+    )
     return {
       hours,
-      cats:      calcHoursPerCat(blocks, sheetProfile.id, weekDates),
-      conflicts: getConflictDetails(blocks, sheetProfile.id, weekDates),
-      covered:   calcCoveredDays(blocks, sheetProfile.id, weekDates),
-      perDay: Array.from({ length: 7 }, (_, i) =>
-        getDayBlocks(blocks, sheetProfile.id, i, weekDates)
-          .reduce((a, b) => a + (timeToMin(b.end_time) - timeToMin(b.start_time)) / 60, 0)
-      ),
+      cats:         calcHoursPerCat(blocks, sheetProfile.id, weekDates),
+      conflicts:    getConflictDetails(blocks, sheetProfile.id, weekDates),
+      covered:      calcCoveredDays(blocks, sheetProfile.id, weekDates),
+      perDay,
+      busiestDay:   calcBusiestDay(blocks, sheetProfile.id, weekDates),
+      avgDuration:  calcAvgBlockDuration(blocks, sheetProfile.id, weekDates),
+      completion:   Math.min(hours / target * 100, 100),
+      blockCount:   getWeekBlocks(blocks, sheetProfile.id, weekDates).length,
     }
   }, [sheetProfile, blocks, weekDates])
+
+  /* ── Export CSV ── */
+  function exportCSV() {
+    const rows: (string | number)[][] = [
+      ['Name', 'Beruf', 'Betrieb', 'Stunden (Ist)', 'Stunden (Soll)', '% Ziel', 'Konflikte', 'Tage abgedeckt', 'Blöcke gesamt'],
+      ...stats.map(s => [
+        `${s.ap.first_name} ${s.ap.last_name}`,
+        s.ap.occupation,
+        s.ap.company_name,
+        s.hours.toFixed(1),
+        s.ap.weekly_hours || 40,
+        ((s.hours / (s.ap.weekly_hours || 40)) * 100).toFixed(0),
+        s.conflicts,
+        s.covered.filter(Boolean).length,
+        getWeekBlocks(blocks, s.ap.id, weekDates).length,
+      ]),
+    ]
+    const csv  = rows.map(r => r.map(c => `"${c}"`).join(',')).join('\n')
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
+    const url  = URL.createObjectURL(blob)
+    const a    = document.createElement('a')
+    a.href     = url
+    a.download = `stundenplan-kw${format(weekStart, 'w')}-${format(weekStart, 'yyyy')}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
 
   const SortIcon = sortDir === 'asc' ? SortByUp01Icon : SortByDown01Icon
 
@@ -379,28 +486,32 @@ export default function AusbilderStundenplanPage() {
               </div>
               <div>
                 <p className="text-xs text-muted-foreground font-medium mb-0.5">Willkommen zurück,</p>
-                <h1 className="text-2xl font-bold tracking-tight">
+                <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
                   {trainerProfile.firstName} {trainerProfile.lastName}
+                  {activeCount > 0 && (
+                    <span className="flex items-center gap-1 text-xs font-semibold text-green-400 bg-green-500/10 px-2 py-0.5 rounded-full border border-green-500/20">
+                      <span className="size-1.5 rounded-full bg-green-400 animate-pulse" />
+                      {activeCount} aktiv
+                    </span>
+                  )}
                 </h1>
                 <p className="text-sm text-muted-foreground mt-0.5">
-                  {format(new Date(), "EEEE, d. MMMM yyyy", { locale: de })} · Stundenplan-Übersicht
+                  {format(new Date(), "EEEE, d. MMMM yyyy", { locale: de })} · KW {format(weekStart, 'w')}
                 </p>
               </div>
             </div>
 
-            {/* Week navigation + refresh */}
+            {/* Week nav + actions */}
             <div className="flex items-center gap-2 flex-wrap">
               <div className="flex items-center gap-1 rounded-xl border border-border bg-background px-1 py-1">
-                <button
-                  onClick={() => setWeekStart(d => addDays(d, -7))}
+                <button onClick={() => setWeekStart(d => addDays(d, -7))}
                   className="size-7 rounded-lg flex items-center justify-center hover:bg-muted transition-colors">
                   <HugeiconsIcon icon={ArrowLeft01Icon} size={14} className="text-muted-foreground" />
                 </button>
                 <span className="text-xs font-semibold px-2 tabular-nums text-muted-foreground min-w-[150px] text-center">
                   {format(weekStart, 'dd. MMM', { locale: de })} – {format(addDays(weekStart, 6), 'dd. MMM yyyy', { locale: de })}
                 </span>
-                <button
-                  onClick={() => setWeekStart(d => addDays(d, 7))}
+                <button onClick={() => setWeekStart(d => addDays(d, 7))}
                   className="size-7 rounded-lg flex items-center justify-center hover:bg-muted transition-colors">
                   <HugeiconsIcon icon={ArrowRight02Icon} size={14} className="text-muted-foreground" />
                 </button>
@@ -414,6 +525,12 @@ export default function AusbilderStundenplanPage() {
               <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs" onClick={load}>
                 Aktualisieren
               </Button>
+              {!loading && stats.length > 0 && (
+                <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs" onClick={exportCSV}>
+                  <HugeiconsIcon icon={Download01Icon} size={12} />
+                  CSV
+                </Button>
+              )}
             </div>
           </div>
 
@@ -424,7 +541,7 @@ export default function AusbilderStundenplanPage() {
                 <HugeiconsIcon icon={Notification01Icon} size={14} className="text-orange-500" />
               </div>
               <p className="text-sm font-medium text-orange-400">
-                <strong>{conflictCount} {conflictCount === 1 ? 'Auszubildende/r hat' : 'Auszubildende haben'}</strong> Zeitkonflikte im Stundenplan.
+                <strong>{conflictCount} {conflictCount === 1 ? 'Auszubildende/r hat' : 'Auszubildende haben'}</strong> Zeitkonflikte im Stundenplan dieser Woche.
               </p>
               <Button size="sm" variant="outline"
                 className="ml-auto h-7 text-xs border-orange-500/30 text-orange-500 hover:bg-orange-500/10 shrink-0"
@@ -439,7 +556,7 @@ export default function AusbilderStundenplanPage() {
       <div className="flex-1 px-6 py-6 max-w-5xl mx-auto w-full">
 
         {/* ── Stat Cards ── */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
           {([
             {
               key: 'alle' as FilterTab, label: 'Auszubildende gesamt',
@@ -478,12 +595,65 @@ export default function AusbilderStundenplanPage() {
           ))}
         </div>
 
+        {/* ── Team Insights Row ── */}
+        {!loading && stats.length > 0 && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
+            {[
+              {
+                icon: Time01Icon,
+                label: 'Gesamtstunden',
+                value: fmtH(teamStats.totalHours),
+                sub: 'Team diese Woche',
+                color: 'text-primary',
+              },
+              {
+                icon: Target01Icon,
+                label: 'Ø Zielerreichung',
+                value: `${Math.round(teamStats.avgCompletion)}%`,
+                sub: `Ø ${fmtH(avgHours)} / Azubi`,
+                color: teamStats.avgCompletion >= 80 ? 'text-green-400' : teamStats.avgCompletion >= 50 ? 'text-yellow-400' : 'text-red-400',
+              },
+              {
+                icon: CheckmarkBadge01Icon,
+                label: 'Gerade aktiv',
+                value: String(activeCount),
+                sub: activeCount === 1 ? '1 Azubi im Block' : `${activeCount} Azubis im Block`,
+                color: activeCount > 0 ? 'text-green-400' : 'text-muted-foreground',
+              },
+              {
+                icon: AnalyticsUpIcon,
+                label: 'Top-Kategorie',
+                value: teamStats.topCat ? CAT_META[teamStats.topCat].label : '–',
+                sub: teamStats.topCat ? `Meistgeplante Kategorie` : 'Keine Daten',
+                color: teamStats.topCat ? undefined : 'text-muted-foreground',
+                catColor: teamStats.topCat ? CAT_META[teamStats.topCat].color : undefined,
+              },
+            ].map((item, i) => (
+              <div key={i} className="rounded-xl border border-border/50 bg-card/50 px-3 py-2.5 flex items-center gap-2.5">
+                <div className="size-7 rounded-lg bg-muted/40 flex items-center justify-center shrink-0">
+                  <HugeiconsIcon icon={item.icon} size={13}
+                    className={item.color ?? ''}
+                    style={item.catColor ? { color: item.catColor } : {}} />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-bold leading-tight truncate"
+                    style={item.catColor ? { color: item.catColor } : {}}
+                    className={cn('text-xs font-bold leading-tight truncate', !item.catColor && item.color)}>
+                    {item.value}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground/70 truncate">{item.sub}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* ── Main card ── */}
         <Card className="border-border overflow-hidden">
 
           {/* Toolbar */}
-          <div className="border-b border-border px-4 py-3 flex items-center gap-3">
-            <div className="relative flex-1 max-w-xs">
+          <div className="border-b border-border px-4 py-3 flex items-center gap-3 flex-wrap">
+            <div className="relative flex-1 max-w-xs min-w-[160px]">
               <HugeiconsIcon icon={Search01Icon} size={14}
                 className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <Input value={search} onChange={e => setSearch(e.target.value)}
@@ -491,7 +661,6 @@ export default function AusbilderStundenplanPage() {
                 className="h-8 pl-8 text-xs bg-background border-border" />
             </div>
 
-            {/* Ø Stunden badge */}
             {!loading && stats.length > 0 && (
               <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted/40 shrink-0">
                 <HugeiconsIcon icon={Time01Icon} size={12} className="text-muted-foreground" />
@@ -500,11 +669,12 @@ export default function AusbilderStundenplanPage() {
             )}
 
             {/* Sort buttons */}
-            <div className="flex items-center gap-1 ml-auto">
+            <div className="flex items-center gap-1 ml-auto flex-wrap">
               {([
                 { key: 'name'       as SortKey, label: 'Name' },
                 { key: 'hours_desc' as SortKey, label: 'Stunden' },
                 { key: 'conflicts'  as SortKey, label: 'Konflikte' },
+                { key: 'target'     as SortKey, label: 'Ziel' },
               ] as const).map(s => (
                 <button key={s.key} onClick={() => toggleSort(s.key)}
                   className={cn(
@@ -518,6 +688,40 @@ export default function AusbilderStundenplanPage() {
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* Category filter chips */}
+          <div className="border-b border-border/60 px-4 py-2 flex items-center gap-1.5 overflow-x-auto">
+            <span className="text-[10px] text-muted-foreground/60 shrink-0 mr-1">Kategorie:</span>
+            <button
+              onClick={() => setCatFilter(null)}
+              className={cn(
+                'flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all border',
+                catFilter === null
+                  ? 'bg-foreground/10 border-border text-foreground'
+                  : 'border-transparent text-muted-foreground hover:border-border/40 hover:text-foreground'
+              )}>
+              Alle
+            </button>
+            {CAT_KEYS.map(cat => {
+              const meta    = CAT_META[cat]
+              const isActive = catFilter === cat
+              const count   = stats.filter(s => (s.cats[cat] ?? 0) > 0).length
+              if (count === 0) return null
+              return (
+                <button key={cat}
+                  onClick={() => setCatFilter(isActive ? null : cat)}
+                  className={cn(
+                    'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all border',
+                    isActive ? 'border-transparent' : 'border-transparent text-muted-foreground hover:text-foreground'
+                  )}
+                  style={isActive ? { backgroundColor: `${meta.color}20`, color: meta.color, borderColor: `${meta.color}40` } : {}}>
+                  <span className="size-1.5 rounded-full shrink-0" style={{ backgroundColor: meta.color }} />
+                  {meta.label}
+                  <span className="text-[10px] opacity-70">({count})</span>
+                </button>
+              )
+            })}
           </div>
 
           {/* Filter tabs */}
@@ -544,6 +748,13 @@ export default function AusbilderStundenplanPage() {
                 </button>
               )
             })}
+            {catFilter && (
+              <div className="ml-auto flex items-center px-3">
+                <span className="text-[10px] text-muted-foreground">
+                  Gefiltert: <strong style={{ color: CAT_META[catFilter].color }}>{CAT_META[catFilter].label}</strong>
+                </span>
+              </div>
+            )}
           </div>
 
           {/* List */}
@@ -563,15 +774,15 @@ export default function AusbilderStundenplanPage() {
                   <HugeiconsIcon icon={CalendarIcon} size={22} className="text-muted-foreground" />
                 </div>
                 <p className="text-sm font-medium text-foreground mb-1">
-                  {search ? 'Kein Azubi gefunden' : 'Keine Einträge'}
+                  {search ? 'Kein Azubi gefunden' : catFilter ? 'Keine Einträge in dieser Kategorie' : 'Keine Einträge'}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  {search ? `Keine Ergebnisse für „${search}"` : 'In dieser Kategorie gibt es nichts zu zeigen.'}
+                  {search ? `Keine Ergebnisse für „${search}"` : 'Probiere eine andere Filterauswahl.'}
                 </p>
               </div>
             ) : (
               <div className="divide-y divide-border">
-                {filtered.map(({ ap, color, hours, conflicts, covered, hasBlocks }) => {
+                {filtered.map(({ ap, color, hours, conflicts, covered, hasBlocks, isActive }) => {
                   const target       = ap.weekly_hours || 40
                   const pct          = Math.min((hours / target) * 100, 100)
                   const coveredCount = covered.filter(Boolean).length
@@ -583,23 +794,33 @@ export default function AusbilderStundenplanPage() {
                       onClick={() => { setSheetTab('plan'); setSheetProfile(ap) }}
                       className="w-full flex items-center gap-4 px-5 py-4 hover:bg-muted/30 transition-colors text-left group">
 
-                      {/* Avatar */}
-                      <div className="size-10 rounded-xl flex items-center justify-center shrink-0 text-sm font-bold text-white"
-                        style={{ backgroundColor: color }}>
-                        {initials}
+                      {/* Avatar + active dot */}
+                      <div className="relative shrink-0">
+                        <div className="size-10 rounded-xl flex items-center justify-center text-sm font-bold text-white"
+                          style={{ backgroundColor: color }}>
+                          {initials}
+                        </div>
+                        {isActive && (
+                          <span className="absolute -top-0.5 -right-0.5 size-3 rounded-full bg-green-400 border-2 border-card" />
+                        )}
                       </div>
 
                       {/* Name + Occupation */}
                       <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-sm text-foreground leading-tight">
+                        <p className="font-semibold text-sm text-foreground leading-tight flex items-center gap-1.5 flex-wrap">
                           {ap.first_name} {ap.last_name}
+                          {isActive && (
+                            <span className="text-[10px] font-bold text-green-400 bg-green-500/10 px-1.5 py-0.5 rounded-full">
+                              Jetzt aktiv
+                            </span>
+                          )}
                           {conflicts > 0 && (
-                            <span className="ml-2 text-[10px] font-bold text-red-400 bg-red-500/10 px-1.5 py-0.5 rounded-full">
+                            <span className="text-[10px] font-bold text-red-400 bg-red-500/10 px-1.5 py-0.5 rounded-full">
                               {conflicts} Konflikt{conflicts > 1 ? 'e' : ''}
                             </span>
                           )}
                           {!hasBlocks && (
-                            <span className="ml-2 text-[10px] font-bold text-orange-400 bg-orange-500/10 px-1.5 py-0.5 rounded-full">
+                            <span className="text-[10px] font-bold text-orange-400 bg-orange-500/10 px-1.5 py-0.5 rounded-full">
                               Kein Plan
                             </span>
                           )}
@@ -660,16 +881,35 @@ export default function AusbilderStundenplanPage() {
               <>
                 <SheetHeader className="px-6 pt-6 pb-4 border-b border-border/40 shrink-0 bg-card">
                   <SheetTitle className="flex items-center gap-3">
+                    {/* Prev / Next */}
+                    <button onClick={() => goSheet(-1)} disabled={!canPrev}
+                      className="size-7 rounded-lg border border-border flex items-center justify-center hover:bg-muted transition-colors disabled:opacity-30 disabled:cursor-not-allowed shrink-0">
+                      <HugeiconsIcon icon={ArrowLeft01Icon} size={12} className="text-muted-foreground" />
+                    </button>
+
                     <div className="size-10 rounded-xl flex items-center justify-center text-sm font-black text-white shrink-0"
                       style={{ backgroundColor: color }}>
                       {sheetProfile.first_name[0]}{sheetProfile.last_name[0]}
                     </div>
-                    <div>
-                      <p className="font-bold text-base">{sheetProfile.first_name} {sheetProfile.last_name}</p>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-base flex items-center gap-2">
+                        {sheetProfile.first_name} {sheetProfile.last_name}
+                        {activeNow.has(sheetProfile.id) && (
+                          <span className="flex items-center gap-1 text-[10px] font-semibold text-green-400 bg-green-500/10 px-1.5 py-0.5 rounded-full border border-green-500/20">
+                            <span className="size-1.5 rounded-full bg-green-400 animate-pulse" /> Aktiv
+                          </span>
+                        )}
+                      </p>
                       <p className="text-xs text-muted-foreground font-normal">{sheetProfile.occupation} · {sheetProfile.company_name}</p>
                     </div>
+
+                    <button onClick={() => goSheet(1)} disabled={!canNext}
+                      className="size-7 rounded-lg border border-border flex items-center justify-center hover:bg-muted transition-colors disabled:opacity-30 disabled:cursor-not-allowed shrink-0">
+                      <HugeiconsIcon icon={ArrowRight02Icon} size={12} className="text-muted-foreground" />
+                    </button>
                   </SheetTitle>
-                  <div className="flex gap-1 mt-1">
+
+                  <div className="flex items-center gap-1 mt-1">
                     {(['plan', 'analyse'] as const).map(t => (
                       <button key={t} onClick={() => setSheetTab(t)}
                         className={cn(
@@ -680,7 +920,7 @@ export default function AusbilderStundenplanPage() {
                         {t === 'plan' ? 'Zeitplan' : 'Analyse'}
                       </button>
                     ))}
-                    {/* Week nav inside sheet */}
+                    {/* Week nav in sheet */}
                     <div className="ml-auto flex items-center gap-1">
                       <button onClick={() => setWeekStart(d => addDays(d, -7))}
                         className="size-7 rounded-lg flex items-center justify-center hover:bg-muted transition-colors">
@@ -695,6 +935,13 @@ export default function AusbilderStundenplanPage() {
                       </button>
                     </div>
                   </div>
+
+                  {/* Position indicator */}
+                  {filtered.length > 1 && (
+                    <p className="text-[10px] text-muted-foreground/50 text-center">
+                      {sheetIdx + 1} / {filtered.length}
+                    </p>
+                  )}
                 </SheetHeader>
 
                 <div className="flex-1 overflow-y-auto px-6 py-5">
@@ -704,9 +951,35 @@ export default function AusbilderStundenplanPage() {
 
                   {sheetTab === 'analyse' && sheetStats && (
                     <div className="space-y-4">
-                      {/* Hours target */}
+
+                      {/* Summary pills */}
+                      <div className="grid grid-cols-3 gap-2">
+                        {[
+                          { label: 'Blöcke',     value: String(sheetStats.blockCount),         sub: 'diese Woche' },
+                          { label: 'Ø Dauer',    value: fmtH(sheetStats.avgDuration),          sub: 'pro Block' },
+                          { label: 'Abdeckung',  value: `${sheetStats.covered.filter(Boolean).length}/7`, sub: 'Tage' },
+                        ].map((item, i) => (
+                          <div key={i} className="rounded-xl border border-border/40 bg-card p-3 text-center">
+                            <p className="text-xl font-black tabular-nums" style={{ color }}>{item.value}</p>
+                            <p className="text-xs font-semibold text-foreground/80 mt-0.5">{item.label}</p>
+                            <p className="text-[10px] text-muted-foreground">{item.sub}</p>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Hours + target */}
                       <div className="rounded-2xl border border-border/40 bg-card p-4">
-                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Wochenstunden</p>
+                        <div className="flex items-center justify-between mb-3">
+                          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Wochenstunden</p>
+                          <span className={cn(
+                            'text-xs font-bold px-2 py-0.5 rounded-full',
+                            sheetStats.completion >= 100 ? 'bg-green-500/10 text-green-400'
+                              : sheetStats.completion >= 70 ? 'bg-yellow-500/10 text-yellow-400'
+                              : 'bg-red-500/10 text-red-400'
+                          )}>
+                            {Math.round(sheetStats.completion)}%
+                          </span>
+                        </div>
                         <div className="flex items-end gap-3 mb-3">
                           <span className="text-3xl font-black tabular-nums" style={{ color }}>
                             {fmtH(sheetStats.hours)}
@@ -714,19 +987,28 @@ export default function AusbilderStundenplanPage() {
                           <span className="text-sm text-muted-foreground mb-1">
                             / {fmtH(sheetProfile.weekly_hours || 40)} Ziel
                           </span>
+                          <span className="text-xs text-muted-foreground mb-1 ml-auto">
+                            {sheetStats.hours > (sheetProfile.weekly_hours || 40)
+                              ? `+${fmtH(sheetStats.hours - (sheetProfile.weekly_hours || 40))} über Ziel`
+                              : `${fmtH((sheetProfile.weekly_hours || 40) - sheetStats.hours)} fehlen`}
+                          </span>
                         </div>
                         <div className="h-2 bg-muted/30 rounded-full overflow-hidden">
                           <div className="h-full rounded-full transition-all"
-                            style={{
-                              width: `${Math.min(sheetStats.hours / (sheetProfile.weekly_hours || 40) * 100, 100)}%`,
-                              backgroundColor: color,
-                            }} />
+                            style={{ width: `${sheetStats.completion}%`, backgroundColor: color }} />
                         </div>
                       </div>
 
                       {/* Hours per day */}
                       <div className="rounded-2xl border border-border/40 bg-card p-4">
-                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">Stunden pro Tag</p>
+                        <div className="flex items-center justify-between mb-4">
+                          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Stunden pro Tag</p>
+                          {sheetStats.busiestDay !== null && (
+                            <span className="text-[10px] text-muted-foreground">
+                              Intensivster Tag: <strong className="text-foreground">{DAY_LABELS[sheetStats.busiestDay]}</strong>
+                            </span>
+                          )}
+                        </div>
                         <div className="flex items-end gap-1.5 h-24">
                           {sheetStats.perDay.map((h, i) => {
                             const maxH = Math.max(...sheetStats.perDay, 1)
@@ -735,10 +1017,12 @@ export default function AusbilderStundenplanPage() {
                                 <span className="text-[9px] text-muted-foreground tabular-nums">{h > 0 ? fmtH(h) : ''}</span>
                                 <div className="w-full flex-1 flex flex-col justify-end">
                                   <div className="rounded-sm transition-all"
-                                    style={{ height: `${(h / maxH) * 100}%`, backgroundColor: h > 0 ? color : 'transparent', minHeight: h > 0 ? 4 : 0 }} />
+                                    style={{
+                                      height: `${(h / maxH) * 100}%`,
+                                      backgroundColor: sheetStats.busiestDay === i ? color : `${color}70`,
+                                      minHeight: h > 0 ? 4 : 0,
+                                    }} />
                                 </div>
-                                <div className={cn('w-full h-1 rounded-full', h > 0 ? 'opacity-100' : 'opacity-20')}
-                                  style={{ backgroundColor: color }} />
                                 <span className={cn('text-[10px] font-bold',
                                   isToday(weekDates[i]) ? 'text-primary' : 'text-muted-foreground/60')}>
                                   {DAY_LABELS[i]}
@@ -754,22 +1038,24 @@ export default function AusbilderStundenplanPage() {
                         <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Kategorien</p>
                         {Object.entries(sheetStats.cats).length > 0 ? (
                           <div className="space-y-2.5">
-                            {(Object.entries(sheetStats.cats) as [ScheduleCategory, number][]).map(([cat, h]) => {
-                              const meta = CAT_META[cat]
-                              const pct  = sheetStats.hours > 0 ? (h / sheetStats.hours) * 100 : 0
-                              return (
-                                <div key={cat} className="flex items-center gap-3">
-                                  <div className="size-2.5 rounded-full shrink-0" style={{ backgroundColor: meta.color }} />
-                                  <span className="text-xs text-muted-foreground w-24 shrink-0">{meta.label}</span>
-                                  <div className="flex-1 h-1.5 bg-muted/30 rounded-full overflow-hidden">
-                                    <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: meta.color }} />
+                            {(Object.entries(sheetStats.cats) as [ScheduleCategory, number][])
+                              .sort((a, b) => b[1] - a[1])
+                              .map(([cat, h]) => {
+                                const meta = CAT_META[cat]
+                                const pct  = sheetStats.hours > 0 ? (h / sheetStats.hours) * 100 : 0
+                                return (
+                                  <div key={cat} className="flex items-center gap-3">
+                                    <div className="size-2.5 rounded-full shrink-0" style={{ backgroundColor: meta.color }} />
+                                    <span className="text-xs text-muted-foreground w-24 shrink-0">{meta.label}</span>
+                                    <div className="flex-1 h-1.5 bg-muted/30 rounded-full overflow-hidden">
+                                      <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: meta.color }} />
+                                    </div>
+                                    <span className="text-xs font-bold w-16 text-right tabular-nums" style={{ color: meta.color }}>
+                                      {fmtH(h)} ({Math.round(pct)}%)
+                                    </span>
                                   </div>
-                                  <span className="text-xs font-bold w-10 text-right tabular-nums" style={{ color: meta.color }}>
-                                    {fmtH(h)}
-                                  </span>
-                                </div>
-                              )
-                            })}
+                                )
+                              })}
                           </div>
                         ) : (
                           <p className="text-xs text-muted-foreground/50 italic">Keine Blöcke in dieser Woche.</p>
@@ -788,8 +1074,12 @@ export default function AusbilderStundenplanPage() {
                               <span className={cn('text-xs font-bold', has ? 'text-foreground' : 'text-muted-foreground/40')}>
                                 {DAY_LABELS[i]}
                               </span>
-                              <div className={cn('size-1.5 rounded-full', has ? 'bg-primary' : 'bg-muted/40')}
-                                style={has ? { backgroundColor: color } : {}} />
+                              <div className="size-1.5 rounded-full"
+                                style={has ? { backgroundColor: color } : { backgroundColor: 'transparent' }}
+                                className={cn('size-1.5 rounded-full', !has && 'bg-muted/40')} />
+                              <span className="text-[9px] text-muted-foreground/60">
+                                {fmtH(sheetStats.perDay[i])}
+                              </span>
                             </div>
                           ))}
                         </div>
@@ -799,9 +1089,13 @@ export default function AusbilderStundenplanPage() {
                       <div className="rounded-2xl border border-border/40 bg-card p-4">
                         <div className="flex items-center justify-between mb-3">
                           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Überschneidungen</p>
-                          {sheetStats.conflicts.length === 0 && (
+                          {sheetStats.conflicts.length === 0 ? (
                             <span className="flex items-center gap-1 text-[10px] text-green-400 font-semibold">
                               <HugeiconsIcon icon={CheckmarkCircle01Icon} size={11} /> Keine
+                            </span>
+                          ) : (
+                            <span className="text-[10px] font-bold text-red-400 bg-red-500/10 px-1.5 py-0.5 rounded-full">
+                              {sheetStats.conflicts.length} gefunden
                             </span>
                           )}
                         </div>
@@ -810,11 +1104,20 @@ export default function AusbilderStundenplanPage() {
                             {sheetStats.conflicts.map((c, i) => (
                               <div key={i} className="flex items-start gap-2.5 rounded-xl bg-destructive/5 border border-destructive/20 px-3 py-2.5">
                                 <HugeiconsIcon icon={Alert01Icon} size={13} className="text-destructive mt-0.5 shrink-0" />
-                                <p className="text-xs text-muted-foreground">
-                                  <span className="font-semibold text-destructive">{c.day}: </span>
-                                  „{c.a.title}" ({c.a.start_time}–{c.a.end_time}) überschneidet sich mit
-                                  „{c.b.title}" ({c.b.start_time}–{c.b.end_time})
-                                </p>
+                                <div>
+                                  <p className="text-xs font-semibold text-destructive mb-0.5">{c.day}</p>
+                                  <p className="text-xs text-muted-foreground">
+                                    „{c.a.title}" ({c.a.start_time}–{c.a.end_time}) ↔ „{c.b.title}" ({c.b.start_time}–{c.b.end_time})
+                                  </p>
+                                  <p className="text-[10px] text-muted-foreground/60 mt-0.5">
+                                    Überlappung: {
+                                      (() => {
+                                        const overlap = timeToMin(c.a.end_time) - timeToMin(c.b.start_time)
+                                        return `${overlap} Min.`
+                                      })()
+                                    }
+                                  </p>
+                                </div>
                               </div>
                             ))}
                           </div>
