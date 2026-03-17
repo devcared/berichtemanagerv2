@@ -79,9 +79,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const isSuccessRoute = pathname.startsWith('/auth/success')
     const isSetupRoute = pathname.startsWith('/setup')
     const isLandingPage = pathname === '/'
+    const isPublicPage = pathname === '/impressum' || pathname === '/datenschutz'
 
     if (!authState.isAuthenticated) {
-      if (!isLoginRegisterRoute && !isSuccessRoute && !isUpdatePasswordRoute && !isLandingPage) {
+      if (!isLoginRegisterRoute && !isSuccessRoute && !isUpdatePasswordRoute && !isLandingPage && !isPublicPage) {
         router.push('/auth/login')
       }
     } else {
