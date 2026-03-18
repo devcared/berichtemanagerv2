@@ -119,24 +119,24 @@ function makeG(dark: boolean) {
   return {
     ...BRAND,
     bg:      dark ? '#060912'                   : '#ffffff',
-    surface: dark ? '#0d1117'                   : '#f8f9fa',
-    surface2:dark ? '#13192b'                   : '#f1f3f4',
-    border:  dark ? 'rgba(255,255,255,0.08)'    : 'rgba(0,0,0,0.07)',
-    text:    dark ? '#e8eaed'                   : '#202124',
-    mid:     dark ? '#9aa0a6'                   : '#5f6368',
-    muted:   dark ? '#5f6368'                   : '#9aa0a6',
+    surface: dark ? '#0d1117'                   : '#f4f7ff',
+    surface2:dark ? '#13192b'                   : '#ebf0fc',
+    border:  dark ? 'rgba(255,255,255,0.08)'    : 'rgba(0,0,0,0.09)',
+    text:    dark ? '#e8eaed'                   : '#111827',
+    mid:     dark ? '#9aa0a6'                   : '#4b5563',
+    muted:   dark ? '#5f6368'                   : '#9ca3af',
   }
 }
 function makeGlass(dark: boolean): React.CSSProperties {
   return dark
     ? { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }
-    : { background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(0,0,0,0.07)',       backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', boxShadow: '0 2px 12px rgba(0,0,0,0.05)' }
+    : { background: '#ffffff', border: '1px solid rgba(0,0,0,0.09)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', boxShadow: '0 2px 16px rgba(0,0,0,0.07)' }
 }
 function makeGradText(dark: boolean): React.CSSProperties {
   return {
     background: dark
       ? 'linear-gradient(180deg,#fff 0%,rgba(232,234,237,0.75) 100%)'
-      : 'linear-gradient(180deg,#202124 0%,rgba(32,33,36,0.75) 100%)',
+      : 'linear-gradient(135deg,#111827 0%,#1d4ed8 55%,#111827 100%)',
     WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
   }
 }
@@ -296,8 +296,8 @@ function OrbitalRings() {
   const o = dark ? 1 : 1.8  // opacity multiplier — rings more visible in light mode
   return (
     <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none" style={{ zIndex: 0 }}>
-      <div className="absolute rounded-full" style={{ width: 800, height: 800, background: `radial-gradient(circle, rgba(66,133,244,${dark ? '0.07' : '0.05'}) 0%, transparent 70%)`, top: '50%', left: '50%', transform: 'translate(-50%,-50%)' }} />
-      <div className="absolute rounded-full" style={{ width: 500, height: 500, background: `radial-gradient(circle, rgba(52,168,83,${dark ? '0.05' : '0.04'}) 0%, transparent 70%)`, top: '20%', right: '15%' }} />
+      <div className="absolute rounded-full" style={{ width: 800, height: 800, background: `radial-gradient(circle, rgba(66,133,244,${dark ? '0.07' : '0.12'}) 0%, transparent 70%)`, top: '50%', left: '50%', transform: 'translate(-50%,-50%)' }} />
+      <div className="absolute rounded-full" style={{ width: 500, height: 500, background: `radial-gradient(circle, rgba(52,168,83,${dark ? '0.05' : '0.07'}) 0%, transparent 70%)`, top: '20%', right: '15%' }} />
 
       {/* Ring 1 — outer CW 28s */}
       <div className="absolute rounded-full" style={{ width: 660, height: 660, border: `1px solid rgba(66,133,244,${0.18 * o})`, animation: 'orbit-cw 28s linear infinite' }}>
@@ -447,7 +447,8 @@ function LandingPage() {
         <LandingNav />
 
         {/* ════ 1. HERO ════ */}
-        <section className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-16 pb-24 overflow-hidden">
+        <section className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-16 pb-24 overflow-hidden"
+          style={dark ? {} : { background: 'linear-gradient(180deg, #f4f7ff 0%, #ffffff 60%)' }}>
           <OrbitalRings />
           <div className="relative z-10 max-w-3xl mx-auto text-center">
             {/* Badge */}
@@ -475,8 +476,8 @@ function LandingPage() {
               <a href="#features">
                 <span className="inline-flex items-center gap-2 px-9 py-4 rounded-full text-base font-semibold cursor-pointer transition-all duration-200"
                   style={{ ...glass, color: G.text }}
-                  onMouseEnter={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.background = dark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.07)' }}
-                  onMouseLeave={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.background = dark ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.85)' }}>
+                  onMouseEnter={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.background = dark ? 'rgba(255,255,255,0.09)' : '#f0f4ff' }}
+                  onMouseLeave={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.background = dark ? 'rgba(255,255,255,0.04)' : '#ffffff' }}>
                   Features entdecken
                 </span>
               </a>
@@ -510,7 +511,7 @@ function LandingPage() {
             {STATS.map((s, i) => (
               <div key={s.label} className="g-reveal text-center" style={{ transitionDelay: `${i * 0.1}s` }}>
                 <div className="size-2 rounded-full mx-auto mb-4" style={{ background: s.color, boxShadow: `0 0 12px ${s.color}` }} />
-                <div className="text-5xl sm:text-6xl font-black mb-2 tabular-nums" style={{ color: s.color, filter: `drop-shadow(0 0 16px ${s.color}60)` }}>
+                <div className="text-5xl sm:text-6xl font-black mb-2 tabular-nums" style={{ color: s.color, filter: dark ? `drop-shadow(0 0 16px ${s.color}60)` : 'none' }}>
                   <AnimatedNumber target={s.value} suffix={s.suffix} />
                 </div>
                 <p className="text-sm font-medium" style={{ color: G.mid }}>{s.label}</p>
@@ -521,7 +522,7 @@ function LandingPage() {
 
         {/* ════ 3. FEATURES ════ */}
         <section id="features" className="py-28 px-6 relative overflow-hidden" style={{ background: G.bg }}>
-          <div className="absolute pointer-events-none rounded-full" style={{ width: 600, height: 600, background: `radial-gradient(circle, rgba(66,133,244,${dark ? '0.06' : '0.04'}) 0%, transparent 70%)`, top: '0%', left: '-10%' }} />
+          <div className="absolute pointer-events-none rounded-full" style={{ width: 600, height: 600, background: `radial-gradient(circle, rgba(66,133,244,${dark ? '0.06' : '0.09'}) 0%, transparent 70%)`, top: '0%', left: '-10%' }} />
           <div className="max-w-6xl mx-auto relative z-10">
             <div className="text-center mb-16">
               <SectionLabel text="Was AzubiHub leistet" color={BRAND.blue} />
@@ -534,8 +535,8 @@ function LandingPage() {
                 <div key={f.title}
                   className="g-reveal rounded-3xl p-8 relative overflow-hidden transition-all duration-300 cursor-default group"
                   style={{ ...glass, transitionDelay: `${i * 0.08}s` }}
-                  onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.background = dark ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.98)'; el.style.borderColor = `${f.color}30`; el.style.transform = 'translateY(-4px)'; el.style.boxShadow = `0 20px 60px ${f.glow}` }}
-                  onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.background = dark ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.85)'; el.style.borderColor = G.border; el.style.transform = ''; el.style.boxShadow = '' }}>
+                  onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.background = dark ? 'rgba(255,255,255,0.07)' : '#f6faff'; el.style.borderColor = `${f.color}35`; el.style.transform = 'translateY(-4px)'; el.style.boxShadow = dark ? `0 20px 60px ${f.glow}` : `0 12px 40px ${f.glow}, 0 4px 16px rgba(0,0,0,0.08)` }}
+                  onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.background = dark ? 'rgba(255,255,255,0.04)' : '#ffffff'; el.style.borderColor = G.border; el.style.transform = ''; el.style.boxShadow = dark ? '' : '0 2px 16px rgba(0,0,0,0.07)' }}>
                   <div className="absolute top-0 right-0 w-40 h-40 rounded-full pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"
                     style={{ background: `radial-gradient(circle, ${f.color}20 0%, transparent 70%)` }} />
                   <div className="flex items-start justify-between mb-6 relative z-10">
@@ -637,8 +638,8 @@ function LandingPage() {
                 <div key={t.name}
                   className="g-reveal rounded-3xl p-6 flex flex-col transition-all duration-300"
                   style={{ ...glass, transitionDelay: `${i * 0.07}s` }}
-                  onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.background = dark ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.98)'; el.style.borderColor = `${t.color}25`; el.style.transform = 'translateY(-4px)'; el.style.boxShadow = `0 20px 50px rgba(0,0,0,${dark ? '0.3' : '0.1'})` }}
-                  onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.background = dark ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.85)'; el.style.borderColor = G.border; el.style.transform = ''; el.style.boxShadow = '' }}>
+                  onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.background = dark ? 'rgba(255,255,255,0.07)' : '#f6faff'; el.style.borderColor = `${t.color}30`; el.style.transform = 'translateY(-4px)'; el.style.boxShadow = dark ? `0 20px 50px rgba(0,0,0,0.3)` : `0 12px 40px rgba(0,0,0,0.1)` }}
+                  onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.background = dark ? 'rgba(255,255,255,0.04)' : '#ffffff'; el.style.borderColor = G.border; el.style.transform = ''; el.style.boxShadow = dark ? '' : '0 2px 16px rgba(0,0,0,0.07)' }}>
                   <div className="flex gap-0.5 mb-4">
                     {[...Array(5)].map((_, j) => <HugeiconsIcon key={j} icon={StarIcon} size={13} style={{ color: BRAND.yellow }} />)}
                   </div>
@@ -700,8 +701,8 @@ function LandingPage() {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 max-w-2xl mx-auto">
               <div className="g-reveal rounded-3xl p-8 transition-all duration-300" style={{ ...glass }}
-                onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.background = dark ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.98)'; el.style.transform = 'translateY(-4px)' }}
-                onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.background = dark ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.85)'; el.style.transform = '' }}>
+                onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.background = dark ? 'rgba(255,255,255,0.07)' : '#f6faff'; el.style.transform = 'translateY(-4px)'; el.style.boxShadow = dark ? '' : '0 12px 40px rgba(0,0,0,0.1)' }}
+                onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.background = dark ? 'rgba(255,255,255,0.04)' : '#ffffff'; el.style.transform = ''; el.style.boxShadow = dark ? '' : '0 2px 16px rgba(0,0,0,0.07)' }}>
                 <p className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: G.muted }}>Kostenlos</p>
                 <div className="flex items-end gap-1.5 mb-2">
                   <span className="text-6xl font-black" style={{ color: G.text }}>0€</span>
@@ -718,7 +719,7 @@ function LandingPage() {
                 <Link href="/auth/register" className="block">
                   <span className="flex items-center justify-center w-full py-3.5 rounded-full text-sm font-semibold cursor-pointer transition-all duration-200"
                     style={{ border: `1px solid ${G.border}`, color: G.text }}
-                    onMouseEnter={(e: React.MouseEvent<HTMLSpanElement>) => (e.currentTarget as HTMLSpanElement).style.background = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'}
+                    onMouseEnter={(e: React.MouseEvent<HTMLSpanElement>) => (e.currentTarget as HTMLSpanElement).style.background = dark ? 'rgba(255,255,255,0.06)' : '#f0f4ff'}
                     onMouseLeave={(e: React.MouseEvent<HTMLSpanElement>) => (e.currentTarget as HTMLSpanElement).style.background = ''}>
                     Jetzt registrieren
                   </span>
@@ -771,7 +772,7 @@ function LandingPage() {
         {/* ════ 9. CTA ════ */}
         <section className="relative py-40 px-6 overflow-hidden" style={{ background: G.bg }}>
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="absolute rounded-full" style={{ width: 700, height: 700, background: `radial-gradient(circle, rgba(66,133,244,${dark ? '0.08' : '0.05'}) 0%, transparent 65%)` }} />
+            <div className="absolute rounded-full" style={{ width: 700, height: 700, background: `radial-gradient(circle, rgba(66,133,244,${dark ? '0.08' : '0.1'}) 0%, transparent 65%)` }} />
             <div className="absolute rounded-full" style={{ width: 480, height: 480, border: `1px solid rgba(66,133,244,${dark ? '0.12' : '0.2'})`, animation: 'orbit-cw 22s linear infinite' }}>
               <span className="absolute rounded-full" style={{ width: 10, height: 10, background: BRAND.blue, top: -5, left: '50%', marginLeft: -5, boxShadow: `0 0 16px ${BRAND.blue}` }} />
             </div>
@@ -798,8 +799,8 @@ function LandingPage() {
               <a href="mailto:kontakt@azubihub.app">
                 <span className="inline-flex items-center gap-2 px-10 py-4 rounded-full text-base font-semibold cursor-pointer transition-all duration-200"
                   style={{ ...glass, color: G.text }}
-                  onMouseEnter={(e: React.MouseEvent<HTMLSpanElement>) => (e.currentTarget as HTMLSpanElement).style.background = dark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.06)'}
-                  onMouseLeave={(e: React.MouseEvent<HTMLSpanElement>) => (e.currentTarget as HTMLSpanElement).style.background = dark ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.85)'}>
+                  onMouseEnter={(e: React.MouseEvent<HTMLSpanElement>) => (e.currentTarget as HTMLSpanElement).style.background = dark ? 'rgba(255,255,255,0.09)' : '#f0f4ff'}
+                  onMouseLeave={(e: React.MouseEvent<HTMLSpanElement>) => (e.currentTarget as HTMLSpanElement).style.background = dark ? 'rgba(255,255,255,0.04)' : '#ffffff'}>
                   <HugeiconsIcon icon={Mail01Icon} size={16} />Kontakt aufnehmen
                 </span>
               </a>
@@ -826,8 +827,8 @@ function LandingPage() {
                     <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer" aria-label={`AzubiHub auf ${s.label}`}
                       className="size-10 rounded-xl flex items-center justify-center transition-all duration-150"
                       style={{ ...glass, color: G.muted }}
-                      onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => { const el = e.currentTarget; el.style.background = dark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.07)'; el.style.color = G.text }}
-                      onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => { const el = e.currentTarget; el.style.background = dark ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.85)'; el.style.color = G.muted }}>
+                      onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => { const el = e.currentTarget; el.style.background = dark ? 'rgba(255,255,255,0.1)' : '#f0f4ff'; el.style.color = G.text }}
+                      onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => { const el = e.currentTarget; el.style.background = dark ? 'rgba(255,255,255,0.04)' : '#ffffff'; el.style.color = G.muted }}>
                       <HugeiconsIcon icon={s.icon} size={16} />
                     </a>
                   ))}
