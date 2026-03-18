@@ -118,7 +118,7 @@ function AppHome() {
     : 'rgba(255,255,255,0.82)'
 
   return (
-    <div style={{ minHeight: '100svh', background: bg, fontFamily: '"Google Sans","Roboto",-apple-system,"Segoe UI",sans-serif', WebkitFontSmoothing: 'antialiased', color: fg, transition: 'background 200ms, color 200ms' }}>
+    <div style={{ minHeight: '100svh', background: bg, fontFamily: 'var(--font-outfit), sans-serif', WebkitFontSmoothing: 'antialiased', color: fg, transition: 'background 200ms, color 200ms' }}>
 
       {/* ══ Sticky Topbar ══ */}
       <header style={{
@@ -281,8 +281,8 @@ function ModuleCard({ mod, icon: I, isDark, cardBg, borderC, fg, fgMuted, primar
   const cardShadow = isDragOver
     ? `0 0 0 2px ${primary}`
     : hovered && enabled
-      ? isDark ? '0 4px 20px rgba(0,0,0,0.45)' : '0 4px 20px rgba(66,133,244,0.12)'
-      : isDark ? '0 1px 4px rgba(0,0,0,0.3)' : '0 1px 3px rgba(0,0,0,0.07)'
+      ? '0 1px 2px rgba(0,0,0,0.05)'
+      : 'none'
 
   return (
     <div
@@ -296,17 +296,21 @@ function ModuleCard({ mod, icon: I, isDark, cardBg, borderC, fg, fgMuted, primar
       onDragEnd={() => { setDragging(false); onDragEnd() }}
       style={{
         border: `1px solid ${isDragOver ? primary : hovered && enabled ? primary : borderC}`,
-        borderRadius: 16,
-        padding: '1.5rem',
-        background: isDragOver ? (isDark ? 'rgba(138,180,248,0.08)' : 'rgba(66,133,244,0.05)') : cardBg,
+        borderRadius: 24,
+        padding: '1.75rem',
+        background: isDragOver 
+          ? (isDark ? 'rgba(138,180,248,0.08)' : 'rgba(66,133,244,0.05)') 
+          : hovered && enabled 
+            ? (isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.01)')
+            : cardBg,
         cursor: draggable ? 'grab' : enabled ? 'pointer' : 'default',
-        opacity: dragging ? 0.4 : enabled ? 1 : 0.52,
-        transition: 'border-color 160ms, box-shadow 160ms, transform 160ms, background 160ms, opacity 160ms',
+        opacity: dragging ? 0.4 : enabled ? 1 : 0.6,
+        transition: 'all 240ms cubic-bezier(0.4, 0, 0.2, 1)',
         display: 'flex',
         flexDirection: 'column',
-        gap: '1.125rem',
+        gap: '1.25rem',
         boxShadow: cardShadow,
-        transform: hovered && enabled && !dragging ? 'translateY(-2px)' : 'none',
+        transform: hovered && enabled && !dragging ? 'translateY(-1px)' : 'none',
         position: 'relative',
         overflow: 'hidden',
         userSelect: 'none',
@@ -484,16 +488,12 @@ function useScrollReveal() {
 
 /* Logo — App Icon.png + wordmark */
 function Logo({ size = 28, dark = false }: { size?: number; dark?: boolean }) {
-  const hubColor = dark ? 'rgba(255,255,255,0.55)' : C.textSec
-  const fs = size * 0.57
+  const fs = size * 0.58
   return (
-    <div style={{ display: 'inline-flex', alignItems: 'center', gap: size * 0.38 }}>
-      {/* App icon */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/App Icon.png" alt="AzubiHub" width={size} height={size} style={{ borderRadius: size * 0.22, display: 'block', objectFit: 'cover' }} />
-      {/* Wordmark */}
-      <span style={{ fontSize: fs, fontWeight: 500, letterSpacing: '-0.01em', lineHeight: 1, userSelect: 'none', color: dark ? 'rgba(255,255,255,0.9)' : C.textPrimary }}>
-        Azubi<span style={{ color: hubColor }}>Hub</span>
+    <div className="flex items-center gap-2.5 select-none">
+      <img src="/App Icon.png" alt="AzubiHub" width={size} height={size} className="rounded-xl object-cover" />
+      <span className="text-foreground tracking-tight font-medium" style={{ fontSize: fs, color: dark ? 'rgba(255,255,255,0.9)' : 'hsl(var(--foreground))', letterSpacing: '-0.02em' }}>
+        Azubi<span className="text-muted-foreground">Hub</span>
       </span>
     </div>
   )
@@ -539,142 +539,98 @@ function FixedBackground() {
 
         {/* Ring 4 — yellow, CCW */}
         <div style={{ position: 'absolute', top: '50%', left: '50%', marginTop: 'min(-115px,-12vmin)', marginLeft: 'min(-115px,-12vmin)', width: 'min(230px,24vmin)', height: 'min(230px,24vmin)', borderRadius: '50%', border: '1px solid rgba(251,188,4,0.18)', animation: 'orbit-ccw 10s linear infinite 0.2s' }}>
-          <span style={dot(6,  'rgba(251,188,4,0.8)',  { top: -3, left: '50%', marginLeft: -3 }, '1s')} />
-          <span style={dot(3,  'rgba(251,188,4,0.3)',  { bottom: -1, right: '32%' }, '2.7s')} />
+          <span style={dot(6, 'rgba(251,188,4,0.8)', { top: -3, left: '50%', marginLeft: -3 }, '1s')} />
+          <span style={dot(3, 'rgba(251,188,4,0.3)', { bottom: -1, right: '32%' }, '2.7s')} />
         </div>
 
-        {/* Ring 5 — innermost, blue, CW */}
-        <div style={{ position: 'absolute', top: '50%', left: '50%', marginTop: 'min(-55px,-5.5vmin)', marginLeft: 'min(-55px,-5.5vmin)', width: 'min(110px,11vmin)', height: 'min(110px,11vmin)', borderRadius: '50%', border: '1px solid rgba(66,133,244,0.16)', animation: 'orbit-cw 6s linear infinite 0.4s' }}>
-          <span style={dot(5,  'rgba(66,133,244,0.65)', { top: -2, left: '50%', marginLeft: -2 }, '0.8s')} />
-        </div>
-
-        {/* Center orb — pure gradient, no shadow */}
         <div style={{ position: 'absolute', top: '50%', left: '50%', marginTop: -22, marginLeft: -22, width: 44, height: 44, borderRadius: '50%', background: 'radial-gradient(circle, rgba(66,133,244,0.5) 0%, rgba(66,133,244,0.15) 50%, transparent 75%)', animation: 'goog-glow-pulse 4s ease-in-out infinite' }} />
       </div>
 
-      {/* Soft edge vignette — fades rings at viewport edges */}
       <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 85% 85% at 50% 50%, transparent 55%, rgba(255,255,255,0.75) 80%, #ffffff 100%)', pointerEvents: 'none' }} />
     </div>
   )
 }
 
-/* Nav — exact antigravity.google: min-height 36px, #ffffffd9, blur(5px), hides on scroll-down */
 function Nav() {
   const [menuOpen, setMenuOpen] = useState(false)
-
   const links = [['#features', 'Features'], ['#pricing', 'Preise'], ['#faq', 'FAQ']] as const
 
   return (
     <>
-      <nav style={{
-        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
-        minHeight: 36,
-        background: '#ffffffd9',
-        backdropFilter: 'blur(5px)',
-        WebkitBackdropFilter: 'blur(5px)',
-        borderBottom: `1px solid ${C.border}`,
-      }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 1.25rem', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          {/* Logo */}
-          <Link href="/" style={{ textDecoration: 'none' }} onClick={() => setMenuOpen(false)}>
-            <Logo size={26} />
+      <nav className="fixed top-0 left-0 right-0 z-[100] bg-white/80 backdrop-blur-md border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+          <Link href="/" className="no-underline" onClick={() => setMenuOpen(false)}>
+            <Logo size={30} />
           </Link>
 
-          {/* Desktop nav links */}
-          <div style={{ display: 'flex', gap: 4, alignItems: 'center' }} className="hidden md:flex">
+          <div className="hidden md:flex items-center gap-1">
             {links.map(([href, label]) => (
-              <a key={href} href={href} style={{ color: C.textSec, fontWeight: 450, fontSize: '0.9375rem', padding: '0.5rem 0.75rem', borderRadius: 4, cursor: 'pointer', transition: 'color 150ms ease', textDecoration: 'none' }}
-                onMouseEnter={e => (e.currentTarget.style.color = C.blue)}
-                onMouseLeave={e => (e.currentTarget.style.color = C.textSec)}>
+              <a key={href} href={href} className="text-[0.9375rem] font-medium text-gray-500 px-4 py-2 rounded-lg hover:text-gray-900 hover:bg-gray-100/50 transition-all duration-200 no-underline">
                 {label}
               </a>
             ))}
           </div>
 
-          {/* Right side */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Link href="/auth/login"
-              style={{ color: C.textSec, fontWeight: 450, fontSize: '0.9375rem', padding: '0.5rem 0.75rem', borderRadius: 4, transition: 'color 150ms ease', textDecoration: 'none' }}
-              onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = C.blue)}
-              onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = C.textSec)}
-              className="hidden sm:inline">
+          <div className="flex items-center gap-3">
+            <Link href="/auth/login" className="hidden sm:inline-flex text-[0.9375rem] font-medium text-gray-500 px-4 py-2 hover:text-gray-900 transition-colors no-underline">
               Anmelden
             </Link>
-            <Link href="/auth/register" className="hidden sm:inline">
-              <span style={{ background: C.blue, color: 'white', padding: '10px 24px', borderRadius: 9999, fontWeight: 450, fontSize: '0.875rem', cursor: 'pointer', transition: 'background 150ms ease', display: 'inline-block' }}
-                onMouseEnter={(e: React.MouseEvent<HTMLSpanElement>) => { (e.currentTarget as HTMLSpanElement).style.background = C.blueDark }}
-                onMouseLeave={(e: React.MouseEvent<HTMLSpanElement>) => { (e.currentTarget as HTMLSpanElement).style.background = C.blue }}>
+            <Link href="/auth/register" className="hidden sm:inline-flex no-underline">
+              <span className="bg-[#4285f4] hover:bg-[#1967d2] text-white px-6 py-2.5 rounded-full text-[0.9375rem] font-semibold transition-all duration-200 active:scale-95 shadow-sm">
                 Kostenlos starten
               </span>
             </Link>
 
-            {/* Hamburger — mobile only */}
             <button
               onClick={() => setMenuOpen(o => !o)}
-              className="flex md:hidden"
-              style={{ width: 40, height: 40, flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 5, background: 'none', border: 'none', cursor: 'pointer', padding: 8, borderRadius: 6 }}
-              aria-label="Menü">
-              <span style={{ width: 22, height: 1.5, background: C.textPrimary, borderRadius: 2, transition: 'all 250ms ease', transform: menuOpen ? 'rotate(45deg) translateY(4.5px)' : 'none' }} />
-              <span style={{ width: 22, height: 1.5, background: C.textPrimary, borderRadius: 2, transition: 'all 250ms ease', opacity: menuOpen ? 0 : 1 }} />
-              <span style={{ width: 22, height: 1.5, background: C.textPrimary, borderRadius: 2, transition: 'all 250ms ease', transform: menuOpen ? 'rotate(-45deg) translateY(-4.5px)' : 'none' }} />
+              className="md:hidden flex flex-col items-center justify-center p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              <div className={`w-5 h-0.5 bg-gray-900 rounded-full transition-transform duration-200 ${menuOpen ? 'rotate-45 translate-y-1' : ''}`} />
+              <div className={`w-5 h-0.5 bg-gray-900 rounded-full mt-1.5 transition-opacity duration-200 ${menuOpen ? 'opacity-0' : ''}`} />
+              <div className={`w-5 h-0.5 bg-gray-900 rounded-full mt-1.5 transition-transform duration-200 ${menuOpen ? '-rotate-45 -translate-y-1' : ''}`} />
             </button>
           </div>
         </div>
       </nav>
 
-      {/* Mobile menu */}
-      <div style={{
-        position: 'fixed', top: 64, left: 0, right: 0, zIndex: 99,
-        background: '#fffffff5',
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
-        borderBottom: `1px solid ${C.border}`,
-        padding: menuOpen ? '1.25rem 1.25rem 1.5rem' : '0 1.25rem',
-        maxHeight: menuOpen ? '400px' : '0',
-        overflow: 'hidden',
-        transition: 'max-height 300ms ease, padding 300ms ease',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '0.25rem',
-      }} className="md:hidden">
-        {links.map(([href, label]) => (
-          <a key={href} href={href} onClick={() => setMenuOpen(false)}
-            style={{ color: C.textPrimary, fontWeight: 450, fontSize: '1.0625rem', padding: '0.875rem 0.5rem', borderBottom: `1px solid ${C.border}`, textDecoration: 'none', display: 'block' }}>
-            {label}
-          </a>
-        ))}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', paddingTop: '1rem' }}>
-          <Link href="/auth/login" onClick={() => setMenuOpen(false)}
-            style={{ color: C.textSec, fontWeight: 450, fontSize: '1rem', textDecoration: 'none', padding: '0.5rem 0.5rem', display: 'block' }}>
-            Anmelden
-          </Link>
-          <Link href="/auth/register" onClick={() => setMenuOpen(false)} style={{ display: 'block' }}>
-            <span style={{ display: 'block', textAlign: 'center', padding: '12px 24px', background: C.blue, color: 'white', borderRadius: 9999, fontWeight: 450, fontSize: '1rem' }}>
-              Kostenlos starten
-            </span>
-          </Link>
+      <div className={`fixed inset-x-0 top-16 bg-white/95 backdrop-blur-xl border-b border-gray-200 z-[99] md:hidden transition-all duration-300 overflow-hidden ${menuOpen ? 'max-h-screen opacity-100 py-6' : 'max-h-0 opacity-0'}`}>
+        <div className="flex flex-col gap-1 px-6">
+          {links.map(([href, label]) => (
+            <a key={href} href={href} onClick={() => setMenuOpen(false)} className="text-lg font-medium text-gray-900 py-4 border-b border-gray-100 no-underline first:pt-0">
+              {label}
+            </a>
+          ))}
+          <div className="pt-6 flex flex-col gap-4">
+            <Link href="/auth/login" onClick={() => setMenuOpen(false)} className="text-base font-medium text-gray-500 no-underline">
+              Anmelden
+            </Link>
+            <Link href="/auth/register" onClick={() => setMenuOpen(false)} className="no-underline">
+              <span className="block text-center py-4 bg-[#4285f4] text-white rounded-2xl font-semibold">
+                Kostenlos starten
+              </span>
+            </Link>
+          </div>
         </div>
       </div>
     </>
   )
 }
 
+
 /* FAQ accordion */
 function FaqItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false)
   return (
-    <div style={{ background: '#ffffff', border: `1px solid ${C.border}`, borderRadius: 12, overflow: 'hidden' }}>
+    <div style={{ background: '#ffffff', border: `1px solid ${C.border}`, borderRadius: 20, overflow: 'hidden', transition: 'all 200ms ease' }}>
       <button onClick={() => setOpen(o => !o)}
-        style={{ width: '100%', padding: '1.25rem 1.5rem', background: 'none', border: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', cursor: 'pointer', textAlign: 'left', fontSize: '1rem', fontWeight: 500, color: C.textPrimary, transition: 'color 150ms ease' }}
-        onMouseEnter={e => (e.currentTarget.style.color = C.blue)}
-        onMouseLeave={e => (e.currentTarget.style.color = C.textPrimary)}>
+        style={{ width: '100%', padding: '1.5rem 2rem', background: 'none', border: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', cursor: 'pointer', textAlign: 'left', fontSize: '1.0625rem', fontWeight: 500, color: C.textPrimary, transition: 'all 200ms ease' }}>
         <span style={{ flex: 1 }}>{q}</span>
-        <span style={{ width: 24, height: 24, color: C.blue, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'transform 250ms ease', transform: open ? 'rotate(180deg)' : 'none', flexShrink: 0 }}>
-          <HugeiconsIcon icon={open ? MinusSignIcon : Add01Icon} size={18} />
+        <span style={{ width: 28, height: 28, borderRadius: '50%', background: open ? C.blue : 'rgba(0,0,0,0.03)', color: open ? 'white' : C.textSec, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 240ms cubic-bezier(0.4, 0, 0.2, 1)', transform: open ? 'rotate(180deg)' : 'none', flexShrink: 0 }}>
+          <HugeiconsIcon icon={open ? MinusSignIcon : Add01Icon} size={16} />
         </span>
       </button>
-      <div style={{ maxHeight: open ? '300px' : '0', overflow: 'hidden', transition: 'max-height 350ms ease-out, padding 350ms ease-out', padding: open ? '0 1.5rem 1.25rem' : '0 1.5rem 0' }}>
-        <p style={{ color: C.textSec, lineHeight: 1.8, margin: 0, fontSize: '0.9375rem' }}>{a}</p>
+      <div style={{ maxHeight: open ? '400px' : '0', opacity: open ? 1 : 0, overflow: 'hidden', transition: 'all 350ms cubic-bezier(0.4, 0, 0.2, 1)', padding: open ? '0 2rem 1.5rem' : '0 2rem 0' }}>
+        <p style={{ color: C.textSec, lineHeight: 1.8, margin: 0, fontSize: '1rem' }}>{a}</p>
       </div>
     </div>
   )
@@ -686,14 +642,13 @@ function FaqItem({ q, a }: { q: string; a: string }) {
 function LandingPage() {
   useScrollReveal()
 
-
   return (
-    <div style={{ fontFamily: '"Google Sans","Roboto",-apple-system,"Segoe UI",sans-serif', color: C.textPrimary, WebkitFontSmoothing: 'antialiased' }}>
+    <div style={{ fontFamily: 'var(--font-outfit), sans-serif', color: C.textPrimary, WebkitFontSmoothing: 'antialiased' }}>
       <FixedBackground />
       <Nav />
 
       {/* ══ 1. HERO ══ */}
-      <section style={{ minHeight: '100svh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 'calc(3rem + 64px) 0 3rem', background: 'transparent', position: 'relative', textAlign: 'center' }}>
+      <section style={{ minHeight: '100svh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '120px 0 80px', background: 'transparent', position: 'relative', textAlign: 'center' }}>
         <div style={{ maxWidth: 800, margin: '0 auto', padding: '0 1.25rem' }}>
 
           {/* Eyebrow chip */}
@@ -864,24 +819,24 @@ function LandingPage() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: '1.5rem', maxWidth: 700, margin: '0 auto' }}>
             {/* Free */}
             <div className="g-reveal"
-              style={{ padding: '2rem', background: '#ffffff', border: `1px solid ${C.border}`, borderRadius: 12, transition: 'all 250ms ease' }}
-              onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.transform = 'translateY(-4px)' }}
-              onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.transform = '' }}>
-              <p style={{ fontSize: '0.75rem', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.1em', color: C.textLight, marginBottom: '1rem' }}>Kostenlos</p>
-              <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, marginBottom: '0.5rem' }}>
-                <span style={{ fontSize: '3.5rem', fontWeight: 700, color: C.textPrimary, lineHeight: 1 }}>0€</span>
-                <span style={{ fontSize: '0.875rem', color: C.textSec, marginBottom: 8 }}>/ für immer</span>
+              style={{ padding: '2.5rem', background: '#ffffff', border: `1px solid ${C.border}`, borderRadius: 24, transition: 'all 250ms ease' }}
+              onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.borderColor = C.blue; el.style.transform = 'translateY(-2px)' }}
+              onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.borderColor = C.border; el.style.transform = '' }}>
+              <p style={{ fontSize: '0.8125rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: C.textLight, marginBottom: '1.25rem' }}>Basis</p>
+              <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, marginBottom: '0.75rem' }}>
+                <span style={{ fontSize: '3.5rem', fontWeight: 500, color: C.textPrimary, lineHeight: 1 }}>0€</span>
+                <span style={{ fontSize: '0.9375rem', color: C.textSec, marginBottom: 10 }}>/ für immer</span>
               </div>
-              <p style={{ fontSize: '0.9375rem', color: C.textSec, marginBottom: '1.5rem', lineHeight: 1.6 }}>Alles für eine vollständige Ausbildungsdokumentation.</p>
-              <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 1.75rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <p style={{ fontSize: '1rem', color: C.textSec, marginBottom: '2rem', lineHeight: 1.6 }}>Alles für eine vollständige Ausbildungsdokumentation.</p>
+              <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 2.25rem', display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
                 {['Unbegrenzte Wochenberichte','KI-Formulierung','Ausbilder-Freigabe','PDF-Export','Kalender & Fristen','Cloud-Sync'].map(f => (
-                  <li key={f} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: '0.9375rem', color: C.textPrimary }}>
-                    <HugeiconsIcon icon={CheckmarkCircle01Icon} size={16} style={{ color: C.green, flexShrink: 0 }} />{f}
+                  <li key={f} style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: '0.9375rem', color: C.textPrimary }}>
+                    <HugeiconsIcon icon={CheckmarkCircle01Icon} size={18} style={{ color: C.green, flexShrink: 0 }} />{f}
                   </li>
                 ))}
               </ul>
               <Link href="/auth/register" style={{ display: 'block' }}>
-                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', padding: '10px 24px', borderRadius: 9999, border: `2px solid ${C.blue}`, color: C.blue, fontWeight: 450, fontSize: '1rem', cursor: 'pointer', transition: 'all 250ms ease' }}
+                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', padding: '14px 24px', borderRadius: 9999, border: `1.5px solid ${C.blue}`, color: C.blue, fontWeight: 500, fontSize: '1rem', cursor: 'pointer', transition: 'all 200ms ease' }}
                   onMouseEnter={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.background = C.blue; el.style.color = 'white' }}
                   onMouseLeave={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.background = 'transparent'; el.style.color = C.blue }}>
                   Jetzt registrieren
@@ -890,26 +845,26 @@ function LandingPage() {
             </div>
 
             {/* Pro */}
-            <div className="g-reveal" style={{ borderRadius: 14, background: `linear-gradient(135deg, ${C.blue}, ${C.green})`, padding: 2, transitionDelay: '0.1s' }}>
-              <div style={{ padding: '2rem', background: 'white', borderRadius: 12, height: '100%' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-                  <p style={{ fontSize: '0.75rem', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.1em', color: C.blue, margin: 0 }}>Pro</p>
+            <div className="g-reveal" style={{ borderRadius: 28, background: `linear-gradient(135deg, ${C.blue}, ${C.green})`, padding: 2, transitionDelay: '0.1s' }}>
+              <div style={{ padding: '2.5rem', background: 'white', borderRadius: 26, height: '100%' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.25rem' }}>
+                  <p style={{ fontSize: '0.8125rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: C.blue, margin: 0 }}>Pro</p>
                   <span style={{ fontSize: '0.6875rem', fontWeight: 700, padding: '0.25rem 0.625rem', borderRadius: 9999, background: C.blue, color: 'white' }}>Demnächst</span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, marginBottom: '0.5rem' }}>
-                  <span style={{ fontSize: '3.5rem', fontWeight: 700, color: C.textPrimary, lineHeight: 1 }}>4,99€</span>
-                  <span style={{ fontSize: '0.875rem', color: C.textSec, marginBottom: 8 }}>/ Monat</span>
+                <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, marginBottom: '0.75rem' }}>
+                  <span style={{ fontSize: '3.5rem', fontWeight: 500, color: C.textPrimary, lineHeight: 1 }}>4,99€</span>
+                  <span style={{ fontSize: '0.9375rem', color: C.textSec, marginBottom: 10 }}>/ Monat</span>
                 </div>
-                <p style={{ fontSize: '0.9375rem', color: C.textSec, marginBottom: '1.5rem', lineHeight: 1.6 }}>Für Betriebe mit mehreren Auszubildenden.</p>
-                <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 1.75rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <p style={{ fontSize: '1rem', color: C.textSec, marginBottom: '2rem', lineHeight: 1.6 }}>Für Betriebe mit mehreren Auszubildenden.</p>
+                <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 2.25rem', display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
                   {['Alles aus Kostenlos','Unbegrenzte KI-Nutzung','Team-Verwaltung (20 Azubis)','Vorlagen-Bibliothek','Prioritäts-Support','Native App'].map(f => (
-                    <li key={f} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: '0.9375rem', color: C.textPrimary }}>
-                      <HugeiconsIcon icon={CheckmarkCircle01Icon} size={16} style={{ color: C.blue, flexShrink: 0 }} />{f}
+                    <li key={f} style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: '0.9375rem', color: C.textPrimary }}>
+                      <HugeiconsIcon icon={CheckmarkCircle01Icon} size={18} style={{ color: C.blue, flexShrink: 0 }} />{f}
                     </li>
                   ))}
                 </ul>
-                <button disabled style={{ width: '100%', padding: '10px 24px', borderRadius: 9999, background: C.blue, color: 'white', border: 'none', fontWeight: 450, fontSize: '1rem', opacity: 0.45, cursor: 'not-allowed' }}>
-                  Benachrichtigen wenn verfügbar
+                <button disabled style={{ width: '100%', padding: '14px 24px', borderRadius: 9999, background: 'rgba(0,0,0,0.04)', color: C.textLight, border: 'none', fontWeight: 500, fontSize: '1rem', cursor: 'not-allowed' }}>
+                  Demnächst verfügbar
                 </button>
               </div>
             </div>
@@ -939,30 +894,33 @@ function LandingPage() {
       </section>
 
       {/* ══ 8. CTA ══ */}
-      <section className="lp-section" style={{ background: `linear-gradient(135deg, ${C.blue} 0%, ${C.blueDark} 100%)`, textAlign: 'center', position: 'relative' }}>
-        <div style={{ maxWidth: 800, margin: '0 auto', padding: '0 2rem' }}>
+      <section className="lp-section" style={{ background: `linear-gradient(165deg, ${C.blue} 0%, ${C.blueDark} 100%)`, textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+        {/* Decorative CTA background elements */}
+        <div style={{ position: 'absolute', top: '-10%', right: '-5%', width: '40%', height: '120%', background: 'radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 70%)', transform: 'rotate(-15deg)' }} />
+        <div style={{ position: 'absolute', bottom: '-20%', left: '-10%', width: '60%', height: '140%', background: 'radial-gradient(circle, rgba(52,168,83,0.08) 0%, transparent 60%)' }} />
+
+        <div style={{ maxWidth: 800, margin: '0 auto', padding: '0 2rem', position: 'relative', zIndex: 1 }}>
           <div className="g-reveal">
-            <h2 style={{ fontWeight: 450, fontSize: 'clamp(2rem,4vw,3rem)', color: 'white', marginBottom: '1rem', lineHeight: 1.2 }}>
+            <h2 style={{ fontWeight: 500, fontSize: 'clamp(2.25rem,5vw,3.5rem)', color: 'white', marginBottom: '1.25rem', lineHeight: 1.15, letterSpacing: '-0.02em' }}>
               Bereit, deine Ausbildung zu transformieren?
             </h2>
-            <p style={{ fontSize: '1.125rem', color: 'rgba(255,255,255,0.9)', marginBottom: '2.5rem', lineHeight: 1.7 }}>
-              Hunderte Betriebe haben bereits gewechselt.<br />
-              Der erste Bericht ist in unter 15 Minuten fertig.
+            <p style={{ fontSize: '1.1875rem', color: 'rgba(255,255,255,0.85)', marginBottom: '3rem', lineHeight: 1.7, maxWidth: 640, margin: '0 auto 3rem' }}>
+              Hunderte Betriebe haben bereits gewechselt. Der erste Bericht ist in unter 15 Minuten fertig.
             </p>
             <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-              <Link href="/auth/register">
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 24px', background: 'white', color: C.blue, borderRadius: 9999, fontWeight: 450, fontSize: '1rem', cursor: 'pointer', transition: 'all 250ms ease' }}
-                  onMouseEnter={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.background = C.bgSecondary; el.style.transform = 'translateY(-2px)' }}
-                  onMouseLeave={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.background = 'white'; el.style.transform = '' }}>
-                  Jetzt kostenlos starten
-                  <HugeiconsIcon icon={ArrowRight01Icon} size={18} />
+              <Link href="/auth/register" className="no-underline">
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '16px 36px', background: 'white', color: C.blue, borderRadius: 9999, fontWeight: 600, fontSize: '1.0625rem', cursor: 'pointer', transition: 'all 240ms cubic-bezier(0.4, 0, 0.2, 1)', boxShadow: '0 4px 14px rgba(0,0,0,0.1)' }}
+                  onMouseEnter={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.transform = 'translateY(-2px) scale(1.02)'; el.style.boxShadow = '0 6px 20px rgba(0,0,0,0.15)' }}
+                  onMouseLeave={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.transform = ''; el.style.boxShadow = '0 4px 14px rgba(0,0,0,0.1)' }}>
+                  Kostenlos registrieren
+                  <HugeiconsIcon icon={ArrowRight01Icon} size={20} />
                 </span>
               </Link>
-              <a href="mailto:kontakt@azubihub.app">
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 24px', background: 'transparent', color: 'white', border: '1px solid rgba(255,255,255,0.6)', borderRadius: 9999, fontWeight: 450, fontSize: '1rem', cursor: 'pointer', transition: 'all 250ms ease' }}
-                  onMouseEnter={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.background = 'rgba(255,255,255,0.1)'; el.style.borderColor = 'white' }}
-                  onMouseLeave={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.background = 'transparent'; el.style.borderColor = 'rgba(255,255,255,0.6)' }}>
-                  <HugeiconsIcon icon={Mail01Icon} size={18} />
+              <a href="mailto:kontakt@azubihub.app" className="no-underline">
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '16px 36px', background: 'rgba(255,255,255,0.1)', color: 'white', border: '1px solid rgba(255,255,255,0.3)', backdropFilter: 'blur(10px)', borderRadius: 9999, fontWeight: 500, fontSize: '1.0625rem', cursor: 'pointer', transition: 'all 240ms cubic-bezier(0.4, 0, 0.2, 1)' }}
+                  onMouseEnter={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.background = 'rgba(255,255,255,0.2)'; el.style.borderColor = 'white' }}
+                  onMouseLeave={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.background = 'rgba(255,255,255,0.1)'; el.style.borderColor = 'rgba(255,255,255,0.3)' }}>
+                  <HugeiconsIcon icon={Mail01Icon} size={20} />
                   Kontakt aufnehmen
                 </span>
               </a>
@@ -975,36 +933,35 @@ function LandingPage() {
       <footer style={{ background: C.bgDark, color: 'white', position: 'relative' }}>
 
         {/* Ring animation — antigravity.google signature */}
-        <div style={{ height: 'calc(16vw + 220px)', position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+        <div style={{ height: 'calc(14vw + 200px)', position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
           {[
-            { size: 'calc(16vw + 220px)', border: 'rgba(66,133,244,0.1)',  anim: 'orbit-cw 60s linear infinite' },
-            { size: 'calc(11vw + 170px)', border: 'rgba(234,67,53,0.07)',  anim: 'orbit-ccw 44s linear infinite 2s' },
-            { size: 'calc(7vw + 120px)',  border: 'rgba(52,168,83,0.09)',  anim: 'orbit-cw 28s linear infinite 1s' },
-            { size: 'calc(4vw + 76px)',   border: 'rgba(251,188,4,0.11)',  anim: 'orbit-ccw 16s linear infinite 0.5s' },
+            { size: 'calc(14vw + 200px)', border: 'rgba(66,133,244,0.08)',  anim: 'orbit-cw 70s linear infinite' },
+            { size: 'calc(10vw + 160px)', border: 'rgba(234,67,53,0.05)',  anim: 'orbit-ccw 50s linear infinite 2s' },
+            { size: 'calc(6vw + 110px)',  border: 'rgba(52,168,83,0.07)',  anim: 'orbit-cw 32s linear infinite 1s' },
+            { size: 'calc(3vw + 70px)',   border: 'rgba(251,188,4,0.09)',  anim: 'orbit-ccw 18s linear infinite 0.5s' },
           ].map((r, i) => (
             <div key={i} style={{ position: 'absolute', width: r.size, height: r.size, borderRadius: '50%', border: `1px solid ${r.border}`, animation: r.anim }} />
           ))}
-          <div style={{ position: 'absolute', width: 48, height: 48, borderRadius: '50%', background: 'radial-gradient(circle, rgba(66,133,244,0.45) 0%, transparent 70%)', animation: 'goog-glow-pulse 3.5s ease-in-out infinite' }} />
+          <div style={{ position: 'absolute', width: 40, height: 40, borderRadius: '50%', background: 'radial-gradient(circle, rgba(66,133,244,0.3) 0%, transparent 70%)', animation: 'goog-glow-pulse 4s ease-in-out infinite' }} />
         </div>
 
-        {/* Nav */}
-        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '3.5rem 2rem 2.5rem' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '4rem', marginBottom: '2.5rem' }} className="footer-grid">
+        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '4rem 2rem 3rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '3rem', marginBottom: '3.5rem' }} className="footer-grid">
 
             {/* Brand */}
             <div>
-              <div style={{ marginBottom: '0.875rem' }}>
-                <Logo size={22} dark />
+              <div style={{ marginBottom: '1.25rem' }}>
+                <Logo size={24} dark />
               </div>
-              <p style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1.65, fontSize: '0.875rem', marginBottom: '1.25rem', maxWidth: 280 }}>
-                Digitale Ausbildungsplattform für Deutschland. KI-gestützt, IHK-konform, kostenlos.
+              <p style={{ color: 'rgba(255,255,255,0.45)', lineHeight: 1.7, fontSize: '0.9375rem', marginBottom: '1.5rem', maxWidth: 300 }}>
+                Digitale Ausbildungsplattform für Deutschland. KI-gestützt, IHK-konform, kostenlos und sicher.
               </p>
-              <div style={{ display: 'flex', gap: '1.25rem' }}>
+              <div style={{ display: 'flex', gap: '1.5rem' }}>
                 {[{ href: 'mailto:kontakt@azubihub.app', label: 'E-Mail' }, { href: 'https://github.com', label: 'GitHub' }].map(s => (
                   <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer"
-                    style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.875rem', textDecoration: 'none', transition: 'color 150ms ease' }}
+                    style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.875rem', textDecoration: 'none', transition: 'color 200ms ease', fontWeight: 500 }}
                     onMouseEnter={e => (e.currentTarget.style.color = 'white')}
-                    onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.45)')}>
+                    onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.4)')}>
                     {s.label}
                   </a>
                 ))}
@@ -1013,11 +970,11 @@ function LandingPage() {
 
             {/* Produkt */}
             <div>
-              <p style={{ fontSize: '0.8125rem', fontWeight: 500, marginBottom: '1rem', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Produkt</p>
-              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
+              <p style={{ fontSize: '0.75rem', fontWeight: 600, marginBottom: '1.25rem', color: 'rgba(255,255,255,0.25)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Produkt</p>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                 {[['#features','Features'],['#pricing','Preise'],['#faq','FAQ'],['/auth/register','Registrieren'],['/auth/login','Anmelden']].map(([href, label]) => (
                   <li key={label}>
-                    <a href={href} style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.9rem', transition: 'color 150ms ease', textDecoration: 'none' }}
+                    <a href={href} style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.9375rem', transition: 'color 200ms ease', textDecoration: 'none' }}
                       onMouseEnter={e => (e.currentTarget.style.color = 'white')}
                       onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.55)')}>
                       {label}
@@ -1029,11 +986,11 @@ function LandingPage() {
 
             {/* Rechtliches */}
             <div>
-              <p style={{ fontSize: '0.8125rem', fontWeight: 500, marginBottom: '1rem', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Rechtliches</p>
-              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
+              <p style={{ fontSize: '0.75rem', fontWeight: 600, marginBottom: '1.25rem', color: 'rgba(255,255,255,0.25)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Rechtliches</p>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                 {[{ href: '/impressum', label: 'Impressum' }, { href: '/datenschutz', label: 'Datenschutz' }, { href: 'mailto:kontakt@azubihub.app', label: 'Kontakt' }].map(({ href, label }) => (
                   <li key={label}>
-                    <Link href={href} style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.9rem', transition: 'color 150ms ease', textDecoration: 'none' }}
+                    <Link href={href} style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.9375rem', transition: 'color 200ms ease', textDecoration: 'none' }}
                       onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = 'white')}
                       onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = 'rgba(255,255,255,0.55)')}>
                       {label}
@@ -1044,9 +1001,12 @@ function LandingPage() {
             </div>
           </div>
 
-          <div style={{ paddingTop: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
-            <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.8125rem' }}>© {new Date().getFullYear()} AzubiHub</span>
-            <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.8125rem' }}>Gebaut für die Ausbildung in Deutschland.</span>
+          <div style={{ paddingTop: '2rem', borderTop: '1px solid rgba(255,255,255,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+            <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: '0.8125rem', fontWeight: 400 }}>© {new Date().getFullYear()} AzubiHub — Digitalisierung für Auszubildende.</span>
+            <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+               <span style={{ width: 6, height: 6, borderRadius: '50%', background: C.green, display: 'inline-block' }} />
+               <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: '0.8125rem' }}>System Status: Online</span>
+            </div>
           </div>
         </div>
       </footer>
