@@ -312,14 +312,6 @@ function ModuleCard({ mod, icon: I, isDark, cardBg, borderC, fg, fgMuted, primar
         userSelect: 'none',
       }}
     >
-      {/* Accent stripe */}
-      {enabled && (
-        <div style={{
-          position: 'absolute', top: 0, left: 0, right: 0, height: 3,
-          background: mod.accentColor, borderRadius: '16px 16px 0 0',
-          opacity: hovered || isDragOver ? 1 : 0, transition: 'opacity 160ms',
-        }} />
-      )}
 
       {/* Header row: icon + drag handle */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
