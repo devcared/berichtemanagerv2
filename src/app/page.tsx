@@ -7,6 +7,7 @@ import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
 import { useProfile } from '@/hooks/use-profile'
 import { useAuth } from '@/contexts/AuthContext'
+import { useTheme } from '@/contexts/ThemeContext'
 import type { AppModule } from '@/types'
 import {
   BookOpenIcon, CheckListIcon, CalendarIcon, GridViewIcon, Logout01Icon,
@@ -33,112 +34,209 @@ function getGreeting() {
   const h = new Date().getHours()
   return h < 12 ? 'Guten Morgen' : h < 18 ? 'Guten Tag' : 'Guten Abend'
 }
+function SunIcon() { return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg> }
+function MoonIcon() { return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg> }
+
 function AppHome() {
   const router = useRouter()
   const { profile } = useProfile()
   const { logout } = useAuth()
+  const { theme, toggleTheme } = useTheme()
   const [isMounted, setIsMounted] = useState(false)
   useEffect(() => { setIsMounted(true) }, [])
-  const today = isMounted ? format(new Date(), "EEEE, d. MMMM yyyy", { locale: de }) : ''
+
+  const today    = isMounted ? format(new Date(), "EEEE, d. MMMM yyyy", { locale: de }) : ''
   const greeting = `${getGreeting()}${profile ? `, ${profile.firstName}` : ''}!`
-  const textPrimary = '#202124'
-  const textSec     = '#5f6368'
-  const textLight   = '#80868b'
-  const border      = '#dadce0'
+  const isDark   = theme === 'dark'
+
+  /* CSS-variable-backed tokens — auto-update on theme change */
+  const fg       = 'hsl(var(--foreground))'
+  const fgMuted  = 'hsl(var(--muted-foreground))'
+  const bg       = 'hsl(var(--background))'
+  const cardBg   = 'hsl(var(--card))'
+  const borderC  = 'hsl(var(--border))'
+  const accent   = 'hsl(var(--accent))'
+  const primary  = isDark ? '#8ab4f8' : '#4285f4'
+
+  const initials = profile
+    ? `${profile.firstName?.[0] ?? ''}${profile.lastName?.[0] ?? ''}`.toUpperCase()
+    : 'AZ'
 
   return (
-    <div style={{ minHeight: '100svh', background: '#ffffff', fontFamily: '"Google Sans","Roboto",-apple-system,"Segoe UI",sans-serif', WebkitFontSmoothing: 'antialiased', color: textPrimary }}>
-      <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 1.5rem' }}>
+    <div style={{ minHeight: '100svh', background: bg, fontFamily: '"Google Sans","Roboto",-apple-system,"Segoe UI",sans-serif', WebkitFontSmoothing: 'antialiased', color: fg, transition: 'background 200ms, color 200ms' }}>
+      <div style={{ maxWidth: 960, margin: '0 auto', padding: '0 1.5rem' }}>
 
-        {/* Header */}
-        <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.25rem 0', borderBottom: `1px solid ${border}` }}>
+        {/* ── Header ── */}
+        <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.125rem 0', borderBottom: `1px solid ${borderC}` }}>
+          {/* Logo */}
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/App Icon.png" alt="AzubiHub" width={28} height={28} style={{ borderRadius: 6, display: 'block', objectFit: 'cover' }} />
-            <span style={{ fontSize: 16, fontWeight: 500, letterSpacing: '-0.01em', color: textPrimary }}>
-              Azubi<span style={{ color: textSec }}>Hub</span>
-            </span>
+            <img src="/App Icon.png" alt="AzubiHub" width={30} height={30} style={{ borderRadius: 8, objectFit: 'cover' }} />
+            <span style={{ fontSize: '0.9375rem', fontWeight: 600, letterSpacing: '-0.01em', color: fg }}>AzubiHub</span>
           </div>
-          <button
-            onClick={() => logout()}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0.5rem 1rem', border: `1px solid ${border}`, borderRadius: 9999, background: 'none', color: textSec, fontSize: '0.875rem', cursor: 'pointer', transition: 'border-color 150ms ease', fontFamily: 'inherit' }}
-            onMouseEnter={e => (e.currentTarget.style.borderColor = '#bdc1c6')}
-            onMouseLeave={e => (e.currentTarget.style.borderColor = border)}
-          >
-            <HugeiconsIcon icon={Logout01Icon} size={15} />
-            <span className="hidden sm:inline">Abmelden</span>
-          </button>
+
+          {/* Right actions */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            {/* Theme toggle */}
+            <button
+              onClick={toggleTheme}
+              title={isDark ? 'Light Mode' : 'Dark Mode'}
+              style={{ width: 36, height: 36, borderRadius: 8, border: `1px solid ${borderC}`, background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: fgMuted, transition: 'background 120ms', fontFamily: 'inherit' }}
+              onMouseEnter={e => (e.currentTarget.style.background = accent)}
+              onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+            >
+              {isDark ? <SunIcon /> : <MoonIcon />}
+            </button>
+
+            {/* Avatar */}
+            <div style={{ width: 32, height: 32, borderRadius: '50%', background: primary, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6875rem', fontWeight: 700, color: isDark ? '#202124' : '#fff', flexShrink: 0 }}>
+              {initials}
+            </div>
+
+            {/* Logout */}
+            <button
+              onClick={logout}
+              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0.4375rem 0.875rem', border: `1px solid ${borderC}`, borderRadius: 9999, background: 'transparent', color: fgMuted, fontSize: '0.8125rem', cursor: 'pointer', transition: 'background 120ms, border-color 120ms', fontFamily: 'inherit' }}
+              onMouseEnter={e => { e.currentTarget.style.background = accent; e.currentTarget.style.borderColor = 'hsl(var(--ring))' }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = borderC }}
+            >
+              <HugeiconsIcon icon={Logout01Icon} size={14} />
+              <span className="hidden sm:inline">Abmelden</span>
+            </button>
+          </div>
         </header>
 
-        {/* Greeting */}
-        <div style={{ paddingTop: '3rem', paddingBottom: '2.5rem' }}>
-          <h1 style={{ fontSize: 'clamp(1.75rem,4vw,2.5rem)', fontWeight: 450, color: textPrimary, lineHeight: 1.2, marginBottom: '0.375rem' }}>{greeting}</h1>
-          <p style={{ fontSize: '0.9375rem', color: textSec }}>{today}</p>
+        {/* ── Greeting ── */}
+        <div style={{ paddingTop: '3rem', paddingBottom: '2.75rem' }}>
+          <h1 style={{ fontSize: 'clamp(1.625rem,4vw,2.375rem)', fontWeight: 400, color: fg, lineHeight: 1.2, marginBottom: '0.375rem', letterSpacing: '-0.02em' }}>{greeting}</h1>
+          <p style={{ fontSize: '0.9375rem', color: fgMuted }}>{today}</p>
         </div>
 
-        {/* Module label */}
-        <p style={{ fontSize: '0.75rem', fontWeight: 600, letterSpacing: '0.09em', textTransform: 'uppercase', color: textSec, marginBottom: '1.25rem' }}>Deine Module</p>
+        {/* ── Section label ── */}
+        <p style={{ fontSize: '0.6875rem', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: fgMuted, marginBottom: '1rem' }}>Deine Module</p>
 
-        {/* Module cards — Google Product Card style */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(240px,1fr))', gap: '1.25rem', marginBottom: '4rem' }}>
+        {/* ── Module grid ── */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(260px,1fr))', gap: '1rem', marginBottom: '4rem' }}>
           {modules.map(mod => {
             const I = moduleIconMap[mod.icon]
             return (
-              <div
+              <ModuleCard
                 key={mod.id}
-                onClick={() => mod.isEnabled && router.push(mod.routePath)}
-                style={{
-                  border: `1px solid ${border}`,
-                  borderRadius: 12,
-                  padding: '1.75rem',
-                  background: '#ffffff',
-                  cursor: mod.isEnabled ? 'pointer' : 'default',
-                  opacity: mod.isEnabled ? 1 : 0.65,
-                  transition: 'border-color 180ms ease, background 180ms ease',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '1.25rem',
-                }}
-                onMouseEnter={e => { if (mod.isEnabled) { e.currentTarget.style.borderColor = '#bdc1c6'; e.currentTarget.style.background = '#fafafa' } }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = border; e.currentTarget.style.background = '#ffffff' }}
-              >
-                {/* Icon */}
-                <div style={{ width: 52, height: 52, borderRadius: 14, background: `${mod.accentColor}14`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  {I && <HugeiconsIcon icon={I} size={24} style={{ color: mod.accentColor }} />}
-                </div>
-
-                {/* Text */}
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: '0.5rem', flexWrap: 'wrap' }}>
-                    <h3 style={{ fontSize: '1rem', fontWeight: 500, color: textPrimary, lineHeight: 1.3 }}>{mod.title}</h3>
-                    {!mod.isEnabled && (
-                      <span style={{ fontSize: '0.6875rem', padding: '0.2rem 0.625rem', borderRadius: 9999, background: '#f1f3f4', color: textSec, fontWeight: 500, whiteSpace: 'nowrap' }}>
-                        Bald verfügbar
-                      </span>
-                    )}
-                  </div>
-                  <p style={{ fontSize: '0.875rem', color: textSec, lineHeight: 1.65, margin: 0 }}>{mod.description}</p>
-                </div>
-
-                {/* CTA */}
-                {mod.isEnabled && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#4285f4', fontSize: '0.875rem', fontWeight: 500 }}>
-                    Öffnen
-                    <HugeiconsIcon icon={ArrowRight01Icon} size={15} />
-                  </div>
-                )}
-              </div>
+                mod={mod}
+                icon={I}
+                isDark={isDark}
+                cardBg={cardBg}
+                borderC={borderC}
+                accent={accent}
+                fg={fg}
+                fgMuted={fgMuted}
+                primary={primary}
+                onOpen={() => router.push(mod.routePath)}
+              />
             )
           })}
         </div>
 
-        {/* Footer line */}
-        <div style={{ borderTop: `1px solid ${border}`, paddingTop: '1.5rem', paddingBottom: '2rem', textAlign: 'center' }}>
-          <p style={{ fontSize: '0.8125rem', color: textLight }}>AzubiHub · Dein persönlicher Ausbildungsassistent</p>
+        {/* ── Footer ── */}
+        <div style={{ borderTop: `1px solid ${borderC}`, paddingTop: '1.25rem', paddingBottom: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <p style={{ fontSize: '0.75rem', color: fgMuted }}>AzubiHub · Dein persönlicher Ausbildungsassistent</p>
         </div>
 
-
       </div>
+    </div>
+  )
+}
+
+/* ── Module card extracted to avoid inline-style volatility ── */
+function ModuleCard({ mod, icon: I, isDark, cardBg, borderC, accent, fg, fgMuted, primary, onOpen }: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  mod: AppModule; icon: any; isDark: boolean; cardBg: string; borderC: string
+  accent: string; fg: string; fgMuted: string; primary: string; onOpen: () => void
+}) {
+  const [hovered, setHovered] = useState(false)
+  const enabled = mod.isEnabled
+
+  const cardShadow = hovered && enabled
+    ? isDark ? '0 4px 20px rgba(0,0,0,0.45)' : '0 4px 20px rgba(66,133,244,0.12)'
+    : isDark ? '0 1px 4px rgba(0,0,0,0.3)' : '0 1px 3px rgba(0,0,0,0.07)'
+
+  return (
+    <div
+      onClick={() => enabled && onOpen()}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        border: `1px solid ${hovered && enabled ? primary : borderC}`,
+        borderRadius: 16,
+        padding: '1.5rem',
+        background: cardBg,
+        cursor: enabled ? 'pointer' : 'default',
+        opacity: enabled ? 1 : 0.55,
+        transition: 'border-color 180ms, box-shadow 180ms, transform 180ms',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '1.125rem',
+        boxShadow: cardShadow,
+        transform: hovered && enabled ? 'translateY(-2px)' : 'none',
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
+      {/* Subtle top accent stripe */}
+      {enabled && (
+        <div style={{
+          position: 'absolute', top: 0, left: 0, right: 0, height: 3,
+          background: mod.accentColor,
+          borderRadius: '16px 16px 0 0',
+          opacity: hovered ? 1 : 0,
+          transition: 'opacity 180ms',
+        }} />
+      )}
+
+      {/* Icon chip */}
+      <div style={{
+        width: 48, height: 48, borderRadius: 14,
+        background: `${mod.accentColor}${isDark ? '22' : '15'}`,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        transition: 'background 180ms',
+      }}>
+        {I && <HugeiconsIcon icon={I} size={22} style={{ color: mod.accentColor }} />}
+      </div>
+
+      {/* Text */}
+      <div style={{ flex: 1 }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: '0.4rem', flexWrap: 'wrap' }}>
+          <h3 style={{ fontSize: '0.9375rem', fontWeight: 500, color: fg, lineHeight: 1.3, margin: 0 }}>{mod.title}</h3>
+          {!enabled && (
+            <span style={{
+              fontSize: '0.625rem', padding: '0.2rem 0.5rem', borderRadius: 9999,
+              background: accent, color: fgMuted,
+              fontWeight: 600, whiteSpace: 'nowrap', letterSpacing: '0.04em', textTransform: 'uppercase',
+            }}>
+              Bald
+            </span>
+          )}
+        </div>
+        <p style={{ fontSize: '0.8125rem', color: fgMuted, lineHeight: 1.6, margin: 0 }}>{mod.description}</p>
+      </div>
+
+      {/* CTA row */}
+      {enabled && (
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          paddingTop: '0.75rem', borderTop: `1px solid ${borderC}`,
+        }}>
+          <span style={{ fontSize: '0.8125rem', fontWeight: 500, color: primary }}>Öffnen</span>
+          <div style={{
+            width: 28, height: 28, borderRadius: '50%',
+            background: hovered ? primary : `${primary}18`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            transition: 'background 180ms',
+          }}>
+            <HugeiconsIcon icon={ArrowRight01Icon} size={14} style={{ color: hovered ? (isDark ? '#202124' : '#fff') : primary }} />
+          </div>
+        </div>
+      )}
     </div>
   )
 }
