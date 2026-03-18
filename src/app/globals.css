@@ -108,3 +108,66 @@ body {
   color: hsl(var(--foreground));
   font-family: var(--font-geist-sans), system-ui, sans-serif;
 }
+
+/* ═══════════════════════════════════════
+   Landing Page — Google-style animations
+═══════════════════════════════════════ */
+
+@keyframes goog-float {
+  0%, 100% { transform: translateY(0px)  rotate(0deg); }
+  33%       { transform: translateY(-22px) rotate(4deg); }
+  66%       { transform: translateY(-10px) rotate(-2deg); }
+}
+@keyframes goog-float2 {
+  0%, 100% { transform: translateY(0px)  rotate(0deg)  scale(1); }
+  50%       { transform: translateY(-30px) rotate(-5deg) scale(1.05); }
+}
+@keyframes goog-float3 {
+  0%, 100% { transform: translateY(0px)  rotate(-15deg); }
+  50%       { transform: translateY(-18px) rotate(-8deg); }
+}
+@keyframes goog-float4 {
+  0%, 100% { transform: translateY(0px)  scale(1); }
+  50%       { transform: translateY(-14px) scale(1.08); }
+}
+@keyframes goog-spin-slow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes goog-pulse-ring {
+  0%   { transform: scale(1);   opacity: 0.6; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+
+/* Scroll-reveal base states */
+.g-reveal {
+  opacity: 0;
+  transform: translateY(44px);
+  transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.g-reveal.g-visible       { opacity: 1; transform: translateY(0); }
+
+.g-reveal-left {
+  opacity: 0;
+  transform: translateX(-44px);
+  transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.g-reveal-left.g-visible  { opacity: 1; transform: translateX(0); }
+
+.g-reveal-right {
+  opacity: 0;
+  transform: translateX(44px);
+  transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.g-reveal-right.g-visible { opacity: 1; transform: translateX(0); }
+
+.g-reveal-scale {
+  opacity: 0;
+  transform: scale(0.88);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.g-reveal-scale.g-visible { opacity: 1; transform: scale(1); }
