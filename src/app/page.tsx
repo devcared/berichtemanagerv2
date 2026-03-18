@@ -128,20 +128,25 @@ function AppHome() {
 
       {/* ══ Sticky Topbar ══ */}
       <header style={{
-        position: 'sticky', top: 0, zIndex: 100,
-        height: 64,
+        position: 'sticky', top: scrolled ? 16 : 0, zIndex: 100,
+        height: scrolled ? 56 : 64,
+        maxWidth: scrolled ? 'min(960px, calc(100% - 2rem))' : '100%',
+        margin: '0 auto',
         display: 'flex', alignItems: 'center',
-        padding: '0 1.5rem',
+        padding: scrolled ? '0 1.25rem' : '0 1.5rem',
         background: scrolled ? (isDark ? 'rgba(30,31,36,0.85)' : 'rgba(255,255,255,0.85)') : 'transparent',
         backdropFilter: 'blur(16px)',
         WebkitBackdropFilter: 'blur(16px)',
-        borderBottom: `1px solid ${scrolled ? (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)') : 'transparent'}`,
-        transition: 'all 240ms ease',
+        border: scrolled ? `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'}` : 'none',
+        borderBottom: !scrolled ? `1px solid ${isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)'}` : undefined,
+        borderRadius: scrolled ? 9999 : 0,
+        boxShadow: scrolled ? '0 10px 30px rgba(0,0,0,0.05)' : 'none',
+        transition: 'all 400ms cubic-bezier(0.4, 0, 0.2, 1)',
         gap: 12,
       }}>
         {/* Logo */}
         <div style={{ flex: 1 }}>
-          <Logo size={28} />
+          <Logo size={scrolled ? 24 : 28} />
         </div>
 
         {/* Right cluster */}
@@ -490,12 +495,19 @@ function useScrollReveal() {
 
 /* Logo — App Icon.png + wordmark */
 function Logo({ size = 28, dark = false }: { size?: number; dark?: boolean }) {
-  const fs = size * 0.58
+  const fs = size * 0.54
+  const c1 = '#4285f4'
+  const c2 = dark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.45)'
+
   return (
-    <div className="flex items-center gap-2.5 select-none">
-      <img src="/App Icon.png" alt="AzubiHub" width={size} height={size} className="rounded-xl object-cover" />
-      <span className="text-foreground tracking-tight font-medium" style={{ fontSize: fs, color: dark ? 'rgba(255,255,255,0.9)' : 'hsl(var(--foreground))', letterSpacing: '-0.02em' }}>
-        Azubi<span className="text-muted-foreground">Hub</span>
+    <div className="flex items-center gap-2 select-none group cursor-pointer">
+      <div className="relative">
+        <img src="/App Icon.png" alt="" width={size} height={size} className="rounded-xl object-cover transition-transform duration-500 group-hover:scale-105" />
+        <div className="absolute inset-0 rounded-xl shadow-inner pointer-events-none" />
+      </div>
+      <span className="tracking-tight font-medium transition-colors" style={{ fontSize: fs, fontFamily: 'var(--font-outfit), sans-serif', letterSpacing: '-0.025em' }}>
+        <span style={{ color: c1 }}>Azubi</span>
+        <span style={{ color: c2, fontWeight: 400 }}>Hub</span>
       </span>
     </div>
   )
@@ -566,30 +578,32 @@ function Nav() {
 
   return (
     <>
-      <nav className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ${scrolled ? 'h-16 bg-white/80 backdrop-blur-xl border-b border-gray-200/50' : 'h-20 bg-transparent'}`}>
-        <div className="max-w-7xl mx-auto px-6 h-full flex items-center justify-between relative">
+      <nav className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 ease-in-out ${scrolled ? 'top-4 inset-x-4 max-w-5xl mx-auto h-14 bg-white/70 backdrop-blur-2xl border border-gray-200/50 rounded-full shadow-xl shadow-gray-200/20' : 'h-20 bg-transparent'}`}>
+        <div className={`h-full flex items-center justify-between relative ${scrolled ? 'px-4' : 'max-w-7xl mx-auto px-6'}`}>
           
           <div className="flex-1 flex justify-start">
             <Link href="/" className="no-underline active:scale-95 transition-transform" onClick={() => setMenuOpen(false)}>
-              <Logo size={28} />
+              <Logo size={scrolled ? 24 : 28} />
             </Link>
           </div>
 
-          <div className={`hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-1 transition-all duration-300 ${scrolled ? 'bg-gray-50/70 p-1 px-1.5' : 'bg-transparent p-0'} backdrop-blur-sm rounded-full ${scrolled ? 'border border-gray-200/50 shadow-sm' : 'border-transparent shadow-none'}`}>
+          <div className={`hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-1 transition-all duration-500 ${scrolled ? 'bg-white/40 p-0.5' : 'bg-transparent p-0'} rounded-full`}>
             {links.map(([href, label]) => (
-              <a key={href} href={href} className="text-[0.875rem] font-medium text-gray-600 px-5 py-2 rounded-full hover:text-blue-600 hover:bg-white/80 transition-all duration-240 no-underline">
+              <a key={href} href={href} className={`text-[0.8125rem] font-medium text-gray-600 px-5 py-2 rounded-full hover:text-blue-600 hover:bg-white transition-all duration-300 no-underline ${scrolled ? 'text-gray-800' : 'text-gray-600'}`}>
                 {label}
               </a>
             ))}
           </div>
 
           <div className="flex-1 flex justify-end items-center gap-2">
-            <Link href="/auth/login" className="hidden sm:inline-flex text-[0.875rem] font-medium text-gray-500 px-4 py-2 hover:text-gray-900 transition-colors no-underline">
-              Anmelden
-            </Link>
-            <Link href="/auth/register" className="hidden sm:inline-flex no-underline">
-              <span className="bg-[#4285f4] hover:bg-[#1a73e8] text-white px-6 py-2.5 rounded-full text-[0.875rem] font-semibold transition-all duration-240 active:scale-95 shadow-sm hover:shadow-md">
-                Loslegen
+            {!scrolled && (
+              <Link href="/auth/login" className="hidden sm:inline-flex text-[0.875rem] font-medium text-gray-500 px-4 py-2 hover:text-gray-900 transition-colors no-underline">
+                Anmelden
+              </Link>
+            )}
+            <Link href="/auth/register" className="no-underline">
+              <span className={`bg-[#4285f4] hover:bg-[#1a73e8] text-white px-6 py-2 rounded-full text-[0.8125rem] font-semibold transition-all duration-300 active:scale-95 shadow-sm hover:shadow-md ${scrolled ? 'h-10 flex items-center' : 'h-11 flex items-center'}`}>
+                {scrolled ? 'Starten' : 'Loslegen'}
               </span>
             </Link>
 
