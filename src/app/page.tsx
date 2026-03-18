@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useEffect, useRef, useState } from 'react'
+import { createContext, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { format } from 'date-fns'
@@ -15,9 +15,9 @@ import type { AppModule } from '@/types'
 import {
   BookOpenIcon, CheckListIcon, CalendarIcon, GridViewIcon, Logout01Icon,
   SparklesIcon, CheckmarkBadge01Icon, ArrowRight01Icon,
-  Shield01Icon,
-  StarIcon, QuoteUpIcon, CheckmarkCircle01Icon, Cancel01Icon, Add01Icon,
-  MinusSignIcon, Mail01Icon, Github01Icon, LockPasswordIcon,
+  Shield01Icon, StarIcon, QuoteUpIcon, CheckmarkCircle01Icon,
+  Add01Icon, MinusSignIcon,
+  Mail01Icon, Github01Icon, LockPasswordIcon,
 } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 
@@ -103,96 +103,126 @@ function AppHome() {
 }
 
 /* ═══════════════════════════════════════
-   THEME SYSTEM
+   DESIGN SYSTEM  — Google Antigravity exact
 ═══════════════════════════════════════ */
 
-/* Google brand colors — identical in both modes */
-const BRAND = {
-  blue:   '#4285f4',
-  red:    '#ea4335',
-  yellow: '#fbbc04',
-  green:  '#34a853',
-  purple: '#9c27b0',
+/* Exact Google brand palette */
+const C = {
+  blue:        '#4285f4',
+  blueDark:    '#1967d2',
+  green:       '#34a853',
+  yellow:      '#fbbc04',
+  red:         '#ea4335',
+  purple:      '#9c27b0',
+  textPrimary: '#202124',
+  textSec:     '#5f6368',
+  textLight:   '#80868b',
+  bgPrimary:   '#ffffff',
+  bgSecondary: '#f8f9fa',
+  bgDark:      '#202124',
+  border:      '#dadce0',
+  shadowSm:    '0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15)',
+  shadowMd:    '0 1px 3px 0 rgba(60,64,67,0.3), 0 4px 8px 3px rgba(60,64,67,0.15)',
 }
 
-/* Google Antigravity exact color palette */
-function makeG(dark: boolean) {
+/* Dark-mode overrides */
+function dk(dark: boolean) {
   return {
-    ...BRAND,
-    bg:      dark ? '#0d0f14'                  : '#ffffff',
-    surface: dark ? '#161b22'                  : '#f8f9fa',
-    surface2:dark ? '#1c2333'                  : '#f1f3f4',
-    border:  dark ? 'rgba(255,255,255,0.1)'    : '#dadce0',
-    text:    dark ? '#e8eaed'                  : '#202124',
-    mid:     dark ? '#9aa0a6'                  : '#5f6368',
-    muted:   dark ? '#5f6368'                  : '#80868b',
-    link:    dark ? '#8ab4f8'                  : '#1a73e8',
+    textPrimary: dark ? '#e8eaed'                  : C.textPrimary,
+    textSec:     dark ? '#9aa0a6'                  : C.textSec,
+    textLight:   dark ? '#5f6368'                  : C.textLight,
+    bg:          dark ? '#0d0f14'                  : C.bgPrimary,
+    surface:     dark ? '#161b22'                  : C.bgSecondary,
+    surface2:    dark ? '#1c2333'                  : '#f1f3f4',
+    border:      dark ? 'rgba(255,255,255,0.1)'    : C.border,
+    heroBg:      dark
+      ? 'linear-gradient(135deg,#0d0f14 0%,#1c2333 100%)'
+      : 'linear-gradient(135deg,#f8f9fa 0%,#e8f0fe 100%)',
+    aboutBg:     dark
+      ? 'linear-gradient(135deg,#161b22 0%,#1c2333 100%)'
+      : 'linear-gradient(135deg,#e8f0fe 0%,#f8f9fa 100%)',
+    cardBg:      dark ? '#1c2333'                  : '#ffffff',
+    shadowSm:    dark ? '0 1px 4px rgba(0,0,0,0.5)' : C.shadowSm,
+    shadowMd:    dark ? '0 4px 16px rgba(0,0,0,0.6)': C.shadowMd,
   }
 }
 
-/* Google Material card style (light) / Glassmorphism (dark) */
-function makeGlass(dark: boolean): React.CSSProperties {
-  return dark
-    ? { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }
-    : { background: '#ffffff', border: '1px solid #dadce0', boxShadow: '0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15)' }
-}
-
-/* Google Antigravity gradient — blue→green (light) / blue→green soft (dark) */
-function makeGradText(dark: boolean): React.CSSProperties {
-  return {
-    background: dark
-      ? 'linear-gradient(135deg, #8ab4f8 0%, #81c995 100%)'
-      : `linear-gradient(90deg, #1a73e8 0%, #34a853 100%)`,
-    WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
-  }
-}
-
+/* Theme context */
 const ThemeCtx = createContext<{ dark: boolean; toggle: () => void }>({ dark: false, toggle: () => {} })
-function useTheme()    { return useContext(ThemeCtx) }
-function useG()        { const { dark } = useTheme(); return makeG(dark) }
 
 /* ═══════════════════════════════════════
    DATA
 ═══════════════════════════════════════ */
 
 const FEATURES = [
-  { icon: BookOpenIcon,         title: 'Kein Papierchaos',        desc: 'Wochenberichte digital, strukturiert und IHK-konform. Kein Drucken, Suchen oder Ablegen.', color: BRAND.blue,   glow: 'rgba(66,133,244,0.2)',   bg: 'rgba(66,133,244,0.12)', bgLight: '#e8f0fe', colorLight: '#1967d2', stat: '0 Papier' },
-  { icon: SparklesIcon,         title: '80 % weniger Aufwand',    desc: 'Stichpunkte eingeben — Claude AI formuliert in Sekunden professionellen IHK-Text.',      color: BRAND.purple, glow: 'rgba(156,39,176,0.2)',   bg: 'rgba(156,39,176,0.12)',bgLight: '#f3e5f5', colorLight: '#6a1b9a', stat: 'Ø 12 Min.' },
-  { icon: CheckmarkBadge01Icon, title: 'Ausbilder-Cockpit',       desc: 'Alle Berichte, Freigaben und Azubis zentral. Kommentieren und freigeben — sofort.',        color: BRAND.green,  glow: 'rgba(52,168,83,0.2)',    bg: 'rgba(52,168,83,0.12)',  bgLight: '#e6f4ea', colorLight: '#137333', stat: 'Bis 20 Azubis' },
-  { icon: Shield01Icon,         title: 'DSGVO & IHK-konform',     desc: 'Verschlüsselt auf EU-Servern. PDF-Export für die IHK mit einem Klick.',                   color: BRAND.red,    glow: 'rgba(234,67,53,0.2)',    bg: 'rgba(234,67,53,0.12)',  bgLight: '#fce8e6', colorLight: '#c5221f', stat: '100 % EU' },
+  {
+    icon: BookOpenIcon,
+    title: 'Kein Papierchaos',
+    desc: 'Wochenberichte digital, strukturiert und IHK-konform. Kein Drucken, kein Suchen, kein Ablegen.',
+    color: C.blue,
+  },
+  {
+    icon: SparklesIcon,
+    title: '80 % weniger Aufwand',
+    desc: 'Stichpunkte eingeben — Claude AI formuliert in Sekunden professionellen IHK-Text.',
+    color: C.purple,
+  },
+  {
+    icon: CheckmarkBadge01Icon,
+    title: 'Ausbilder-Cockpit',
+    desc: 'Alle Berichte, Freigaben und Azubis zentral. Kommentieren und freigeben — sofort.',
+    color: C.green,
+  },
+  {
+    icon: Shield01Icon,
+    title: 'DSGVO & IHK-konform',
+    desc: 'Verschlüsselt auf EU-Servern. PDF-Export für die IHK mit einem Klick, druckfertig.',
+    color: C.red,
+  },
+  {
+    icon: LockPasswordIcon,
+    title: 'EU-Datenschutz',
+    desc: 'Alle Daten bleiben auf europäischen Servern. Volle DSGVO-Compliance ohne Kompromisse.',
+    color: C.yellow,
+  },
+  {
+    icon: CalendarIcon,
+    title: 'Kalender & Fristen',
+    desc: 'Automatische Erinnerungen für IHK-Fristen. Kein Termin geht mehr vergessen.',
+    color: C.blue,
+  },
 ]
+
 const STATS = [
-  { value: 500,   suffix: '+',  label: 'Aktive Nutzer',    color: BRAND.blue   },
-  { value: 12000, suffix: '+',  label: 'Berichte erstellt', color: BRAND.red    },
-  { value: 80,    suffix: '%',  label: 'Zeitersparnis',     color: BRAND.yellow },
-  { value: 49,    suffix: ' ★', label: 'Nutzerbewertung',   color: BRAND.green  },
+  { value: '500+',  label: 'Aktive Nutzer',    color: C.blue   },
+  { value: '12K+',  label: 'Berichte erstellt', color: C.red    },
+  { value: '80 %',  label: 'Zeitersparnis',     color: C.yellow },
+  { value: '4,9 ★', label: 'Nutzerbewertung',   color: C.green  },
 ]
-const STEPS = [
-  { num: '01', title: 'Betrieb registrieren',  desc: 'Konto anlegen, Betrieb einrichten, Auszubildende einladen — in unter 5 Minuten.',       color: BRAND.blue  },
-  { num: '02', title: 'Profile einrichten',    desc: 'Auszubildende nehmen die Einladung an und können sofort ihren ersten Bericht schreiben.', color: BRAND.red   },
-  { num: '03', title: 'Digital verwalten',     desc: 'Berichte schreiben, KI nutzen, freigeben lassen — vollständig digital.',                 color: BRAND.green },
-]
+
+
 const TESTIMONIALS = [
-  { name: 'Lena M.',    role: 'Auszubildende · Fachinformatikerin',      text: 'Ich tippe Stichpunkte ein und die KI macht den Rest. Absoluter Game Changer!',             color: BRAND.blue   },
-  { name: 'Thomas K.',  role: 'Ausbilder · IT-Systemkaufmann',           text: 'Endlich alle Berichte zentral. Kein E-Mail-Chaos — alles übersichtlich an einem Ort.',      color: BRAND.red    },
-  { name: 'Sara B.',    role: 'Auszubildende · Kauffrau Büromanagement', text: 'So aufgeräumt und modern. Man merkt, dass es jemand gebaut hat, der Ausbildung kennt.',      color: BRAND.green  },
-  { name: 'Marcus D.',  role: 'Ausbilder · Mechatronik',                 text: 'E-Mail schicken, Azubis sind in Minuten drin. Das Einladungssystem ist wirklich genial.',   color: BRAND.yellow },
-  { name: 'Jana F.',    role: 'Auszubildende · Industriekauffrau',       text: 'Direkte Kommentare am Bericht — keine E-Mail-Threads mehr. Einfach direkt im System.',      color: BRAND.blue   },
-  { name: 'Florian R.', role: 'Ausbildungsleiter · Großbetrieb',         text: '12 Azubis über AzubiHub. Die Zeitersparnis verglichen mit Papier ist wirklich enorm.',       color: BRAND.purple },
+  { name: 'Lena M.',    role: 'Auszubildende · Fachinformatikerin',      text: 'Ich tippe Stichpunkte ein und die KI macht den Rest. Absoluter Game Changer!',             color: C.blue   },
+  { name: 'Thomas K.',  role: 'Ausbilder · IT-Systemkaufmann',           text: 'Endlich alle Berichte zentral. Kein E-Mail-Chaos — alles übersichtlich an einem Ort.',      color: C.red    },
+  { name: 'Sara B.',    role: 'Auszubildende · Kauffrau Büromanagement', text: 'So aufgeräumt und modern. Man merkt, dass es jemand gebaut hat, der Ausbildung kennt.',      color: C.green  },
+  { name: 'Marcus D.',  role: 'Ausbilder · Mechatronik',                 text: 'E-Mail schicken, Azubis sind in Minuten drin. Das Einladungssystem ist wirklich genial.',   color: C.yellow },
+  { name: 'Jana F.',    role: 'Auszubildende · Industriekauffrau',       text: 'Direkte Kommentare am Bericht — keine E-Mail-Threads mehr. Einfach direkt im System.',      color: C.blue   },
+  { name: 'Florian R.', role: 'Ausbildungsleiter · Großbetrieb',         text: '12 Azubis über AzubiHub. Die Zeitersparnis verglichen mit Papier ist wirklich enorm.',       color: C.purple },
 ]
+
 const FAQS = [
-  { q: 'Ist AzubiHub kostenlos?',                          a: 'Ja, vollständig kostenlos — für Auszubildende und Ausbilder. Der Kern bleibt dauerhaft gratis.' },
-  { q: 'Welche Ausbildungsberufe werden unterstützt?',     a: 'Alle Berufe mit wöchentlichem Ausbildungsnachweis — nahezu alle IHK- und HWK-Berufe.' },
-  { q: 'Wie funktioniert die KI-Formulierung?',            a: 'Stichpunkte eingeben, Länge und Stil wählen — Claude AI formuliert IHK-konformen Text in Sekunden.' },
-  { q: 'Kann mein Ausbilder die Berichte kommentieren?',   a: 'Ja. Direkt am Bericht kommentieren, Revisionen anfordern oder freigeben — alles in AzubiHub.' },
-  { q: 'Sind meine Daten sicher und DSGVO-konform?',       a: 'Ja. Verschlüsselt auf EU-Servern. Wir verarbeiten keine Daten außerhalb der EU.' },
-  { q: 'Kann ich meine Berichte exportieren?',             a: 'Ja, als professionelles PDF — alle Jahresberichte in einem Dokument, druckfertig für die IHK.' },
-  { q: 'Wie funktioniert die Ausbilder-Einladung?',        a: 'E-Mail eingeben → automatische Einladung → Auszubildende sind in Minuten aktiv.' },
-  { q: 'Funktioniert AzubiHub auf dem Smartphone?',        a: 'Ja, vollständig responsive. Native App ist in Planung.' },
+  { q: 'Was ist AzubiHub?',                                  a: 'AzubiHub ist eine digitale Ausbildungsplattform, die Wochenberichte, Ausbilder-Freigaben und die gesamte Ausbildungsdokumentation digitalisiert — KI-gestützt und kostenlos.' },
+  { q: 'Wie unterscheidet sich AzubiHub von anderen Tools?', a: 'AzubiHub ist speziell für die Ausbildung in Deutschland entwickelt. IHK-konform, DSGVO-sicher und dauerhaft kostenlos — kein Abo, keine versteckten Kosten.' },
+  { q: 'Ist AzubiHub wirklich kostenlos?',                   a: 'Ja, vollständig kostenlos — für Auszubildende und Ausbilder. Der Kern bleibt dauerhaft gratis. Eine Pro-Version für Großbetriebe ist in Planung.' },
+  { q: 'Wie funktioniert die KI-Formulierung?',              a: 'Stichpunkte eingeben, Länge und Stil wählen — Claude AI formuliert IHK-konformen Text in Sekunden. Der fertige Bericht kann direkt eingereicht werden.' },
+  { q: 'Welche Ausbildungsberufe werden unterstützt?',       a: 'Alle Berufe mit wöchentlichem Ausbildungsnachweis — nahezu alle IHK- und HWK-Berufe. Der Export entspricht den offiziellen IHK-Vorgaben.' },
+  { q: 'Kann mein Ausbilder die Berichte kommentieren?',     a: 'Ja. Direkt am Bericht kommentieren, Revisionen anfordern oder freigeben — alles in AzubiHub, ohne E-Mail hin und her.' },
+  { q: 'Sind meine Daten sicher und DSGVO-konform?',         a: 'Ja. Alle Daten liegen verschlüsselt auf EU-Servern. Wir verarbeiten keine Daten außerhalb der EU und halten alle DSGVO-Anforderungen ein.' },
+  { q: 'Funktioniert AzubiHub auf dem Smartphone?',          a: 'Ja, vollständig responsive — läuft auf jedem Gerät im Browser. Eine native App für iOS und Android ist in Planung.' },
 ]
 
 /* ═══════════════════════════════════════
-   HOOKS & SMALL HELPERS
+   HELPERS
 ═══════════════════════════════════════ */
 
 function useScrollReveal() {
@@ -201,40 +231,13 @@ function useScrollReveal() {
     if (!els.length) return
     const io = new IntersectionObserver(
       entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('g-visible'); io.unobserve(e.target) } }),
-      { threshold: 0.08, rootMargin: '0px 0px -60px 0px' }
+      { threshold: 0.08, rootMargin: '0px 0px -40px 0px' }
     )
     els.forEach(el => io.observe(el))
     return () => io.disconnect()
   }, [])
 }
 
-function AnimatedNumber({ target, suffix = '' }: { target: number; suffix?: string }) {
-  const [count, setCount] = useState(0)
-  const ref = useRef<HTMLSpanElement>(null)
-  const started = useRef(false)
-  useEffect(() => {
-    const el = ref.current; if (!el) return
-    const io = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting && !started.current) {
-        started.current = true
-        const display = target === 49 ? 4.9 : target
-        const steps = 50; const stepVal = display / steps; let cur = 0
-        const timer = setInterval(() => {
-          cur = Math.min(cur + stepVal, display as number)
-          setCount(Math.round(cur * 10) / 10)
-          if (cur >= display) clearInterval(timer)
-        }, 28)
-      }
-    }, { threshold: 0.5 })
-    io.observe(el); return () => io.disconnect()
-  }, [target])
-  const display = target === 49 ? count.toFixed(1)
-    : target > 999 ? (count >= 1000 ? (count / 1000).toFixed(0) + '.000' : Math.round(count).toString())
-    : Math.round(count).toString()
-  return <span ref={ref}>{display}{suffix}</span>
-}
-
-/* Inline SVG icons for theme toggle */
 function SunSVG() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -252,209 +255,138 @@ function MoonSVG() {
 }
 
 /* ═══════════════════════════════════════
-   SHARED COMPONENTS
+   COMPONENTS
 ═══════════════════════════════════════ */
 
-function Logo() {
-  const G = useG()
-  return (
-    <div className="flex items-center gap-2.5">
-      <div className="size-8 rounded-lg flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${BRAND.blue}, ${BRAND.green})` }}>
-        <span className="text-white font-black text-sm leading-none">A</span>
-      </div>
-      <span className="font-bold text-base tracking-tight" style={{ color: G.text }}>AzubiHub</span>
-    </div>
-  )
-}
-
-/* Google-style pill buttons */
-function GButton({
-  href, children, primary = false, outline = false, className = '',
-  onClick,
-}: {
-  href?: string
-  children: React.ReactNode
-  primary?: boolean
-  outline?: boolean
-  className?: string
-  onClick?: () => void
-}) {
-  const { dark } = useTheme()
-  const G = useG()
-
-  const base: React.CSSProperties = primary
-    ? { background: '#1a73e8', color: '#ffffff', border: '1px solid #1a73e8' }
-    : outline
-      ? { background: 'transparent', color: G.link, border: `1px solid ${G.border}` }
-      : dark
-        ? { background: 'rgba(255,255,255,0.08)', color: '#e8eaed', border: '1px solid rgba(255,255,255,0.16)' }
-        : { background: '#ffffff', color: '#3c4043', border: '1px solid #dadce0' }
-
-  const inner = (
-    <span
-      className={`inline-flex items-center gap-2 rounded-full font-medium cursor-pointer select-none transition-all duration-150 ${className}`}
-      style={{ ...base, padding: className ? undefined : '0 24px', height: className ? undefined : '40px', fontSize: '14px', lineHeight: '40px' }}
-      onMouseEnter={(e: React.MouseEvent<HTMLSpanElement>) => {
-        const el = e.currentTarget as HTMLSpanElement
-        if (primary) { el.style.background = '#1765cc'; el.style.boxShadow = '0 1px 3px 1px rgba(66,133,244,0.4)' }
-        else if (outline) { el.style.background = `${G.link}0d`; el.style.borderColor = G.link }
-        else if (dark) { el.style.background = 'rgba(255,255,255,0.14)' }
-        else { el.style.background = '#f8f9fa' }
-      }}
-      onMouseLeave={(e: React.MouseEvent<HTMLSpanElement>) => {
-        const el = e.currentTarget as HTMLSpanElement
-        if (primary) { el.style.background = '#1a73e8'; el.style.boxShadow = '' }
-        else if (outline) { el.style.background = 'transparent'; el.style.borderColor = G.border }
-        else if (dark) { el.style.background = 'rgba(255,255,255,0.08)' }
-        else { el.style.background = '#ffffff' }
-      }}
-      onClick={onClick}>
-      {children}
-    </span>
-  )
-
-  if (href) return <Link href={href}>{inner}</Link>
-  return inner
-}
-
 /* Google Antigravity ring particles */
-function OrbitalRings() {
-  const { dark } = useTheme()
-  const o = dark ? 1 : 2.2
+function OrbitalRings({ dark }: { dark: boolean }) {
+  const o = dark ? 1 : 2
   return (
-    <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none" style={{ zIndex: 0 }}>
-      {/* Ambient glow */}
-      <div className="absolute rounded-full" style={{ width: 900, height: 900, background: `radial-gradient(circle, rgba(66,133,244,${dark ? '0.07' : '0.1'}) 0%, transparent 65%)`, top: '50%', left: '50%', transform: 'translate(-50%,-50%)' }} />
-      <div className="absolute rounded-full" style={{ width: 600, height: 600, background: `radial-gradient(circle, rgba(52,168,83,${dark ? '0.04' : '0.07'}) 0%, transparent 70%)`, top: '15%', right: '10%' }} />
-      <div className="absolute rounded-full" style={{ width: 400, height: 400, background: `radial-gradient(circle, rgba(234,67,53,${dark ? '0.03' : '0.06'}) 0%, transparent 70%)`, bottom: '20%', left: '5%' }} />
+    <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden" style={{ zIndex: 0 }}>
+      <div className="absolute rounded-full" style={{ width: 860, height: 860, background: `radial-gradient(circle, rgba(66,133,244,${dark ? '0.08' : '0.07'}) 0%, transparent 65%)`, top: '50%', left: '50%', transform: 'translate(-50%,-50%)' }} />
 
-      {/* Ring 1 — outermost CW 32s */}
-      <div className="absolute rounded-full" style={{ width: 700, height: 700, border: `1px solid rgba(66,133,244,${0.15 * o})`, animation: 'orbit-cw 32s linear infinite' }}>
-        <span className="absolute rounded-full" style={{ width: 14, height: 14, background: BRAND.blue, top: -7, left: '50%', marginLeft: -7, boxShadow: `0 0 20px ${BRAND.blue}, 0 0 40px rgba(66,133,244,0.4)` }} />
-        <span className="absolute rounded-full" style={{ width: 7, height: 7, background: `rgba(66,133,244,0.6)`, bottom: -3, right: '25%', boxShadow: `0 0 10px ${BRAND.blue}` }} />
+      {/* Ring 1 CW */}
+      <div className="absolute rounded-full" style={{ width: 680, height: 680, border: `1px solid rgba(66,133,244,${0.14 * o})`, animation: 'orbit-cw 30s linear infinite' }}>
+        <span className="absolute rounded-full" style={{ width: 13, height: 13, background: C.blue, top: -6, left: '50%', marginLeft: -6, boxShadow: `0 0 18px ${C.blue}, 0 0 36px rgba(66,133,244,0.4)` }} />
+        <span className="absolute rounded-full" style={{ width: 6, height: 6, background: `rgba(66,133,244,0.5)`, bottom: -3, right: '28%' }} />
       </div>
 
-      {/* Ring 2 — CCW 22s */}
-      <div className="absolute rounded-full" style={{ width: 520, height: 520, border: `1px solid rgba(234,67,53,${0.14 * o})`, animation: 'orbit-ccw 22s linear infinite 1.5s' }}>
-        <span className="absolute rounded-full" style={{ width: 11, height: 11, background: BRAND.red, bottom: -5, left: '50%', marginLeft: -5, boxShadow: `0 0 16px ${BRAND.red}, 0 0 32px rgba(234,67,53,0.35)` }} />
-        <span className="absolute rounded-full" style={{ width: 5, height: 5, background: `rgba(234,67,53,0.5)`, top: '20%', right: -2 }} />
+      {/* Ring 2 CCW */}
+      <div className="absolute rounded-full" style={{ width: 490, height: 490, border: `1px solid rgba(234,67,53,${0.13 * o})`, animation: 'orbit-ccw 21s linear infinite 1s' }}>
+        <span className="absolute rounded-full" style={{ width: 10, height: 10, background: C.red, bottom: -5, left: '50%', marginLeft: -5, boxShadow: `0 0 14px ${C.red}, 0 0 28px rgba(234,67,53,0.35)` }} />
+        <span className="absolute rounded-full" style={{ width: 5, height: 5, background: `rgba(234,67,53,0.5)`, top: '22%', right: -2 }} />
       </div>
 
-      {/* Ring 3 — dashed CW 15s */}
-      <div className="absolute rounded-full" style={{ width: 340, height: 340, border: `1px dashed rgba(52,168,83,${0.18 * o})`, animation: 'orbit-cw 15s linear infinite 0.8s' }}>
-        <span className="absolute rounded-full" style={{ width: 9, height: 9, background: BRAND.green, top: -4, right: '20%', boxShadow: `0 0 14px ${BRAND.green}, 0 0 28px rgba(52,168,83,0.3)` }} />
+      {/* Ring 3 dashed CW */}
+      <div className="absolute rounded-full" style={{ width: 320, height: 320, border: `1px dashed rgba(52,168,83,${0.16 * o})`, animation: 'orbit-cw 13s linear infinite 0.5s' }}>
+        <span className="absolute rounded-full" style={{ width: 8, height: 8, background: C.green, top: -4, right: '22%', boxShadow: `0 0 12px ${C.green}` }} />
       </div>
 
-      {/* Ring 4 — innermost CCW 9s */}
-      <div className="absolute rounded-full" style={{ width: 180, height: 180, border: `1px solid rgba(251,188,4,${0.22 * o})`, animation: 'orbit-ccw 9s linear infinite 0.3s' }}>
-        <span className="absolute rounded-full" style={{ width: 7, height: 7, background: BRAND.yellow, top: -3, left: '50%', marginLeft: -3, boxShadow: `0 0 12px ${BRAND.yellow}` }} />
+      {/* Ring 4 CCW */}
+      <div className="absolute rounded-full" style={{ width: 170, height: 170, border: `1px solid rgba(251,188,4,${0.2 * o})`, animation: 'orbit-ccw 8s linear infinite 0.3s' }}>
+        <span className="absolute rounded-full" style={{ width: 7, height: 7, background: C.yellow, top: -3, left: '50%', marginLeft: -3, boxShadow: `0 0 10px ${C.yellow}` }} />
       </div>
 
       {/* Center orb */}
-      <div className="absolute rounded-full" style={{ width: 56, height: 56, background: `radial-gradient(circle, rgba(66,133,244,${dark ? '0.9' : '0.5'}) 0%, rgba(66,133,244,0) 70%)`, animation: 'goog-glow-pulse 3.5s ease-in-out infinite', boxShadow: `0 0 40px rgba(66,133,244,0.5), 0 0 80px rgba(66,133,244,0.2)` }} />
+      <div className="absolute rounded-full" style={{ width: 52, height: 52, background: `radial-gradient(circle, rgba(66,133,244,${dark ? '0.85' : '0.5'}) 0%, transparent 70%)`, animation: 'goog-glow-pulse 3.5s ease-in-out infinite', boxShadow: '0 0 40px rgba(66,133,244,0.5)' }} />
     </div>
   )
 }
 
-/* ─── Google-style Navigation ─── */
-function LandingNav() {
-  const G = useG()
-  const { dark, toggle } = useTheme()
+/* Sticky nav — exact antigravity.google style */
+function Nav({ dark, toggle }: { dark: boolean; toggle: () => void }) {
+  const G = dk(dark)
   const [scrolled, setScrolled] = useState(false)
   useEffect(() => {
-    const fn = () => setScrolled(window.scrollY > 20)
+    const fn = () => setScrolled(window.scrollY > 10)
     window.addEventListener('scroll', fn, { passive: true })
     return () => window.removeEventListener('scroll', fn)
   }, [])
 
-  return (
-    <nav className="fixed top-0 inset-x-0 z-50 transition-all duration-200"
-      style={{
-        background:   scrolled ? (dark ? 'rgba(13,15,20,0.95)' : 'rgba(255,255,255,0.97)') : 'transparent',
-        borderBottom: scrolled ? `1px solid ${G.border}` : '1px solid transparent',
-        backdropFilter: scrolled ? 'blur(8px)' : 'none',
-        WebkitBackdropFilter: scrolled ? 'blur(8px)' : 'none',
-        boxShadow: scrolled && !dark ? '0 1px 4px rgba(0,0,0,0.1)' : 'none',
-      }}>
-      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-6">
-        <Link href="/"><Logo /></Link>
+  const navStyle: React.CSSProperties = {
+    position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
+    backgroundColor: scrolled
+      ? (dark ? 'rgba(13,15,20,0.97)' : 'rgba(255,255,255,0.97)')
+      : 'transparent',
+    backdropFilter: scrolled ? 'blur(10px)' : 'none',
+    WebkitBackdropFilter: scrolled ? 'blur(10px)' : 'none',
+    borderBottom: scrolled ? `1px solid ${G.border}` : '1px solid transparent',
+    transition: 'all 250ms ease-in-out',
+  }
 
-        <div className="hidden md:flex items-center gap-1 text-sm">
-          {[['#features','Features'],['#how-it-works','So funktioniert\'s'],['#pricing','Preise'],['#faq','FAQ']].map(([href, label]) => (
-            <a key={href} href={href}
-              className="px-4 py-2 rounded-full text-sm font-medium transition-colors duration-150"
-              style={{ color: G.mid }}
-              onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => { e.currentTarget.style.color = G.text; e.currentTarget.style.background = dark ? 'rgba(255,255,255,0.06)' : '#f1f3f4' }}
-              onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => { e.currentTarget.style.color = G.mid; e.currentTarget.style.background = 'transparent' }}>
+  const linkStyle: React.CSSProperties = { color: G.textSec, fontWeight: 500, fontSize: '0.9375rem', padding: '0.5rem 0.75rem', borderRadius: '4px', cursor: 'pointer', transition: 'color 150ms ease' }
+
+  return (
+    <nav style={navStyle}>
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 2rem', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        {/* Logo */}
+        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
+          <div style={{ width: 32, height: 32, borderRadius: 8, background: `linear-gradient(135deg, ${C.blue}, ${C.green})`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ color: 'white', fontWeight: 900, fontSize: 14, lineHeight: 1 }}>A</span>
+          </div>
+          <span style={{ fontFamily: '"Google Sans","Segoe UI",sans-serif', fontWeight: 700, fontSize: '1.125rem', color: G.textPrimary }}>AzubiHub</span>
+        </Link>
+
+        {/* Nav links */}
+        <div style={{ display: 'flex', gap: 4, alignItems: 'center' }} className="hidden md:flex">
+          {[['#features', 'Features'], ['#how-it-works', 'So funktioniert\'s'], ['#pricing', 'Preise'], ['#faq', 'FAQ']].map(([href, label]) => (
+            <a key={href} href={href} style={linkStyle}
+              onMouseEnter={e => (e.currentTarget.style.color = C.blue)}
+              onMouseLeave={e => (e.currentTarget.style.color = G.textSec)}>
               {label}
             </a>
           ))}
         </div>
 
-        <div className="flex items-center gap-2">
-          <Link href="/auth/login"
-            className="hidden sm:block px-4 py-2 text-sm font-medium rounded-full transition-colors duration-150"
-            style={{ color: G.mid }}
-            onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => { e.currentTarget.style.color = G.text; e.currentTarget.style.background = dark ? 'rgba(255,255,255,0.06)' : '#f1f3f4' }}
-            onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => { e.currentTarget.style.color = G.mid; e.currentTarget.style.background = 'transparent' }}>
+        {/* Right side */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <Link href="/auth/login" style={{ ...linkStyle, display: 'none' }} className="hidden sm:block"
+            onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = C.blue)}
+            onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = G.textSec)}>
             Anmelden
           </Link>
 
           {/* Theme toggle */}
-          <button
-            onClick={toggle}
+          <button onClick={toggle}
             title={dark ? 'Light Mode' : 'Dark Mode'}
-            className="size-9 rounded-full flex items-center justify-center transition-all duration-150"
-            style={{ color: G.mid, border: `1px solid ${G.border}` }}
-            onMouseEnter={(e: React.MouseEvent<HTMLButtonElement>) => { const el = e.currentTarget; el.style.background = dark ? 'rgba(255,255,255,0.08)' : '#f1f3f4'; el.style.color = G.text }}
-            onMouseLeave={(e: React.MouseEvent<HTMLButtonElement>) => { const el = e.currentTarget; el.style.background = 'transparent'; el.style.color = G.mid }}>
+            style={{ width: 36, height: 36, borderRadius: '50%', border: `1px solid ${G.border}`, background: 'transparent', color: G.textSec, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 150ms ease' }}
+            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = dark ? 'rgba(255,255,255,0.1)' : C.bgSecondary }}
+            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent' }}>
             {dark ? <SunSVG /> : <MoonSVG />}
           </button>
 
-          <GButton href="/auth/register" primary>
-            Kostenlos starten
-          </GButton>
+          {/* CTA */}
+          <Link href="/auth/register">
+            <span style={{ background: C.blue, color: 'white', padding: '0.5rem 1.25rem', borderRadius: 9999, fontWeight: 600, fontSize: '0.875rem', cursor: 'pointer', transition: 'all 150ms ease', display: 'inline-block' }}
+              onMouseEnter={(e: React.MouseEvent<HTMLSpanElement>) => { (e.currentTarget as HTMLSpanElement).style.background = C.blueDark; (e.currentTarget as HTMLSpanElement).style.boxShadow = C.shadowSm }}
+              onMouseLeave={(e: React.MouseEvent<HTMLSpanElement>) => { (e.currentTarget as HTMLSpanElement).style.background = C.blue; (e.currentTarget as HTMLSpanElement).style.boxShadow = 'none' }}>
+              Kostenlos starten
+            </span>
+          </Link>
         </div>
       </div>
     </nav>
   )
 }
 
-/* ─── Google Material Accordion ─── */
-function FaqItem({ q, a, idx }: { q: string; a: string; idx: number }) {
-  const G = useG()
-  const { dark } = useTheme()
+/* FAQ item — Material accordion card */
+function FaqItem({ q, a, dark }: { q: string; a: string; dark: boolean }) {
+  const G = dk(dark)
   const [open, setOpen] = useState(false)
-  const colors = [BRAND.blue, BRAND.red, BRAND.green, BRAND.yellow, BRAND.blue, BRAND.red, BRAND.green, BRAND.yellow]
-  const c = colors[idx % colors.length]
   return (
-    <button onClick={() => setOpen(o => !o)}
-      className="w-full text-left px-6 py-5 transition-all duration-150"
-      style={{
-        background: dark ? (open ? 'rgba(255,255,255,0.05)' : 'transparent') : (open ? '#f8f9fa' : '#ffffff'),
-        borderBottom: `1px solid ${G.border}`,
-      }}>
-      <div className="flex items-center justify-between gap-4">
-        <span className="font-medium text-sm leading-snug" style={{ color: G.text }}>{q}</span>
-        <span className="size-6 rounded-full flex items-center justify-center shrink-0 transition-all duration-200"
-          style={{ background: open ? c : 'transparent', color: open ? '#fff' : G.muted, border: `1px solid ${open ? c : G.border}` }}>
-          <HugeiconsIcon icon={open ? MinusSignIcon : Add01Icon} size={12} />
+    <div style={{ background: G.cardBg, border: `1px solid ${G.border}`, borderRadius: 12, overflow: 'hidden', transition: 'box-shadow 250ms ease', boxShadow: open ? G.shadowMd : 'none' }}>
+      <button onClick={() => setOpen(o => !o)}
+        style={{ width: '100%', padding: '1.25rem 1.5rem', background: 'none', border: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', cursor: 'pointer', textAlign: 'left', fontFamily: '"Google Sans","Segoe UI",sans-serif', fontSize: '1rem', fontWeight: 600, color: G.textPrimary, transition: 'color 150ms ease' }}
+        onMouseEnter={e => (e.currentTarget.style.color = C.blue)}
+        onMouseLeave={e => (e.currentTarget.style.color = G.textPrimary)}>
+        <span style={{ flex: 1 }}>{q}</span>
+        <span style={{ width: 24, height: 24, color: C.blue, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'transform 250ms ease', transform: open ? 'rotate(180deg)' : 'none', flexShrink: 0 }}>
+          <HugeiconsIcon icon={open ? MinusSignIcon : Add01Icon} size={18} />
         </span>
+      </button>
+      <div style={{ maxHeight: open ? '300px' : '0', overflow: 'hidden', transition: 'max-height 350ms ease-out, padding 350ms ease-out', padding: open ? '0 1.5rem 1.25rem' : '0 1.5rem 0' }}>
+        <p style={{ color: G.textSec, lineHeight: 1.8, margin: 0, fontSize: '0.9375rem' }}>{a}</p>
       </div>
-      <div style={{ maxHeight: open ? '160px' : '0', overflow: 'hidden', transition: 'max-height 0.3s cubic-bezier(0.4,0,0.2,1)', marginTop: open ? '10px' : '0' }}>
-        <p className="text-sm leading-relaxed" style={{ color: G.mid }}>{a}</p>
-      </div>
-    </button>
-  )
-}
-
-function SectionLabel({ text, color }: { text: string; color: string }) {
-  return (
-    <div className="g-reveal flex justify-center mb-5">
-      <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.15em] px-4 py-1.5 rounded-full"
-        style={{ color, background: `${color}14`, border: `1px solid ${color}30` }}>
-        {text}
-      </span>
     </div>
   )
 }
@@ -463,7 +395,6 @@ function SectionLabel({ text, color }: { text: string; color: string }) {
    LANDING PAGE
 ═══════════════════════════════════════ */
 function LandingPage() {
-  /* Default LIGHT — matching antigravity.google */
   const [dark, setDark] = useState<boolean>(() => {
     if (typeof window !== 'undefined') return localStorage.getItem('azubihub-theme') === 'dark'
     return false
@@ -472,251 +403,187 @@ function LandingPage() {
     const next = !dark; setDark(next)
     localStorage.setItem('azubihub-theme', next ? 'dark' : 'light')
   }
-
   useScrollReveal()
+  const G = dk(dark)
 
-  const G = makeG(dark)
-  const glass = makeGlass(dark)
-  const gradText = makeGradText(dark)
+  /* Gradient text style — exact antigravity.google blue→green */
+  const gradText: React.CSSProperties = {
+    background: dark
+      ? 'linear-gradient(135deg, #8ab4f8 0%, #81c995 100%)'
+      : `linear-gradient(135deg, ${C.blue} 0%, ${C.green} 100%)`,
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+    backgroundClip: 'text',
+    display: 'inline',
+  }
 
-  /* Material card hover helpers */
-  const cardHoverIn = (el: HTMLElement, color?: string) => {
-    el.style.boxShadow = dark
-      ? `0 8px 32px rgba(0,0,0,0.5)`
-      : `0 1px 3px 0 rgba(60,64,67,0.3), 0 4px 8px 3px rgba(60,64,67,0.15)`
-    el.style.transform = 'translateY(-2px)'
-    if (color && !dark) el.style.borderColor = `${color}50`
-  }
-  const cardHoverOut = (el: HTMLElement) => {
-    el.style.boxShadow = dark
-      ? 'none'
-      : '0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15)'
-    el.style.transform = ''
-    if (!dark) el.style.borderColor = '#dadce0'
-  }
+  /* Feature icon gradient — exact match */
+  const featureIconBg = `linear-gradient(135deg, ${C.blue} 0%, ${C.green} 100%)`
 
   return (
     <ThemeCtx.Provider value={{ dark, toggle }}>
-      <div style={{ background: G.bg, color: G.text, fontFamily: '"Google Sans","Roboto","Segoe UI",system-ui,sans-serif', transition: 'background 0.3s, color 0.3s' }} className="min-h-screen overflow-x-hidden">
-        <LandingNav />
+      <div style={{ fontFamily: '"Google Sans","Roboto",-apple-system,"Segoe UI",sans-serif', color: G.textPrimary, background: G.bg, WebkitFontSmoothing: 'antialiased', transition: 'background 0.3s, color 0.3s' }}>
+        <Nav dark={dark} toggle={toggle} />
 
-        {/* ════ 1. HERO ════ */}
-        <section className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-20 pb-28 overflow-hidden"
-          style={dark ? {} : { background: 'linear-gradient(180deg,#f8f9ff 0%,#ffffff 55%)' }}>
-          <OrbitalRings />
+        {/* ══ 1. HERO ══ */}
+        <section style={{ minHeight: '90vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 'calc(6rem + 64px) 0 6rem', background: G.heroBg, position: 'relative', overflow: 'hidden', textAlign: 'center' }}>
+          <OrbitalRings dark={dark} />
 
-          <div className="relative z-10 max-w-3xl mx-auto text-center">
-            {/* Google-style pill badge */}
-            <div className="g-reveal inline-flex items-center gap-2 rounded-full px-5 py-2 mb-10 text-sm font-medium"
-              style={{
-                background: dark ? 'rgba(138,180,248,0.12)' : '#e8f0fe',
-                border: dark ? '1px solid rgba(138,180,248,0.25)' : '1px solid #c5d7fd',
-                color: dark ? '#8ab4f8' : '#1967d2',
-              }}>
-              <HugeiconsIcon icon={SparklesIcon} size={13} />
-              Neu · KI-Formulierung mit Claude AI
+          <div style={{ maxWidth: 860, margin: '0 auto', padding: '0 2rem', position: 'relative', zIndex: 1 }}>
+            {/* Badge */}
+            <div className="g-reveal" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '0.5rem 1.25rem', background: dark ? 'rgba(255,255,255,0.08)' : 'white', borderRadius: 9999, boxShadow: dark ? 'none' : C.shadowSm, border: dark ? `1px solid rgba(255,255,255,0.12)` : 'none', marginBottom: '1.75rem', fontSize: '0.875rem', fontWeight: 500, color: G.textSec, animation: 'fadeInUp 0.8s ease-out' }}>
+              <HugeiconsIcon icon={SparklesIcon} size={16} style={{ color: C.yellow }} />
+              Für Betriebe · Ausbilder · Auszubildende
             </div>
 
-            {/* Display headline */}
-            <h1 className="g-reveal font-black tracking-tight leading-none mb-8"
-              style={{ ...gradText, fontSize: 'clamp(52px,8.5vw,92px)', letterSpacing: '-3px', transitionDelay: '0.1s' }}>
-              Ausbildung,<br />neu gedacht.
+            {/* H1 */}
+            <h1 className="g-reveal" style={{ fontFamily: '"Google Sans","Segoe UI",sans-serif', fontWeight: 700, lineHeight: 1.15, marginBottom: '1.25rem', color: G.textPrimary, transitionDelay: '0.1s', fontSize: 'clamp(2.5rem,5.5vw,4.5rem)' }}>
+              Deine Ausbildung,{' '}
+              <span style={gradText}>neu gedacht.</span>
             </h1>
 
-            <p className="g-reveal text-xl leading-relaxed mb-12 max-w-2xl mx-auto" style={{ color: G.mid, transitionDelay: '0.2s' }}>
+            {/* Subtitle */}
+            <p className="g-reveal" style={{ fontSize: '1.25rem', lineHeight: 1.8, color: G.textSec, maxWidth: 700, margin: '0 auto 2.5rem', transitionDelay: '0.15s' }}>
               AzubiHub digitalisiert Berichtshefte, Ausbilder-Freigaben und die gesamte
-              Ausbildungsdokumentation — KI-gestützt, IHK-konform, kostenlos.
+              Ausbildungsdokumentation. KI-gestützt, IHK-konform und dauerhaft kostenlos.
             </p>
 
-            {/* CTA row */}
-            <div className="g-reveal flex flex-col sm:flex-row gap-3 justify-center mb-14" style={{ transitionDelay: '0.3s' }}>
-              <GButton href="/auth/register" primary className="text-[15px] px-8 py-3 h-auto leading-none">
-                Kostenlos starten <HugeiconsIcon icon={ArrowRight01Icon} size={16} />
-              </GButton>
-              <GButton href="#features" outline className="text-[15px] px-8 py-3 h-auto leading-none">
-                Features entdecken
-              </GButton>
+            {/* CTA buttons */}
+            <div className="g-reveal" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center', marginBottom: '3rem', transitionDelay: '0.2s' }}>
+              <Link href="/auth/register">
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '1rem 2.25rem', background: C.blue, color: 'white', borderRadius: 9999, fontWeight: 500, fontSize: '1rem', cursor: 'pointer', boxShadow: C.shadowSm, transition: 'all 250ms ease' }}
+                  onMouseEnter={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.background = C.blueDark; el.style.boxShadow = C.shadowMd; el.style.transform = 'translateY(-2px)' }}
+                  onMouseLeave={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.background = C.blue; el.style.boxShadow = C.shadowSm; el.style.transform = '' }}>
+                  Kostenlos starten
+                  <HugeiconsIcon icon={ArrowRight01Icon} size={18} />
+                </span>
+              </Link>
+              <a href="#features">
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '1rem 2.25rem', background: 'transparent', color: C.blue, border: `2px solid ${C.blue}`, borderRadius: 9999, fontWeight: 500, fontSize: '1rem', cursor: 'pointer', transition: 'all 250ms ease' }}
+                  onMouseEnter={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.background = C.blue; el.style.color = 'white' }}
+                  onMouseLeave={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.background = 'transparent'; el.style.color = C.blue }}>
+                  Demo ansehen
+                </span>
+              </a>
             </div>
 
-            {/* Trust row */}
-            <div className="g-reveal flex flex-wrap items-center justify-center gap-2.5" style={{ transitionDelay: '0.4s' }}>
+            {/* Feature pills below CTAs */}
+            <div className="g-reveal" style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem', flexWrap: 'wrap', transitionDelay: '0.25s' }}>
               {[
-                { icon: Shield01Icon,         label: 'DSGVO-konform',  color: BRAND.blue   },
-                { icon: CheckmarkBadge01Icon, label: 'IHK-konform',    color: BRAND.green  },
-                { icon: SparklesIcon,         label: 'KI-gestützt',    color: BRAND.purple },
-                { icon: LockPasswordIcon,     label: 'EU-Server',      color: BRAND.red    },
+                { icon: Shield01Icon,         label: 'DSGVO-konform' },
+                { icon: CheckmarkBadge01Icon, label: 'IHK-konform'   },
+                { icon: SparklesIcon,         label: 'KI-gestützt'   },
               ].map(t => (
-                <span key={t.label} className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium"
-                  style={{
-                    background: dark ? 'rgba(255,255,255,0.06)' : `${t.color}0f`,
-                    border: `1px solid ${dark ? 'rgba(255,255,255,0.1)' : `${t.color}28`}`,
-                    color: dark ? G.mid : t.color,
-                  }}>
-                  <HugeiconsIcon icon={t.icon} size={12} style={{ color: t.color }} />
+                <span key={t.label} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '0.625rem 1.25rem', background: dark ? 'rgba(255,255,255,0.08)' : 'white', borderRadius: 9999, boxShadow: dark ? 'none' : C.shadowSm, border: dark ? '1px solid rgba(255,255,255,0.12)' : 'none', color: G.textSec, fontWeight: 500, fontSize: '0.875rem', transition: 'all 250ms ease' }}
+                  onMouseEnter={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.boxShadow = dark ? 'none' : C.shadowMd; el.style.transform = 'translateY(-2px)'; el.style.color = C.blue }}
+                  onMouseLeave={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.boxShadow = dark ? 'none' : C.shadowSm; el.style.transform = ''; el.style.color = G.textSec }}>
+                  <HugeiconsIcon icon={t.icon} size={20} style={{ color: C.blue }} />
                   {t.label}
                 </span>
               ))}
             </div>
           </div>
-
-          {/* Scroll indicator */}
-          <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5" style={{ opacity: 0.35 }}>
-            <div className="size-6 rounded-full border flex items-center justify-center" style={{ borderColor: G.muted }}>
-              <div className="size-1.5 rounded-full" style={{ background: G.muted, animation: 'goog-float4 2.5s ease-in-out infinite' }} />
-            </div>
-          </div>
         </section>
 
-        {/* ════ 2. STATS ════ */}
-        <section className="py-20 px-6" style={{ background: G.surface, borderTop: `1px solid ${G.border}`, borderBottom: `1px solid ${G.border}` }}>
-          <div className="max-w-5xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-10">
+        {/* ══ 2. STATS ══ */}
+        <section style={{ padding: '5rem 0', background: G.surface, borderTop: `1px solid ${G.border}`, borderBottom: `1px solid ${G.border}` }}>
+          <div style={{ maxWidth: 1000, margin: '0 auto', padding: '0 2rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: '2.5rem' }}>
             {STATS.map((s, i) => (
-              <div key={s.label} className="g-reveal text-center" style={{ transitionDelay: `${i * 0.08}s` }}>
-                <div className="size-2 rounded-full mx-auto mb-4" style={{ background: s.color }} />
-                <div className="text-5xl sm:text-6xl font-black mb-2 tabular-nums" style={{ color: s.color }}>
-                  <AnimatedNumber target={s.value} suffix={s.suffix} />
-                </div>
-                <p className="text-sm font-medium" style={{ color: G.mid }}>{s.label}</p>
+              <div key={s.label} className="g-reveal" style={{ textAlign: 'center', transitionDelay: `${i * 0.08}s` }}>
+                <div style={{ fontSize: '3rem', fontWeight: 700, color: s.color, marginBottom: '0.375rem', fontFamily: '"Google Sans","Segoe UI",sans-serif' }}>{s.value}</div>
+                <div style={{ fontSize: '1rem', color: G.textSec, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{s.label}</div>
               </div>
             ))}
           </div>
         </section>
 
-        {/* ════ 3. FEATURES ════ */}
-        <section id="features" className="py-28 px-6" style={{ background: G.bg }}>
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-14">
-              <SectionLabel text="Was AzubiHub leistet" color={BRAND.blue} />
-              <h2 className="g-reveal text-4xl sm:text-5xl font-black tracking-tight" style={{ ...gradText, letterSpacing: '-1.5px', transitionDelay: '0.1s' }}>
-                Vier Gründe, die überzeugen.
+        {/* ══ 3. FEATURES ══ */}
+        <section id="features" style={{ padding: '6rem 0', background: G.surface }}>
+          <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 2rem' }}>
+            <div className="g-reveal" style={{ textAlign: 'center', marginBottom: '4rem' }}>
+              <h2 style={{ fontFamily: '"Google Sans","Segoe UI",sans-serif', fontWeight: 700, fontSize: 'clamp(2rem,4vw,3rem)', color: G.textPrimary, marginBottom: '1rem', lineHeight: 1.2 }}>
+                Agent-First Ausbildung
               </h2>
+              <p style={{ fontSize: '1.25rem', color: G.textSec, maxWidth: 700, margin: '0 auto', lineHeight: 1.7 }}>
+                Revolutionäre Funktionen, die deine Ausbildungsdokumentation transformieren.
+              </p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(320px,1fr))', gap: '1.75rem' }}>
               {FEATURES.map((f, i) => (
-                <div key={f.title}
-                  className="g-reveal rounded-2xl p-7 relative overflow-hidden cursor-default"
-                  style={{ ...glass, transitionDelay: `${i * 0.08}s`, transition: 'box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease' }}
-                  onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => cardHoverIn(e.currentTarget, f.color)}
-                  onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => cardHoverOut(e.currentTarget)}>
-                  <div className="flex items-start justify-between mb-5">
-                    <div className="size-12 rounded-xl flex items-center justify-center" style={{ background: dark ? f.bg : f.bgLight }}>
-                      <HugeiconsIcon icon={f.icon} size={24} style={{ color: dark ? f.color : f.colorLight }} />
-                    </div>
-                    <span className="text-xs font-semibold px-3 py-1 rounded-full" style={{ background: dark ? f.bg : f.bgLight, color: dark ? f.color : f.colorLight }}>
-                      {f.stat}
-                    </span>
+                <div key={f.title} className="g-reveal"
+                  style={{ padding: '2rem', background: G.cardBg, borderRadius: 12, boxShadow: G.shadowSm, transition: 'all 250ms ease', transitionDelay: `${i * 0.07}s` }}
+                  onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.boxShadow = G.shadowMd; el.style.transform = 'translateY(-4px)' }}
+                  onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.boxShadow = G.shadowSm; el.style.transform = '' }}>
+                  <div style={{ width: 64, height: 64, background: featureIconBg, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.25rem' }}>
+                    <HugeiconsIcon icon={f.icon} size={30} style={{ color: 'white' }} />
                   </div>
-                  <h3 className="text-base font-semibold mb-2" style={{ color: G.text }}>{f.title}</h3>
-                  <p className="text-sm leading-relaxed" style={{ color: G.mid }}>{f.desc}</p>
+                  <h3 style={{ fontFamily: '"Google Sans","Segoe UI",sans-serif', fontSize: '1.25rem', fontWeight: 700, color: G.textPrimary, marginBottom: '0.625rem', lineHeight: 1.3 }}>{f.title}</h3>
+                  <p style={{ color: G.textSec, lineHeight: 1.7, margin: 0, fontSize: '0.9375rem' }}>{f.desc}</p>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* ════ 4. PROBLEM / LÖSUNG ════ */}
-        <section className="py-28 px-6" style={{ background: G.surface, borderTop: `1px solid ${G.border}`, borderBottom: `1px solid ${G.border}` }}>
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-14">
-              <SectionLabel text="Die Ausgangslage" color={BRAND.red} />
-              <h2 className="g-reveal text-4xl sm:text-5xl font-black tracking-tight" style={{ ...gradText, letterSpacing: '-1.5px', transitionDelay: '0.1s' }}>
-                So war es bisher.{' '}
-                <span style={{ WebkitTextFillColor: BRAND.green, background: 'none' }}>So geht es besser.</span>
+        {/* ══ 4. ABOUT / HOW IT WORKS ══ */}
+        <section id="how-it-works" style={{ padding: '6rem 0', background: G.aboutBg }}>
+          <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 2rem', textAlign: 'center' }}>
+            <div className="g-reveal">
+              <h2 style={{ fontFamily: '"Google Sans","Segoe UI",sans-serif', fontWeight: 700, fontSize: 'clamp(2rem,4vw,3rem)', color: G.textPrimary, marginBottom: '1.5rem', lineHeight: 1.2 }}>
+                Die Zukunft der Ausbildung ist da.
               </h2>
+              <p style={{ fontSize: '1.125rem', lineHeight: 1.8, color: G.textSec, marginBottom: '1.25rem' }}>
+                Schluss mit Papierstapeln, verlorenen Dokumenten und unübersichtlichen E-Mail-Threads.
+                AzubiHub digitalisiert jeden Schritt deiner Ausbildungsdokumentation —
+                vom ersten Stichpunkt bis zum fertig signierten IHK-Bericht.
+              </p>
+              <p style={{ fontSize: '1.125rem', lineHeight: 1.8, color: G.textSec, marginBottom: '3rem' }}>
+                Mit der integrierten Claude-KI formulierst du professionelle Wochenberichte in Minuten statt Stunden.
+                Ausbilder erhalten sofortige Übersicht über alle Auszubildenden — und freigeben war noch nie so einfach.
+              </p>
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {/* WITHOUT */}
-              <div className="g-reveal-left rounded-2xl p-7" style={{ ...glass, borderColor: dark ? 'rgba(234,67,53,0.2)' : '#fad2cf' }}>
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="size-9 rounded-lg flex items-center justify-center" style={{ background: dark ? 'rgba(234,67,53,0.15)' : '#fce8e6' }}>
-                    <HugeiconsIcon icon={Cancel01Icon} size={17} style={{ color: BRAND.red }} />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-sm" style={{ color: G.text }}>Ohne AzubiHub</p>
-                    <p className="text-xs" style={{ color: G.mid }}>Der Ausbildungsalltag heute</p>
-                  </div>
+
+            {/* Stats */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(160px,1fr))', gap: '2.5rem', marginTop: '3rem' }}>
+              {[
+                { value: '10×',     label: 'Schneller als Papier' },
+                { value: 'IHK',     label: 'Konform & Exportierbar' },
+                { value: '99,9 %',  label: 'Uptime-Garantie' },
+              ].map((s, i) => (
+                <div key={s.label} className="g-reveal" style={{ textAlign: 'center', transitionDelay: `${i * 0.1}s` }}>
+                  <div style={{ fontSize: '3rem', fontWeight: 700, color: C.blue, marginBottom: '0.375rem', fontFamily: '"Google Sans","Segoe UI",sans-serif' }}>{s.value}</div>
+                  <div style={{ fontSize: '1rem', color: G.textSec, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{s.label}</div>
                 </div>
-                <ul className="space-y-4">
-                  {[
-                    { t: '3+ Stunden Schreibaufwand/Woche',  d: 'Für Berichte, die nur der Ausbilder liest.' },
-                    { t: 'Papierdokumente gehen verloren',    d: 'Kein Ablagesystem, kein Backup, alles im Ordner.' },
-                    { t: 'Freigabe per E-Mail & Telefon',     d: 'Hin- und herschicken, Korrekturen, erneut senden.' },
-                    { t: 'IHK-Fristen werden übersehen',      d: 'Kein Überblick, keine automatischen Erinnerungen.' },
-                  ].map(item => (
-                    <li key={item.t} className="flex items-start gap-3">
-                      <div className="size-5 rounded-full flex items-center justify-center shrink-0 mt-0.5" style={{ background: dark ? 'rgba(234,67,53,0.15)' : '#fce8e6' }}>
-                        <HugeiconsIcon icon={Cancel01Icon} size={9} style={{ color: BRAND.red }} />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium" style={{ color: dark ? '#f28b82' : '#c5221f' }}>{item.t}</p>
-                        <p className="text-xs mt-0.5 leading-relaxed" style={{ color: G.mid }}>{item.d}</p>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              {/* WITH */}
-              <div className="g-reveal-right rounded-2xl p-7" style={{ ...glass, borderColor: dark ? 'rgba(52,168,83,0.25)' : '#ceead6' }}>
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="size-9 rounded-lg flex items-center justify-center" style={{ background: dark ? 'rgba(52,168,83,0.15)' : '#e6f4ea' }}>
-                    <HugeiconsIcon icon={CheckmarkBadge01Icon} size={17} style={{ color: BRAND.green }} />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-sm" style={{ color: G.text }}>Mit AzubiHub</p>
-                    <p className="text-xs" style={{ color: G.mid }}>Digitaler Workflow der funktioniert</p>
-                  </div>
-                </div>
-                <ul className="space-y-4">
-                  {[
-                    { t: '15 Minuten statt 3 Stunden',  d: 'KI formuliert IHK-Text aus Stichpunkten — in Sekunden.' },
-                    { t: 'Alles zentral in der Cloud',   d: 'Sicheres Ablagesystem, Backup, auf allen Geräten.' },
-                    { t: 'Digitaler Freigabe-Workflow',  d: 'Einreichen, kommentieren, freigeben — ein Klick.' },
-                    { t: 'Keine Frist mehr verpassen',   d: 'Erinnerungen und Live-Statusübersicht für Ausbilder.' },
-                  ].map(item => (
-                    <li key={item.t} className="flex items-start gap-3">
-                      <div className="size-5 rounded-full flex items-center justify-center shrink-0 mt-0.5" style={{ background: dark ? 'rgba(52,168,83,0.15)' : '#e6f4ea' }}>
-                        <HugeiconsIcon icon={CheckmarkCircle01Icon} size={9} style={{ color: BRAND.green }} />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium" style={{ color: dark ? '#81c995' : '#137333' }}>{item.t}</p>
-                        <p className="text-xs mt-0.5 leading-relaxed" style={{ color: G.mid }}>{item.d}</p>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* ════ 5. TESTIMONIALS ════ */}
-        <section className="py-28 px-6" style={{ background: G.bg }}>
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-14">
-              <SectionLabel text="Echte Meinungen" color={BRAND.yellow} />
-              <h2 className="g-reveal text-4xl sm:text-5xl font-black tracking-tight" style={{ ...gradText, letterSpacing: '-1.5px', transitionDelay: '0.1s' }}>
-                Was andere sagen.
-              </h2>
+        {/* ══ 5. TESTIMONIALS ══ */}
+        <section style={{ padding: '6rem 0', background: G.bg }}>
+          <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 2rem' }}>
+            <div className="g-reveal" style={{ textAlign: 'center', marginBottom: '4rem' }}>
+              <h2 style={{ fontFamily: '"Google Sans","Segoe UI",sans-serif', fontWeight: 700, fontSize: 'clamp(2rem,4vw,3rem)', color: G.textPrimary, marginBottom: '1rem', lineHeight: 1.2 }}>Was andere sagen.</h2>
+              <p style={{ fontSize: '1.25rem', color: G.textSec, maxWidth: 700, margin: '0 auto' }}>Echte Meinungen von Auszubildenden und Ausbildern.</p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: '1.5rem' }}>
               {TESTIMONIALS.map((t, i) => (
-                <div key={t.name}
-                  className="g-reveal rounded-2xl p-6 flex flex-col"
-                  style={{ ...glass, transitionDelay: `${i * 0.07}s`, transition: 'box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease' }}
-                  onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => cardHoverIn(e.currentTarget, t.color)}
-                  onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => cardHoverOut(e.currentTarget)}>
-                  <div className="flex gap-0.5 mb-3">
-                    {[...Array(5)].map((_, j) => <HugeiconsIcon key={j} icon={StarIcon} size={12} style={{ color: BRAND.yellow }} />)}
+                <div key={t.name} className="g-reveal"
+                  style={{ padding: '1.75rem', background: G.cardBg, borderRadius: 12, boxShadow: G.shadowSm, display: 'flex', flexDirection: 'column', transition: 'all 250ms ease', transitionDelay: `${i * 0.07}s` }}
+                  onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.boxShadow = G.shadowMd; el.style.transform = 'translateY(-4px)' }}
+                  onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.boxShadow = G.shadowSm; el.style.transform = '' }}>
+                  <div style={{ display: 'flex', gap: 2, marginBottom: '0.875rem' }}>
+                    {[...Array(5)].map((_, j) => <HugeiconsIcon key={j} icon={StarIcon} size={14} style={{ color: C.yellow }} />)}
                   </div>
-                  <HugeiconsIcon icon={QuoteUpIcon} size={18} style={{ color: `${t.color}${dark ? '40' : '55'}`, marginBottom: 8 }} />
-                  <p className="text-sm leading-relaxed flex-1 mb-5" style={{ color: G.mid }}>{t.text}</p>
-                  <div className="flex items-center gap-3 pt-4" style={{ borderTop: `1px solid ${G.border}` }}>
-                    <div className="size-8 rounded-lg flex items-center justify-center font-bold text-xs text-white shrink-0" style={{ background: t.color }}>
+                  <HugeiconsIcon icon={QuoteUpIcon} size={22} style={{ color: `${t.color}50`, marginBottom: 10 }} />
+                  <p style={{ color: G.textSec, lineHeight: 1.7, flex: 1, marginBottom: '1.25rem', fontSize: '0.9375rem' }}>{t.text}</p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, paddingTop: '1rem', borderTop: `1px solid ${G.border}` }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 8, background: t.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 12, color: 'white', flexShrink: 0 }}>
                       {t.name.split(' ').map(n => n[0]).join('')}
                     </div>
                     <div>
-                      <p className="font-semibold text-sm" style={{ color: G.text }}>{t.name}</p>
-                      <p className="text-[10px]" style={{ color: G.muted }}>{t.role}</p>
+                      <div style={{ fontWeight: 600, fontSize: '0.875rem', color: G.textPrimary }}>{t.name}</div>
+                      <div style={{ fontSize: '0.75rem', color: G.textLight }}>{t.role}</div>
                     </div>
                   </div>
                 </div>
@@ -725,94 +592,60 @@ function LandingPage() {
           </div>
         </section>
 
-        {/* ════ 6. HOW IT WORKS ════ */}
-        <section id="how-it-works" className="py-28 px-6" style={{ background: G.surface, borderTop: `1px solid ${G.border}`, borderBottom: `1px solid ${G.border}` }}>
-          <div className="max-w-5xl mx-auto">
-            <div className="text-center mb-14">
-              <SectionLabel text="Der Einstieg" color={BRAND.green} />
-              <h2 className="g-reveal text-4xl sm:text-5xl font-black tracking-tight" style={{ ...gradText, letterSpacing: '-1.5px', transitionDelay: '0.1s' }}>
-                In 3 Schritten startklar.
-              </h2>
-              <p className="g-reveal text-lg mt-4 max-w-lg mx-auto" style={{ color: G.mid, transitionDelay: '0.2s' }}>
-                Kein Onboarding-Aufwand. Kein IT-Projekt. Einfach loslegen.
-              </p>
+        {/* ══ 6. PRICING ══ */}
+        <section id="pricing" style={{ padding: '6rem 0', background: G.surface, borderTop: `1px solid ${G.border}`, borderBottom: `1px solid ${G.border}` }}>
+          <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 2rem' }}>
+            <div className="g-reveal" style={{ textAlign: 'center', marginBottom: '4rem' }}>
+              <h2 style={{ fontFamily: '"Google Sans","Segoe UI",sans-serif', fontWeight: 700, fontSize: 'clamp(2rem,4vw,3rem)', color: G.textPrimary, marginBottom: '1rem', lineHeight: 1.2 }}>Einfach. Kostenlos.</h2>
+              <p style={{ fontSize: '1.25rem', color: G.textSec, maxWidth: 600, margin: '0 auto' }}>Kein Abo. Keine Kreditkarte. Keine versteckten Kosten.</p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 relative">
-              {/* Connector line */}
-              <div className="absolute top-10 hidden sm:block" style={{ left: 'calc(16.7% + 2.5rem)', right: 'calc(16.7% + 2.5rem)', height: '1px', background: `linear-gradient(90deg, ${BRAND.blue}60, ${BRAND.red}60, ${BRAND.green}60)` }} />
-              {STEPS.map((s, i) => (
-                <div key={s.num} className="g-reveal flex flex-col items-center text-center" style={{ transitionDelay: `${i * 0.12}s` }}>
-                  <div className="size-20 rounded-2xl flex items-center justify-center mb-6 text-3xl font-black text-white relative z-10"
-                    style={{ background: s.color, boxShadow: dark ? `0 0 24px ${s.color}50` : `0 4px 16px ${s.color}40` }}>
-                    {s.num}
-                  </div>
-                  <h3 className="font-semibold text-base mb-2.5" style={{ color: G.text }}>{s.title}</h3>
-                  <p className="text-sm leading-relaxed" style={{ color: G.mid }}>{s.desc}</p>
-                </div>
-              ))}
-            </div>
-            <div className="text-center mt-12">
-              <GButton href="/auth/register" primary className="text-[15px] px-8 py-3 h-auto leading-none">
-                Jetzt kostenlos starten <HugeiconsIcon icon={ArrowRight01Icon} size={16} />
-              </GButton>
-            </div>
-          </div>
-        </section>
-
-        {/* ════ 7. PRICING ════ */}
-        <section id="pricing" className="py-28 px-6" style={{ background: G.bg }}>
-          <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-14">
-              <SectionLabel text="Preise" color={BRAND.blue} />
-              <h2 className="g-reveal text-4xl sm:text-5xl font-black tracking-tight" style={{ ...gradText, letterSpacing: '-1.5px', transitionDelay: '0.1s' }}>
-                Einfach. Kostenlos.
-              </h2>
-              <p className="g-reveal text-lg mt-4 max-w-lg mx-auto" style={{ color: G.mid, transitionDelay: '0.2s' }}>
-                Kein Abo. Keine Kreditkarte. Keine versteckten Kosten.
-              </p>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 max-w-2xl mx-auto">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: '1.5rem', maxWidth: 700, margin: '0 auto' }}>
               {/* Free */}
-              <div className="g-reveal rounded-2xl p-8" style={{ ...glass, transition: 'box-shadow 0.2s, transform 0.2s' }}
-                onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => cardHoverIn(e.currentTarget)}
-                onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => cardHoverOut(e.currentTarget)}>
-                <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: G.muted }}>Kostenlos</p>
-                <div className="flex items-end gap-1.5 mb-2">
-                  <span className="text-5xl font-black" style={{ color: G.text }}>0€</span>
-                  <span className="mb-1.5 text-sm" style={{ color: G.mid }}>/ für immer</span>
+              <div className="g-reveal" style={{ padding: '2rem', background: G.cardBg, borderRadius: 12, boxShadow: G.shadowSm, transition: 'all 250ms ease' }}
+                onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.boxShadow = G.shadowMd; el.style.transform = 'translateY(-4px)' }}
+                onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.boxShadow = G.shadowSm; el.style.transform = '' }}>
+                <p style={{ fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: G.textLight, marginBottom: '1rem' }}>Kostenlos</p>
+                <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, marginBottom: '0.5rem' }}>
+                  <span style={{ fontSize: '3.5rem', fontWeight: 700, color: G.textPrimary, lineHeight: 1, fontFamily: '"Google Sans","Segoe UI",sans-serif' }}>0€</span>
+                  <span style={{ fontSize: '0.875rem', color: G.textSec, marginBottom: 8 }}>/ für immer</span>
                 </div>
-                <p className="text-sm mb-6 leading-relaxed" style={{ color: G.mid }}>Alles für eine vollständige Ausbildungsdokumentation.</p>
-                <ul className="space-y-3 mb-7">
-                  {['Unbegrenzte Wochenberichte','KI-Formulierung','Ausbilder-Freigabe','PDF-Export','Kalender & Statistiken','Cloud-Sync'].map(f => (
-                    <li key={f} className="flex items-center gap-2.5 text-sm" style={{ color: G.text }}>
-                      <HugeiconsIcon icon={CheckmarkCircle01Icon} size={15} style={{ color: BRAND.green, flexShrink: 0 }} />{f}
+                <p style={{ fontSize: '0.9375rem', color: G.textSec, marginBottom: '1.5rem', lineHeight: 1.6 }}>Alles für eine vollständige Ausbildungsdokumentation.</p>
+                <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 1.75rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  {['Unbegrenzte Wochenberichte','KI-Formulierung','Ausbilder-Freigabe','PDF-Export','Kalender & Fristen','Cloud-Sync'].map(f => (
+                    <li key={f} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: '0.9375rem', color: G.textPrimary }}>
+                      <HugeiconsIcon icon={CheckmarkCircle01Icon} size={16} style={{ color: C.green, flexShrink: 0 }} />{f}
                     </li>
                   ))}
                 </ul>
-                <GButton href="/auth/register" outline className="w-full justify-center text-sm px-6 py-2.5 h-auto leading-none">
-                  Jetzt registrieren
-                </GButton>
+                <Link href="/auth/register" style={{ display: 'block' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', padding: '0.875rem', borderRadius: 9999, border: `2px solid ${C.blue}`, color: C.blue, fontWeight: 500, fontSize: '1rem', cursor: 'pointer', transition: 'all 250ms ease' }}
+                    onMouseEnter={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.background = C.blue; el.style.color = 'white' }}
+                    onMouseLeave={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.background = 'transparent'; el.style.color = C.blue }}>
+                    Jetzt registrieren
+                  </span>
+                </Link>
               </div>
+
               {/* Pro */}
-              <div className="g-reveal rounded-2xl p-[1px]" style={{ background: `linear-gradient(135deg, ${BRAND.blue}, ${BRAND.green})`, transitionDelay: '0.1s' }}>
-                <div className="rounded-[15px] p-8 h-full" style={{ background: dark ? G.surface2 : '#ffffff' }}>
-                  <div className="flex items-start justify-between mb-4">
-                    <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: BRAND.blue }}>Pro</p>
-                    <span className="text-[10px] font-bold px-2.5 py-1 rounded-full" style={{ background: BRAND.blue, color: '#fff' }}>Demnächst</span>
+              <div className="g-reveal" style={{ borderRadius: 14, background: `linear-gradient(135deg, ${C.blue}, ${C.green})`, padding: 2, transitionDelay: '0.1s' }}>
+                <div style={{ padding: '2rem', background: dark ? G.surface2 : 'white', borderRadius: 12, height: '100%' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+                    <p style={{ fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: C.blue, margin: 0 }}>Pro</p>
+                    <span style={{ fontSize: '0.6875rem', fontWeight: 700, padding: '0.25rem 0.625rem', borderRadius: 9999, background: C.blue, color: 'white' }}>Demnächst</span>
                   </div>
-                  <div className="flex items-end gap-1.5 mb-2">
-                    <span className="text-5xl font-black" style={{ color: G.text }}>4,99€</span>
-                    <span className="mb-1.5 text-sm" style={{ color: G.mid }}>/ Monat</span>
+                  <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, marginBottom: '0.5rem' }}>
+                    <span style={{ fontSize: '3.5rem', fontWeight: 700, color: G.textPrimary, lineHeight: 1, fontFamily: '"Google Sans","Segoe UI",sans-serif' }}>4,99€</span>
+                    <span style={{ fontSize: '0.875rem', color: G.textSec, marginBottom: 8 }}>/ Monat</span>
                   </div>
-                  <p className="text-sm mb-6 leading-relaxed" style={{ color: G.mid }}>Für Betriebe mit mehreren Auszubildenden.</p>
-                  <ul className="space-y-3 mb-7">
+                  <p style={{ fontSize: '0.9375rem', color: G.textSec, marginBottom: '1.5rem', lineHeight: 1.6 }}>Für Betriebe mit mehreren Auszubildenden.</p>
+                  <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 1.75rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                     {['Alles aus Kostenlos','Unbegrenzte KI-Nutzung','Team-Verwaltung (20 Azubis)','Vorlagen-Bibliothek','Prioritäts-Support','Native App'].map(f => (
-                      <li key={f} className="flex items-center gap-2.5 text-sm" style={{ color: G.text }}>
-                        <HugeiconsIcon icon={CheckmarkCircle01Icon} size={15} style={{ color: BRAND.blue, flexShrink: 0 }} />{f}
+                      <li key={f} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: '0.9375rem', color: G.textPrimary }}>
+                        <HugeiconsIcon icon={CheckmarkCircle01Icon} size={16} style={{ color: C.blue, flexShrink: 0 }} />{f}
                       </li>
                     ))}
                   </ul>
-                  <button disabled className="w-full py-2.5 rounded-full text-sm font-medium opacity-40 cursor-not-allowed" style={{ background: BRAND.blue, color: '#fff' }}>
+                  <button disabled style={{ width: '100%', padding: '0.875rem', borderRadius: 9999, background: C.blue, color: 'white', border: 'none', fontWeight: 500, fontSize: '1rem', opacity: 0.45, cursor: 'not-allowed' }}>
                     Benachrichtigen wenn verfügbar
                   </button>
                 </div>
@@ -821,131 +654,122 @@ function LandingPage() {
           </div>
         </section>
 
-        {/* ════ 8. FAQ ════ */}
-        <section id="faq" className="py-28 px-6" style={{ background: G.surface, borderTop: `1px solid ${G.border}`, borderBottom: `1px solid ${G.border}` }}>
-          <div className="max-w-3xl mx-auto">
-            <div className="text-center mb-14">
-              <SectionLabel text="FAQ" color={BRAND.red} />
-              <h2 className="g-reveal text-4xl sm:text-5xl font-black tracking-tight" style={{ ...gradText, letterSpacing: '-1.5px', transitionDelay: '0.1s' }}>
-                Häufige Fragen.
-              </h2>
+        {/* ══ 7. FAQ ══ */}
+        <section id="faq" style={{ padding: '6rem 0', background: G.bg }}>
+          <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 2rem' }}>
+            <div className="g-reveal" style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
+              <h2 style={{ fontFamily: '"Google Sans","Segoe UI",sans-serif', fontWeight: 700, fontSize: 'clamp(2rem,4vw,3rem)', color: G.textPrimary, marginBottom: '1rem', lineHeight: 1.2 }}>Häufige Fragen</h2>
+              <p style={{ fontSize: '1.25rem', color: G.textSec, maxWidth: 600, margin: '0 auto' }}>Alles, was du über AzubiHub wissen musst.</p>
             </div>
-            <div className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${G.border}`, background: dark ? G.surface2 : '#ffffff' }}>
-              {FAQS.map((f, i) => <FaqItem key={f.q} q={f.q} a={f.a} idx={i} />)}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {FAQS.map(f => <FaqItem key={f.q} q={f.q} a={f.a} dark={dark} />)}
             </div>
-            <p className="text-center text-sm mt-8" style={{ color: G.muted }}>
+            <p style={{ textAlign: 'center', marginTop: '2.5rem', fontSize: '0.9375rem', color: G.textSec }}>
               Noch Fragen?{' '}
-              <a href="mailto:kontakt@azubihub.app" className="font-semibold transition-colors" style={{ color: G.link }}>Schreib uns direkt.</a>
+              <a href="mailto:kontakt@azubihub.app" style={{ color: C.blue, fontWeight: 600, textDecoration: 'none' }}
+                onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.textDecoration = 'underline')}
+                onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.textDecoration = 'none')}>
+                Schreib uns direkt.
+              </a>
             </p>
           </div>
         </section>
 
-        {/* ════ 9. CTA ════ */}
-        <section className="relative py-36 px-6 overflow-hidden" style={{ background: G.bg }}>
-          {/* Background rings (CTA) */}
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="absolute rounded-full" style={{ width: 700, height: 700, background: `radial-gradient(circle, rgba(66,133,244,${dark ? '0.07' : '0.09'}) 0%, transparent 65%)` }} />
-            <div className="absolute rounded-full" style={{ width: 500, height: 500, border: `1px solid rgba(66,133,244,${dark ? '0.12' : '0.18'})`, animation: 'orbit-cw 24s linear infinite' }}>
-              <span className="absolute rounded-full" style={{ width: 10, height: 10, background: BRAND.blue, top: -5, left: '50%', marginLeft: -5, boxShadow: `0 0 16px ${BRAND.blue}` }} />
-            </div>
-            <div className="absolute rounded-full" style={{ width: 340, height: 340, border: `1px solid rgba(52,168,83,${dark ? '0.14' : '0.2'})`, animation: 'orbit-ccw 17s linear infinite 1s' }}>
-              <span className="absolute rounded-full" style={{ width: 8, height: 8, background: BRAND.green, bottom: -4, right: '30%', boxShadow: `0 0 12px ${BRAND.green}` }} />
-            </div>
-          </div>
-
-          <div className="relative z-10 max-w-2xl mx-auto text-center">
-            <div className="g-reveal inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-medium mb-10"
-              style={{
-                background: dark ? 'rgba(52,168,83,0.12)' : '#e6f4ea',
-                border: dark ? '1px solid rgba(52,168,83,0.25)' : '1px solid #ceead6',
-                color: dark ? '#81c995' : '#137333',
-              }}>
-              <HugeiconsIcon icon={CheckmarkBadge01Icon} size={13} style={{ color: BRAND.green }} />
-              Kostenlos · Keine Kreditkarte · Sofort startklar
-            </div>
-            <h2 className="g-reveal font-black tracking-tight leading-none mb-6"
-              style={{ ...gradText, fontSize: 'clamp(48px,7.5vw,84px)', letterSpacing: '-2px', transitionDelay: '0.1s' }}>
-              Bereit?
-            </h2>
-            <p className="g-reveal text-xl mb-12 leading-relaxed" style={{ color: G.mid, transitionDelay: '0.2s' }}>
-              Hunderte Betriebe haben bereits gewechselt.<br />
-              Der erste Bericht ist in unter 15 Minuten fertig.
-            </p>
-            <div className="g-reveal flex flex-col sm:flex-row gap-3 justify-center" style={{ transitionDelay: '0.3s' }}>
-              <GButton href="/auth/register" primary className="text-[15px] px-9 py-3 h-auto leading-none">
-                Kostenlos starten <HugeiconsIcon icon={ArrowRight01Icon} size={16} />
-              </GButton>
-              <GButton href="mailto:kontakt@azubihub.app" outline className="text-[15px] px-9 py-3 h-auto leading-none">
-                <HugeiconsIcon icon={Mail01Icon} size={15} /> Kontakt aufnehmen
-              </GButton>
+        {/* ══ 8. CTA ══ — exact antigravity.google blue gradient */}
+        <section style={{ padding: '6rem 0', background: `linear-gradient(135deg, ${C.blue} 0%, ${C.blueDark} 100%)`, textAlign: 'center' }}>
+          <div style={{ maxWidth: 800, margin: '0 auto', padding: '0 2rem' }}>
+            <div className="g-reveal">
+              <h2 style={{ fontFamily: '"Google Sans","Segoe UI",sans-serif', fontWeight: 700, fontSize: 'clamp(2rem,4vw,3rem)', color: 'white', marginBottom: '1rem', lineHeight: 1.2 }}>
+                Bereit, deine Ausbildung zu transformieren?
+              </h2>
+              <p style={{ fontSize: '1.25rem', color: 'rgba(255,255,255,0.9)', marginBottom: '2.5rem', lineHeight: 1.7 }}>
+                Hunderte Betriebe haben bereits gewechselt.<br />
+                Der erste Bericht ist in unter 15 Minuten fertig.
+              </p>
+              <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+                <Link href="/auth/register">
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '1rem 2.25rem', background: 'white', color: C.blue, borderRadius: 9999, fontWeight: 500, fontSize: '1rem', cursor: 'pointer', boxShadow: C.shadowSm, transition: 'all 250ms ease' }}
+                    onMouseEnter={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.background = C.bgSecondary; el.style.transform = 'translateY(-2px)' }}
+                    onMouseLeave={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.background = 'white'; el.style.transform = '' }}>
+                    Jetzt kostenlos starten
+                    <HugeiconsIcon icon={ArrowRight01Icon} size={18} />
+                  </span>
+                </Link>
+                <a href="mailto:kontakt@azubihub.app">
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '1rem 2.25rem', background: 'transparent', color: 'white', border: '2px solid rgba(255,255,255,0.6)', borderRadius: 9999, fontWeight: 500, fontSize: '1rem', cursor: 'pointer', transition: 'all 250ms ease' }}
+                    onMouseEnter={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.background = 'rgba(255,255,255,0.1)'; el.style.borderColor = 'white' }}
+                    onMouseLeave={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.background = 'transparent'; el.style.borderColor = 'rgba(255,255,255,0.6)' }}>
+                    <HugeiconsIcon icon={Mail01Icon} size={18} />
+                    Kontakt aufnehmen
+                  </span>
+                </a>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* ════ FOOTER ════ */}
-        <footer className="py-14 px-6" style={{ background: dark ? G.surface : '#202124', borderTop: `1px solid ${dark ? G.border : 'rgba(255,255,255,0.1)'}` }}>
-          <div className="max-w-6xl mx-auto">
-            <div className="grid grid-cols-1 sm:grid-cols-12 gap-10 mb-10">
-              <div className="sm:col-span-5">
-                {/* Footer logo — always use white text in footer */}
-                <div className="flex items-center gap-2.5">
-                  <div className="size-8 rounded-lg flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${BRAND.blue}, ${BRAND.green})` }}>
-                    <span className="text-white font-black text-sm leading-none">A</span>
+        {/* ══ FOOTER ══ — exact antigravity.google dark footer */}
+        <footer style={{ padding: '4rem 0 1.75rem', background: C.bgDark, color: 'white' }}>
+          <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 2rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '4rem', marginBottom: '2.5rem' }} className="footer-grid">
+              {/* Col 1 */}
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: '1rem' }}>
+                  <div style={{ width: 32, height: 32, borderRadius: 8, background: `linear-gradient(135deg, ${C.blue}, ${C.green})`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ color: 'white', fontWeight: 900, fontSize: 14, lineHeight: 1 }}>A</span>
                   </div>
-                  <span className="font-bold text-base tracking-tight text-white">AzubiHub</span>
+                  <span style={{ fontFamily: '"Google Sans","Segoe UI",sans-serif', fontWeight: 700, fontSize: '1.125rem' }}>AzubiHub</span>
                 </div>
-                <p className="text-sm leading-relaxed mt-4 max-w-xs" style={{ color: '#9aa0a6' }}>
+                <p style={{ color: 'rgba(255,255,255,0.7)', lineHeight: 1.6, marginBottom: '1.25rem', fontSize: '0.9375rem' }}>
                   Die digitale Ausbildungsplattform für moderne Betriebe. KI-gestützt, IHK-konform, kostenlos.
                 </p>
-                <div className="flex gap-2 mt-4 flex-wrap">
-                  {[{ label: 'DSGVO', c: BRAND.blue }, { label: 'IHK-konform', c: BRAND.green }, { label: 'KI-gestützt', c: BRAND.purple }].map(b => (
-                    <span key={b.label} className="text-xs font-medium px-3 py-1 rounded-full"
-                      style={{ border: `1px solid ${b.c}40`, color: b.c, background: `${b.c}15` }}>
-                      {b.label}
-                    </span>
-                  ))}
-                </div>
-                <div className="flex gap-2 mt-4">
+                <div style={{ display: 'flex', gap: 8 }}>
                   {[{ href: 'mailto:kontakt@azubihub.app', icon: Mail01Icon, label: 'E-Mail' }, { href: 'https://github.com', icon: Github01Icon, label: 'GitHub' }].map(s => (
-                    <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer" aria-label={`AzubiHub auf ${s.label}`}
-                      className="size-9 rounded-lg flex items-center justify-center transition-all duration-150"
-                      style={{ background: 'rgba(255,255,255,0.08)', color: '#9aa0a6', border: '1px solid rgba(255,255,255,0.1)' }}
-                      onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => { const el = e.currentTarget; el.style.background = 'rgba(255,255,255,0.14)'; el.style.color = '#e8eaed' }}
-                      onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => { const el = e.currentTarget; el.style.background = 'rgba(255,255,255,0.08)'; el.style.color = '#9aa0a6' }}>
+                    <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer"
+                      style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.7)', transition: 'all 150ms ease' }}
+                      onMouseEnter={e => { e.currentTarget.style.color = C.blue; e.currentTarget.style.background = 'rgba(255,255,255,0.14)' }}
+                      onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.7)'; e.currentTarget.style.background = 'rgba(255,255,255,0.08)' }}>
                       <HugeiconsIcon icon={s.icon} size={15} />
                     </a>
                   ))}
                 </div>
               </div>
-              <div className="sm:col-span-3">
-                <p className="text-xs font-semibold uppercase tracking-widest mb-5" style={{ color: '#5f6368' }}>Produkt</p>
-                <nav className="space-y-3">
+
+              {/* Col 2 */}
+              <div>
+                <p style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '1rem' }}>Produkt</p>
+                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                   {[['#features','Features'],['#pricing','Preise'],['#faq','FAQ'],['/auth/register','Registrieren'],['/auth/login','Anmelden']].map(([href, label]) => (
-                    <a key={label} href={href} className="block text-sm transition-colors duration-150" style={{ color: '#9aa0a6' }}
-                      onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = '#e8eaed')}
-                      onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = '#9aa0a6')}>
-                      {label}
-                    </a>
+                    <li key={label}>
+                      <a href={href} style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.9375rem', transition: 'color 150ms ease', textDecoration: 'none' }}
+                        onMouseEnter={e => (e.currentTarget.style.color = C.blue)}
+                        onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.7)')}>
+                        {label}
+                      </a>
+                    </li>
                   ))}
-                </nav>
+                </ul>
               </div>
-              <div className="sm:col-span-4">
-                <p className="text-xs font-semibold uppercase tracking-widest mb-5" style={{ color: '#5f6368' }}>Rechtliches</p>
-                <nav className="space-y-3">
-                  {[{ href: '/impressum', label: 'Impressum' }, { href: '/datenschutz', label: 'Datenschutzerklärung' }, { href: 'mailto:kontakt@azubihub.app', label: 'kontakt@azubihub.app' }].map(({ href, label }) => (
-                    <Link key={label} href={href} className="block text-sm transition-colors duration-150" style={{ color: '#9aa0a6' }}
-                      onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = '#e8eaed')}
-                      onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = '#9aa0a6')}>
-                      {label}
-                    </Link>
+
+              {/* Col 3 */}
+              <div>
+                <p style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '1rem' }}>Rechtliches</p>
+                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  {[{ href: '/impressum', label: 'Impressum' }, { href: '/datenschutz', label: 'Datenschutz' }, { href: 'mailto:kontakt@azubihub.app', label: 'Kontakt' }].map(({ href, label }) => (
+                    <li key={label}>
+                      <Link href={href} style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.9375rem', transition: 'color 150ms ease', textDecoration: 'none' }}
+                        onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = C.blue)}
+                        onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = 'rgba(255,255,255,0.7)')}>
+                        {label}
+                      </Link>
+                    </li>
                   ))}
-                  <span className="block text-sm" style={{ color: '#5f6368' }}>AGB (in Vorbereitung)</span>
-                </nav>
+                </ul>
               </div>
             </div>
-            <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-              <span className="text-xs" style={{ color: '#5f6368' }}>© {new Date().getFullYear()} AzubiHub. Alle Rechte vorbehalten.</span>
-              <span className="text-xs" style={{ color: '#5f6368' }}>Gebaut für Auszubildende und Ausbilder in Deutschland</span>
+
+            <div style={{ paddingTop: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.1)', textAlign: 'center', color: 'rgba(255,255,255,0.5)', fontSize: '0.875rem' }}>
+              © {new Date().getFullYear()} AzubiHub. Alle Rechte vorbehalten.
             </div>
           </div>
         </footer>
