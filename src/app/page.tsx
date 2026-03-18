@@ -352,10 +352,7 @@ function LandingPage() {
           {/* Headline */}
           <h1 className="g-reveal font-black tracking-tight leading-none mb-8"
             style={{ fontSize: 'clamp(52px, 9vw, 96px)', letterSpacing: '-3px', transitionDelay: '0.1s' }}>
-            Ausbildung,{' '}
-            <span style={{ color: G.blue }}>neu</span>{' '}
-            <span style={{ color: G.red }}>ge</span><span style={{ color: G.yellow }}>dacht</span>
-            <span style={{ color: G.green }}>.</span>
+            Ausbildung, neu gedacht.
           </h1>
 
           <p className="g-reveal text-xl leading-relaxed mb-12 max-w-2xl mx-auto" style={{ color: G.mid, transitionDelay: '0.2s' }}>
