@@ -28,14 +28,14 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="min-h-[100svh] bg-background flex flex-col items-center justify-center p-6 text-foreground selection:bg-primary/20">
-      
-      {/* Theme Toggle in Corner */}
+
+      {/*   Theme Toggle in Corner   */}
       <div className="fixed top-6 right-6 z-50">
         <ThemeToggle />
       </div>
 
       <div className="w-full max-w-[400px]">
-        
+
         <div className="flex justify-center mb-10">
           <AuthLogo size={42} />
         </div>
