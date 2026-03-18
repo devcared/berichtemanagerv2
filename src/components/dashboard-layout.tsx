@@ -249,40 +249,64 @@ export default function DashboardLayout({ children, sections, subtitle }: Props)
           </button>
 
           {/* User + Collapse toggle */}
-          <div style={{ marginTop: 4, borderTop: '1px solid hsl(var(--sidebar-border))', paddingTop: '0.625rem', display: 'flex', alignItems: 'center', gap: 6 }}>
-            <button
-              onClick={() => router.push('/berichtsheft/profil')}
-              title={isCollapsed ? (profile ? `${profile.firstName} ${profile.lastName}` : 'Profil') : undefined}
-              style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '0.5rem 0.625rem', borderRadius: 8, border: 'none', background: 'transparent', cursor: 'pointer', transition: 'background 100ms', fontFamily: 'inherit', flex: 1, minWidth: 0, overflow: 'hidden' }}
-              onMouseEnter={e => (e.currentTarget.style.background = hoverBg)}
-              onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-            >
-              <div style={{ width: 30, height: 30, borderRadius: '50%', background: primaryColor, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6875rem', fontWeight: 700, color: 'white', flexShrink: 0 }}>
-                {initials}
+          <div style={{ marginTop: 4, borderTop: '1px solid hsl(var(--sidebar-border))', paddingTop: '0.625rem' }}>
+            {isCollapsed ? (
+              /* ── Collapsed: avatar centered, toggle below ── */
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                <button
+                  onClick={() => router.push('/berichtsheft/profil')}
+                  title={profile ? `${profile.firstName} ${profile.lastName}` : 'Profil'}
+                  style={{ width: 36, height: 36, borderRadius: '50%', background: primaryColor, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6875rem', fontWeight: 700, color: 'white', transition: 'opacity 150ms' }}
+                  onMouseEnter={e => (e.currentTarget.style.opacity = '0.8')}
+                  onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
+                >
+                  {initials}
+                </button>
+                {!forMobile && (
+                  <button
+                    onClick={() => setCollapsed(false)}
+                    title="Sidebar öffnen"
+                    style={iconBtn({ width: 30, height: 30, borderRadius: 6 })}
+                    onMouseEnter={e => (e.currentTarget.style.background = hoverBg)}
+                    onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                  >
+                    <ChevronRight />
+                  </button>
+                )}
               </div>
-              {!isCollapsed && (
-                <div style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
-                  <div style={{ fontSize: '0.8125rem', fontWeight: 500, color: 'hsl(var(--sidebar-foreground))', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {profile ? `${profile.firstName} ${profile.lastName}` : 'Kein Profil'}
+            ) : (
+              /* ── Expanded: avatar + info + collapse arrow ── */
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <button
+                  onClick={() => router.push('/berichtsheft/profil')}
+                  style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '0.5rem 0.625rem', borderRadius: 8, border: 'none', background: 'transparent', cursor: 'pointer', transition: 'background 100ms', fontFamily: 'inherit', flex: 1, minWidth: 0 }}
+                  onMouseEnter={e => (e.currentTarget.style.background = hoverBg)}
+                  onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                >
+                  <div style={{ width: 30, height: 30, borderRadius: '50%', background: primaryColor, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6875rem', fontWeight: 700, color: 'white', flexShrink: 0 }}>
+                    {initials}
                   </div>
-                  <div style={{ fontSize: '0.6875rem', color: 'hsl(var(--muted-foreground))', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {profile?.occupation ?? 'Profil einrichten'}
+                  <div style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
+                    <div style={{ fontSize: '0.8125rem', fontWeight: 500, color: 'hsl(var(--sidebar-foreground))', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {profile ? `${profile.firstName} ${profile.lastName}` : 'Kein Profil'}
+                    </div>
+                    <div style={{ fontSize: '0.6875rem', color: 'hsl(var(--muted-foreground))', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {profile?.occupation ?? 'Profil einrichten'}
+                    </div>
                   </div>
-                </div>
-              )}
-            </button>
-
-            {/* Collapse toggle — desktop only, next to profile */}
-            {!forMobile && (
-              <button
-                onClick={() => setCollapsed(c => !c)}
-                title={collapsed ? 'Sidebar öffnen' : 'Sidebar minimieren'}
-                style={iconBtn({ width: 28, height: 28, borderRadius: 6, flexShrink: 0 })}
-                onMouseEnter={e => (e.currentTarget.style.background = hoverBg)}
-                onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-              >
-                {collapsed ? <ChevronRight /> : <ChevronLeft />}
-              </button>
+                </button>
+                {!forMobile && (
+                  <button
+                    onClick={() => setCollapsed(true)}
+                    title="Sidebar minimieren"
+                    style={iconBtn({ width: 28, height: 28, borderRadius: 6, flexShrink: 0 })}
+                    onMouseEnter={e => (e.currentTarget.style.background = hoverBg)}
+                    onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                  >
+                    <ChevronLeft />
+                  </button>
+                )}
+              </div>
             )}
           </div>
         </div>
