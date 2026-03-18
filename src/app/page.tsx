@@ -293,6 +293,8 @@ function FixedBackground() {
 /* Nav — exact antigravity.google: min-height 36px, #ffffffd9, blur(5px), hides on scroll-down */
 function Nav() {
   const [hidden, setHidden] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
+
   useEffect(() => {
     let lastY = window.scrollY
     const fn = () => {
@@ -304,53 +306,102 @@ function Nav() {
     return () => window.removeEventListener('scroll', fn)
   }, [])
 
+  const links = [['#features', 'Features'], ['#pricing', 'Preise'], ['#faq', 'FAQ']] as const
+
   return (
-    <nav style={{
-      position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
-      minHeight: 36,
-      background: '#ffffffd9',
-      backdropFilter: 'blur(5px)',
-      WebkitBackdropFilter: 'blur(5px)',
-      borderBottom: `1px solid ${C.border}`,
-      transform: hidden ? 'translateY(-100%)' : 'translateY(0)',
-      transition: 'transform 300ms ease',
-    }}>
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 2rem', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        {/* Logo */}
-        <Link href="/" style={{ textDecoration: 'none' }}>
-          <Logo size={26} />
-        </Link>
+    <>
+      <nav style={{
+        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
+        minHeight: 36,
+        background: '#ffffffd9',
+        backdropFilter: 'blur(5px)',
+        WebkitBackdropFilter: 'blur(5px)',
+        borderBottom: `1px solid ${C.border}`,
+        transform: hidden ? 'translateY(-100%)' : 'translateY(0)',
+        transition: 'transform 300ms ease',
+      }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 1.25rem', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          {/* Logo */}
+          <Link href="/" style={{ textDecoration: 'none' }} onClick={() => setMenuOpen(false)}>
+            <Logo size={26} />
+          </Link>
 
-        {/* Nav links */}
-        <div style={{ display: 'flex', gap: 4, alignItems: 'center' }} className="hidden md:flex">
-          {[['#features', 'Features'], ['#pricing', 'Preise'], ['#faq', 'FAQ']].map(([href, label]) => (
-            <a key={href} href={href} style={{ color: C.textSec, fontWeight: 450, fontSize: '0.9375rem', padding: '0.5rem 0.75rem', borderRadius: 4, cursor: 'pointer', transition: 'color 150ms ease', textDecoration: 'none' }}
-              onMouseEnter={e => (e.currentTarget.style.color = C.blue)}
-              onMouseLeave={e => (e.currentTarget.style.color = C.textSec)}>
-              {label}
-            </a>
-          ))}
+          {/* Desktop nav links */}
+          <div style={{ display: 'flex', gap: 4, alignItems: 'center' }} className="hidden md:flex">
+            {links.map(([href, label]) => (
+              <a key={href} href={href} style={{ color: C.textSec, fontWeight: 450, fontSize: '0.9375rem', padding: '0.5rem 0.75rem', borderRadius: 4, cursor: 'pointer', transition: 'color 150ms ease', textDecoration: 'none' }}
+                onMouseEnter={e => (e.currentTarget.style.color = C.blue)}
+                onMouseLeave={e => (e.currentTarget.style.color = C.textSec)}>
+                {label}
+              </a>
+            ))}
+          </div>
+
+          {/* Right side */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Link href="/auth/login"
+              style={{ color: C.textSec, fontWeight: 450, fontSize: '0.9375rem', padding: '0.5rem 0.75rem', borderRadius: 4, transition: 'color 150ms ease', textDecoration: 'none' }}
+              onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = C.blue)}
+              onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = C.textSec)}
+              className="hidden sm:inline">
+              Anmelden
+            </Link>
+            <Link href="/auth/register" className="hidden sm:inline">
+              <span style={{ background: C.blue, color: 'white', padding: '10px 24px', borderRadius: 9999, fontWeight: 450, fontSize: '0.875rem', cursor: 'pointer', transition: 'background 150ms ease', display: 'inline-block' }}
+                onMouseEnter={(e: React.MouseEvent<HTMLSpanElement>) => { (e.currentTarget as HTMLSpanElement).style.background = C.blueDark }}
+                onMouseLeave={(e: React.MouseEvent<HTMLSpanElement>) => { (e.currentTarget as HTMLSpanElement).style.background = C.blue }}>
+                Kostenlos starten
+              </span>
+            </Link>
+
+            {/* Hamburger — mobile only */}
+            <button
+              onClick={() => setMenuOpen(o => !o)}
+              className="flex md:hidden"
+              style={{ width: 40, height: 40, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 5, background: 'none', border: 'none', cursor: 'pointer', padding: 8, borderRadius: 6 }}
+              aria-label="Menü">
+              <span style={{ width: 22, height: 1.5, background: C.textPrimary, borderRadius: 2, transition: 'all 250ms ease', transform: menuOpen ? 'rotate(45deg) translateY(4.5px)' : 'none' }} />
+              <span style={{ width: 22, height: 1.5, background: C.textPrimary, borderRadius: 2, transition: 'all 250ms ease', opacity: menuOpen ? 0 : 1 }} />
+              <span style={{ width: 22, height: 1.5, background: C.textPrimary, borderRadius: 2, transition: 'all 250ms ease', transform: menuOpen ? 'rotate(-45deg) translateY(-4.5px)' : 'none' }} />
+            </button>
+          </div>
         </div>
+      </nav>
 
-        {/* Right side */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Link href="/auth/login"
-            style={{ color: C.textSec, fontWeight: 450, fontSize: '0.9375rem', padding: '0.5rem 0.75rem', borderRadius: 4, transition: 'color 150ms ease', textDecoration: 'none' }}
-            onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = C.blue)}
-            onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = C.textSec)}
-            className="hidden sm:inline">
+      {/* Mobile menu */}
+      <div style={{
+        position: 'fixed', top: 64, left: 0, right: 0, zIndex: 99,
+        background: '#fffffff5',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        borderBottom: `1px solid ${C.border}`,
+        padding: menuOpen ? '1.25rem 1.25rem 1.5rem' : '0 1.25rem',
+        maxHeight: menuOpen ? '400px' : '0',
+        overflow: 'hidden',
+        transition: 'max-height 300ms ease, padding 300ms ease',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '0.25rem',
+      }} className="md:hidden">
+        {links.map(([href, label]) => (
+          <a key={href} href={href} onClick={() => setMenuOpen(false)}
+            style={{ color: C.textPrimary, fontWeight: 450, fontSize: '1.0625rem', padding: '0.875rem 0.5rem', borderBottom: `1px solid ${C.border}`, textDecoration: 'none', display: 'block' }}>
+            {label}
+          </a>
+        ))}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', paddingTop: '1rem' }}>
+          <Link href="/auth/login" onClick={() => setMenuOpen(false)}
+            style={{ color: C.textSec, fontWeight: 450, fontSize: '1rem', textDecoration: 'none', padding: '0.5rem 0.5rem', display: 'block' }}>
             Anmelden
           </Link>
-          <Link href="/auth/register">
-            <span style={{ background: C.blue, color: 'white', padding: '10px 24px', borderRadius: 9999, fontWeight: 450, fontSize: '0.875rem', cursor: 'pointer', transition: 'all 150ms ease', display: 'inline-block' }}
-              onMouseEnter={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.background = C.blueDark }}
-              onMouseLeave={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.background = C.blue }}>
+          <Link href="/auth/register" onClick={() => setMenuOpen(false)} style={{ display: 'block' }}>
+            <span style={{ display: 'block', textAlign: 'center', padding: '12px 24px', background: C.blue, color: 'white', borderRadius: 9999, fontWeight: 450, fontSize: '1rem' }}>
               Kostenlos starten
             </span>
           </Link>
         </div>
       </div>
-    </nav>
+    </>
   )
 }
 
@@ -388,8 +439,8 @@ function LandingPage() {
       <Nav />
 
       {/* ══ 1. HERO ══ */}
-      <section style={{ minHeight: '100svh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 'calc(4rem + 64px) 0 4rem', background: 'transparent', position: 'relative', textAlign: 'center' }}>
-        <div style={{ maxWidth: 800, margin: '0 auto', padding: '0 2rem' }}>
+      <section style={{ minHeight: '100svh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 'calc(3rem + 64px) 0 3rem', background: 'transparent', position: 'relative', textAlign: 'center' }}>
+        <div style={{ maxWidth: 800, margin: '0 auto', padding: '0 1.25rem' }}>
 
           {/* Eyebrow chip */}
           <div className="g-reveal" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 14px', border: `1px solid ${C.border}`, borderRadius: 9999, marginBottom: '2.25rem', fontSize: '0.8125rem', fontWeight: 500, color: C.textSec, background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)' }}>
@@ -449,7 +500,7 @@ function LandingPage() {
       </section>
 
       {/* ══ 2. STATS — solid bg covers fixed animation ══ */}
-      <section style={{ padding: '5rem 0', background: C.bgSecondary, borderTop: `1px solid ${C.border}`, borderBottom: `1px solid ${C.border}`, position: 'relative' }}>
+      <section className="lp-section" style={{ background: C.bgSecondary, borderTop: `1px solid ${C.border}`, borderBottom: `1px solid ${C.border}`, position: 'relative' }}>
         <div style={{ maxWidth: 1000, margin: '0 auto', padding: '0 2rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: '2.5rem' }}>
           {STATS.map((s, i) => (
             <div key={s.label} className="g-reveal" style={{ textAlign: 'center', transitionDelay: `${i * 0.08}s` }}>
@@ -461,7 +512,7 @@ function LandingPage() {
       </section>
 
       {/* ══ 3. FEATURES ══ */}
-      <section id="features" style={{ padding: '6rem 0', background: '#ffffff', position: 'relative' }}>
+      <section id="features" className="lp-section" style={{ background: '#ffffff', position: 'relative' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 2rem' }}>
           <div className="g-reveal" style={{ textAlign: 'center', marginBottom: '4.5rem' }}>
             <p style={{ fontSize: '0.8125rem', fontWeight: 600, letterSpacing: '0.09em', textTransform: 'uppercase', color: C.blue, marginBottom: '0.75rem', margin: '0 0 0.75rem' }}>Features</p>
@@ -488,7 +539,7 @@ function LandingPage() {
       </section>
 
       {/* ══ 4. ABOUT ══ */}
-      <section id="how-it-works" style={{ padding: '6rem 0', background: '#ffffff', position: 'relative' }}>
+      <section id="how-it-works" className="lp-section" style={{ background: '#ffffff', position: 'relative' }}>
         <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 2rem', textAlign: 'center' }}>
           <div className="g-reveal">
             <h2 style={{ fontWeight: 450, fontSize: 'clamp(2rem,4vw,3rem)', color: C.textPrimary, marginBottom: '1.5rem', lineHeight: 1.2 }}>
@@ -520,13 +571,13 @@ function LandingPage() {
       </section>
 
       {/* ══ 5. TESTIMONIALS ══ */}
-      <section style={{ padding: '6rem 0', background: '#ffffff', position: 'relative' }}>
+      <section className="lp-section" style={{ background: '#ffffff', position: 'relative' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 2rem' }}>
           <div className="g-reveal" style={{ textAlign: 'center', marginBottom: '4.5rem' }}>
             <p style={{ fontSize: '0.8125rem', fontWeight: 600, letterSpacing: '0.09em', textTransform: 'uppercase', color: C.blue, margin: '0 0 0.75rem' }}>Stimmen</p>
             <h2 style={{ fontWeight: 450, fontSize: 'clamp(1.875rem,3.5vw,2.75rem)', color: C.textPrimary, lineHeight: 1.2 }}>Was andere sagen.</h2>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: '1px', background: C.border }}>
+          <div className="testimonials-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: '1px', background: C.border }}>
             {TESTIMONIALS.map((t, i) => (
               <div key={t.name} className="g-reveal"
                 style={{ padding: '2rem', background: '#ffffff', display: 'flex', flexDirection: 'column', transition: 'background 180ms ease', transitionDelay: `${i * 0.06}s` }}
@@ -550,7 +601,7 @@ function LandingPage() {
       </section>
 
       {/* ══ 6. PRICING ══ */}
-      <section id="pricing" style={{ padding: '6rem 0', background: '#ffffff', borderTop: `1px solid ${C.border}`, position: 'relative' }}>
+      <section id="pricing" className="lp-section" style={{ background: '#ffffff', borderTop: `1px solid ${C.border}`, position: 'relative' }}>
         <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 2rem' }}>
           <div className="g-reveal" style={{ textAlign: 'center', marginBottom: '4rem' }}>
             <h2 style={{ fontWeight: 450, fontSize: 'clamp(2rem,4vw,3rem)', color: C.textPrimary, marginBottom: '1rem', lineHeight: 1.2 }}>Einfach. Kostenlos.</h2>
@@ -613,7 +664,7 @@ function LandingPage() {
       </section>
 
       {/* ══ 7. FAQ ══ */}
-      <section id="faq" style={{ padding: '6rem 0', background: C.bgSecondary, position: 'relative' }}>
+      <section id="faq" className="lp-section" style={{ background: C.bgSecondary, position: 'relative' }}>
         <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 2rem' }}>
           <div className="g-reveal" style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
             <h2 style={{ fontWeight: 450, fontSize: 'clamp(2rem,4vw,3rem)', color: C.textPrimary, marginBottom: '1rem', lineHeight: 1.2 }}>Häufige Fragen</h2>
@@ -634,7 +685,7 @@ function LandingPage() {
       </section>
 
       {/* ══ 8. CTA ══ */}
-      <section style={{ padding: '6rem 0', background: `linear-gradient(135deg, ${C.blue} 0%, ${C.blueDark} 100%)`, textAlign: 'center', position: 'relative' }}>
+      <section className="lp-section" style={{ background: `linear-gradient(135deg, ${C.blue} 0%, ${C.blueDark} 100%)`, textAlign: 'center', position: 'relative' }}>
         <div style={{ maxWidth: 800, margin: '0 auto', padding: '0 2rem' }}>
           <div className="g-reveal">
             <h2 style={{ fontWeight: 450, fontSize: 'clamp(2rem,4vw,3rem)', color: 'white', marginBottom: '1rem', lineHeight: 1.2 }}>
