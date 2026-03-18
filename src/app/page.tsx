@@ -82,7 +82,6 @@ function AppHome() {
   const bg      = 'hsl(var(--background))'
   const cardBg  = 'hsl(var(--card))'
   const borderC = 'hsl(var(--border))'
-  const accent  = 'hsl(var(--accent))'
   const primary = isDark ? '#8ab4f8' : '#4285f4'
 
   const initials = profile
@@ -114,40 +113,88 @@ function AppHome() {
 
   const sharedCardProps = { isDark, cardBg, borderC, fg, fgMuted, primary }
 
+  const navBg = isDark
+    ? 'rgba(30,31,36,0.82)'
+    : 'rgba(255,255,255,0.82)'
+
   return (
     <div style={{ minHeight: '100svh', background: bg, fontFamily: '"Google Sans","Roboto",-apple-system,"Segoe UI",sans-serif', WebkitFontSmoothing: 'antialiased', color: fg, transition: 'background 200ms, color 200ms' }}>
-      <div style={{ maxWidth: 960, margin: '0 auto', padding: '0 1.5rem' }}>
 
-        {/* ── Header ── */}
-        <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.125rem 0', borderBottom: `1px solid ${borderC}` }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/App Icon.png" alt="AzubiHub" width={30} height={30} style={{ borderRadius: 8, objectFit: 'cover' }} />
-            <span style={{ fontSize: '0.9375rem', fontWeight: 600, letterSpacing: '-0.01em', color: fg }}>AzubiHub</span>
+      {/* ══ Sticky Topbar ══ */}
+      <header style={{
+        position: 'sticky', top: 0, zIndex: 20,
+        height: 60,
+        display: 'flex', alignItems: 'center',
+        padding: '0 clamp(1rem, 3vw, 2rem)',
+        background: navBg,
+        backdropFilter: 'blur(14px)',
+        WebkitBackdropFilter: 'blur(14px)',
+        borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)'}`,
+        gap: 12,
+      }}>
+        {/* Logo */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 9, flex: 1 }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/App Icon.png" alt="AzubiHub" width={28} height={28} style={{ borderRadius: 7, objectFit: 'cover', display: 'block' }} />
+          <div style={{ lineHeight: 1 }}>
+            <span style={{ fontSize: '0.9375rem', fontWeight: 600, color: fg, letterSpacing: '-0.01em' }}>AzubiHub</span>
+            <span style={{ fontSize: '0.6875rem', color: fgMuted, display: 'block', marginTop: 1 }}>Übersicht</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <button
-              onClick={toggleTheme} title={isDark ? 'Light Mode' : 'Dark Mode'}
-              style={{ width: 36, height: 36, borderRadius: 8, border: `1px solid ${borderC}`, background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: fgMuted, transition: 'background 120ms', fontFamily: 'inherit' }}
-              onMouseEnter={e => (e.currentTarget.style.background = accent)}
-              onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-            >
-              {isDark ? <SunIcon /> : <MoonIcon />}
-            </button>
-            <div style={{ width: 32, height: 32, borderRadius: '50%', background: primary, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6875rem', fontWeight: 700, color: isDark ? '#202124' : '#fff', flexShrink: 0 }}>
+        </div>
+
+        {/* Right cluster */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+
+          {/* Theme */}
+          <button
+            onClick={toggleTheme} title={isDark ? 'Light Mode' : 'Dark Mode'}
+            style={{ width: 36, height: 36, borderRadius: 9, border: 'none', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: fgMuted, transition: 'background 120ms, color 120ms', fontFamily: 'inherit', flexShrink: 0 }}
+            onMouseEnter={e => { e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.06)'; e.currentTarget.style.color = fg }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = fgMuted }}
+          >
+            {isDark ? <SunIcon /> : <MoonIcon />}
+          </button>
+
+          {/* Divider */}
+          <div style={{ width: 1, height: 20, background: borderC, flexShrink: 0 }} />
+
+          {/* Avatar pill */}
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 8,
+            padding: '0.3125rem 0.625rem 0.3125rem 0.375rem',
+            borderRadius: 9999,
+            border: `1px solid ${borderC}`,
+            background: 'transparent',
+            cursor: 'default',
+          }}>
+            <div style={{
+              width: 26, height: 26, borderRadius: '50%',
+              background: primary,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: '0.625rem', fontWeight: 700,
+              color: isDark ? '#1a1b1f' : '#fff',
+              flexShrink: 0,
+            }}>
               {initials}
             </div>
-            <button
-              onClick={logout}
-              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0.4375rem 0.875rem', border: `1px solid ${borderC}`, borderRadius: 9999, background: 'transparent', color: fgMuted, fontSize: '0.8125rem', cursor: 'pointer', transition: 'background 120ms, border-color 120ms', fontFamily: 'inherit' }}
-              onMouseEnter={e => { e.currentTarget.style.background = accent; e.currentTarget.style.borderColor = 'hsl(var(--ring))' }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = borderC }}
-            >
-              <HugeiconsIcon icon={Logout01Icon} size={14} />
-              <span className="hidden sm:inline">Abmelden</span>
-            </button>
+            <span className="hidden sm:block" style={{ fontSize: '0.8125rem', fontWeight: 500, color: fg, whiteSpace: 'nowrap', maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {profile ? `${profile.firstName} ${profile.lastName}` : 'Profil'}
+            </span>
           </div>
-        </header>
+
+          {/* Logout */}
+          <button
+            onClick={logout} title="Abmelden"
+            style={{ width: 36, height: 36, borderRadius: 9, border: 'none', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: fgMuted, transition: 'background 120ms, color 120ms', fontFamily: 'inherit', flexShrink: 0 }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(234,67,53,0.09)'; e.currentTarget.style.color = '#ea4335' }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = fgMuted }}
+          >
+            <HugeiconsIcon icon={Logout01Icon} size={16} />
+          </button>
+        </div>
+      </header>
+
+      <div style={{ maxWidth: 960, margin: '0 auto', padding: '0 1.5rem' }}>
 
         {/* ── Greeting ── */}
         <div style={{ paddingTop: '3rem', paddingBottom: '2.75rem' }}>
