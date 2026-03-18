@@ -3,7 +3,11 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
-/** GET /api/schedule/documents — returns signed-URL documents assigned to the current user */
+/**
+ * GET /api/schedule/documents
+ * Returns published, non-expired documents assigned to the current user.
+ * Includes signed URLs (1h), isRead flag, description, category, expiresAt.
+ */
 export async function GET() {
   try {
     const cookieStore = await cookies()
@@ -17,8 +21,9 @@ export async function GET() {
     if (!user) return NextResponse.json({ error: 'Nicht angemeldet.' }, { status: 401 })
 
     const admin = createAdminClient()
+    const now   = new Date().toISOString()
 
-    /* fetch assignments */
+    /* assignments for this user */
     const { data: assignments } = await admin
       .from('schedule_document_assignments')
       .select('document_id')
@@ -27,13 +32,26 @@ export async function GET() {
     if (!assignments?.length) return NextResponse.json({ documents: [] })
 
     const docIds = assignments.map(a => a.document_id)
+
+    /* fetch docs — filter draft + expired */
     const { data: docs, error } = await admin
       .from('schedule_documents')
-      .select('id, title, file_name, file_path, file_size, created_at')
+      .select('id, title, description, category, file_name, file_path, file_size, created_at, expires_at')
       .in('id', docIds)
+      .eq('status', 'published')
+      .or(`expires_at.is.null,expires_at.gt.${now}`)
       .order('created_at', { ascending: false })
 
     if (error) throw error
+
+    /* which docs has this user already read? */
+    const { data: reads } = await admin
+      .from('schedule_document_reads')
+      .select('document_id')
+      .eq('profile_id', user.id)
+      .in('document_id', docIds)
+
+    const readSet = new Set((reads ?? []).map(r => r.document_id))
 
     /* generate signed URLs (1-hour expiry) */
     const documentsWithUrls = await Promise.all(
@@ -42,12 +60,16 @@ export async function GET() {
           .from('schedule-documents')
           .createSignedUrl(doc.file_path, 3600)
         return {
-          id:        doc.id,
-          title:     doc.title,
-          fileName:  doc.file_name,
-          fileSize:  doc.file_size,
-          createdAt: doc.created_at,
-          url:       data?.signedUrl ?? null,
+          id:          doc.id,
+          title:       doc.title,
+          description: doc.description ?? null,
+          category:    doc.category    ?? 'allgemein',
+          fileName:    doc.file_name,
+          fileSize:    doc.file_size,
+          createdAt:   doc.created_at,
+          expiresAt:   doc.expires_at  ?? null,
+          isRead:      readSet.has(doc.id),
+          url:         data?.signedUrl ?? null,
         }
       })
     )
