@@ -26,6 +26,53 @@ interface Props {
   subtitle: string
 }
 
+const SEGMENT_LABELS: Record<string, string> = {
+  berichtsheft: 'Berichtsheft',
+  stundenplan:  'Stundenplan',
+  kalender:     'Kalender',
+  statistiken:  'Statistiken',
+  profil:       'Profil',
+  editor:       'Editor',
+  ausbilder:    'Ausbilder',
+  verwaltung:   'Verwaltung',
+  vorlagen:     'Vorlagen',
+}
+
+function Breadcrumb({ pathname, onNavigate }: { pathname: string; onNavigate: (href: string) => void }) {
+  const segments = pathname.split('/').filter(Boolean)
+  const crumbs = segments.map((seg, i) => ({
+    label: SEGMENT_LABELS[seg] ?? seg,
+    href:  '/' + segments.slice(0, i + 1).join('/'),
+    isLast: i === segments.length - 1,
+  }))
+
+  return (
+    <nav aria-label="Breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 4, overflow: 'hidden' }}>
+      {crumbs.map((crumb, i) => (
+        <React.Fragment key={crumb.href}>
+          {i > 0 && (
+            <span style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.8125rem', userSelect: 'none', flexShrink: 0 }}>›</span>
+          )}
+          {crumb.isLast ? (
+            <span style={{ fontSize: '0.875rem', fontWeight: 500, color: 'hsl(var(--foreground))', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {crumb.label}
+            </span>
+          ) : (
+            <button
+              onClick={() => onNavigate(crumb.href)}
+              style={{ fontSize: '0.875rem', fontWeight: 400, color: 'hsl(var(--muted-foreground))', background: 'none', border: 'none', cursor: 'pointer', padding: '2px 4px', borderRadius: 4, transition: 'color 120ms, background 120ms', fontFamily: 'inherit', flexShrink: 0, whiteSpace: 'nowrap' }}
+              onMouseEnter={e => { e.currentTarget.style.color = 'hsl(var(--foreground))'; e.currentTarget.style.background = 'hsl(var(--accent))' }}
+              onMouseLeave={e => { e.currentTarget.style.color = 'hsl(var(--muted-foreground))'; e.currentTarget.style.background = 'transparent' }}
+            >
+              {crumb.label}
+            </button>
+          )}
+        </React.Fragment>
+      ))}
+    </nav>
+  )
+}
+
 const SIDEBAR_FULL      = 256
 const SIDEBAR_COLLAPSED = 60
 
@@ -268,23 +315,19 @@ export default function DashboardLayout({ children, sections, subtitle }: Props)
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
         <header style={{ height: 56, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 12, padding: '0 1.5rem', borderBottom: '1px solid hsl(var(--border))', background: 'hsl(var(--background))', position: 'sticky', top: 0, zIndex: 10 }}>
 
-          {/* Mobile hamburger */}
+          {/* Hamburger — mobile only (no inline display to avoid override) */}
           <button
             className="md:hidden"
             onClick={() => setMobileOpen(o => !o)}
-            style={{ width: 34, height: 34, borderRadius: 8, border: 'none', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'hsl(var(--foreground))', transition: 'background 120ms', flexShrink: 0 }}
+            style={{ width: 34, height: 34, borderRadius: 8, border: 'none', background: 'transparent', cursor: 'pointer', alignItems: 'center', justifyContent: 'center', color: 'hsl(var(--foreground))', transition: 'background 120ms', flexShrink: 0 }}
             onMouseEnter={e => (e.currentTarget.style.background = 'hsl(var(--accent))')}
             onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
           >
             {mobileOpen ? <CloseIcon /> : <MenuIcon />}
           </button>
 
-          {/* Mobile logo */}
-          <div className="md:hidden" style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/App Icon.png" alt="" width={22} height={22} style={{ borderRadius: 5, objectFit: 'cover' }} />
-            <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>AzubiHub</span>
-          </div>
+          {/* Breadcrumb — always visible */}
+          <Breadcrumb pathname={pathname} onNavigate={href => router.push(href)} />
 
           <div style={{ flex: 1 }} />
 
