@@ -318,7 +318,7 @@ function Nav() {
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 2rem', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         {/* Logo */}
         <Link href="/" style={{ textDecoration: 'none' }}>
-          <Logo size={38} />
+          <Logo size={26} />
         </Link>
 
         {/* Nav links */}
@@ -332,7 +332,7 @@ function Nav() {
           ))}
         </div>
 
-        {/*Right side*/}
+        {/* Right side */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <Link href="/auth/login"
             style={{ color: C.textSec, fontWeight: 450, fontSize: '0.9375rem', padding: '0.5rem 0.75rem', borderRadius: 4, transition: 'color 150ms ease', textDecoration: 'none' }}
@@ -689,7 +689,7 @@ function LandingPage() {
             {/* Brand */}
             <div>
               <div style={{ marginBottom: '0.875rem' }}>
-                <Logo size={34} dark />
+                <Logo size={22} dark />
               </div>
               <p style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1.65, fontSize: '0.875rem', marginBottom: '1.25rem', maxWidth: 280 }}>
                 Digitale Ausbildungsplattform für Deutschland. KI-gestützt, IHK-konform, kostenlos.
