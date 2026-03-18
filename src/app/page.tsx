@@ -106,55 +106,60 @@ function AppHome() {
    THEME SYSTEM
 ═══════════════════════════════════════ */
 
-/* Brand colors — same in both modes */
+/* Google brand colors — identical in both modes */
 const BRAND = {
-  blue:   '#4285F4',
-  red:    '#EA4335',
-  yellow: '#FBBC04',
-  green:  '#34A853',
+  blue:   '#4285f4',
+  red:    '#ea4335',
+  yellow: '#fbbc04',
+  green:  '#34a853',
   purple: '#9c27b0',
 }
 
+/* Google Antigravity exact color palette */
 function makeG(dark: boolean) {
   return {
     ...BRAND,
-    bg:      dark ? '#060912'                   : '#ffffff',
-    surface: dark ? '#0d1117'                   : '#f4f7ff',
-    surface2:dark ? '#13192b'                   : '#ebf0fc',
-    border:  dark ? 'rgba(255,255,255,0.08)'    : 'rgba(0,0,0,0.09)',
-    text:    dark ? '#e8eaed'                   : '#111827',
-    mid:     dark ? '#9aa0a6'                   : '#4b5563',
-    muted:   dark ? '#5f6368'                   : '#9ca3af',
+    bg:      dark ? '#0d0f14'                  : '#ffffff',
+    surface: dark ? '#161b22'                  : '#f8f9fa',
+    surface2:dark ? '#1c2333'                  : '#f1f3f4',
+    border:  dark ? 'rgba(255,255,255,0.1)'    : '#dadce0',
+    text:    dark ? '#e8eaed'                  : '#202124',
+    mid:     dark ? '#9aa0a6'                  : '#5f6368',
+    muted:   dark ? '#5f6368'                  : '#80868b',
+    link:    dark ? '#8ab4f8'                  : '#1a73e8',
   }
 }
+
+/* Google Material card style (light) / Glassmorphism (dark) */
 function makeGlass(dark: boolean): React.CSSProperties {
   return dark
-    ? { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }
-    : { background: '#ffffff', border: '1px solid rgba(0,0,0,0.09)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', boxShadow: '0 2px 16px rgba(0,0,0,0.07)' }
+    ? { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }
+    : { background: '#ffffff', border: '1px solid #dadce0', boxShadow: '0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15)' }
 }
+
+/* Google Antigravity gradient — blue→green (light) / blue→green soft (dark) */
 function makeGradText(dark: boolean): React.CSSProperties {
   return {
     background: dark
-      ? 'linear-gradient(180deg,#fff 0%,rgba(232,234,237,0.75) 100%)'
-      : 'linear-gradient(135deg,#111827 0%,#1d4ed8 55%,#111827 100%)',
+      ? 'linear-gradient(135deg, #8ab4f8 0%, #81c995 100%)'
+      : `linear-gradient(90deg, #1a73e8 0%, #34a853 100%)`,
     WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
   }
 }
 
-const ThemeCtx = createContext<{ dark: boolean; toggle: () => void }>({ dark: true, toggle: () => {} })
+const ThemeCtx = createContext<{ dark: boolean; toggle: () => void }>({ dark: false, toggle: () => {} })
 function useTheme()    { return useContext(ThemeCtx) }
 function useG()        { const { dark } = useTheme(); return makeG(dark) }
-function useGlass()    { const { dark } = useTheme(); return makeGlass(dark) }
 
 /* ═══════════════════════════════════════
    DATA
 ═══════════════════════════════════════ */
 
 const FEATURES = [
-  { icon: BookOpenIcon,         title: 'Kein Papierchaos',        desc: 'Wochenberichte digital, strukturiert und IHK-konform. Kein Drucken, Suchen oder Ablegen.', color: BRAND.blue,   glow: 'rgba(66,133,244,0.15)',  bg: 'rgba(66,133,244,0.1)',  bgLight: '#e8f0fe', colorLight: '#1a56db', stat: '0 Papier' },
-  { icon: SparklesIcon,         title: '80 % weniger Aufwand',    desc: 'Stichpunkte eingeben — Claude AI formuliert in Sekunden professionellen IHK-Text.',      color: BRAND.purple, glow: 'rgba(156,39,176,0.15)',  bg: 'rgba(156,39,176,0.1)', bgLight: '#f3e5f5', colorLight: '#6a1b9a', stat: 'Ø 12 Min.' },
-  { icon: CheckmarkBadge01Icon, title: 'Ausbilder-Cockpit',       desc: 'Alle Berichte, Freigaben und Azubis zentral. Kommentieren und freigeben — sofort.',        color: BRAND.green,  glow: 'rgba(52,168,83,0.15)',   bg: 'rgba(52,168,83,0.1)',  bgLight: '#e6f4ea', colorLight: '#137333', stat: 'Bis 20 Azubis' },
-  { icon: Shield01Icon,         title: 'DSGVO & IHK-konform',     desc: 'Verschlüsselt auf EU-Servern. PDF-Export für die IHK mit einem Klick.',                   color: BRAND.red,    glow: 'rgba(234,67,53,0.15)',   bg: 'rgba(234,67,53,0.1)',  bgLight: '#fce8e6', colorLight: '#c5221f', stat: '100 % EU' },
+  { icon: BookOpenIcon,         title: 'Kein Papierchaos',        desc: 'Wochenberichte digital, strukturiert und IHK-konform. Kein Drucken, Suchen oder Ablegen.', color: BRAND.blue,   glow: 'rgba(66,133,244,0.2)',   bg: 'rgba(66,133,244,0.12)', bgLight: '#e8f0fe', colorLight: '#1967d2', stat: '0 Papier' },
+  { icon: SparklesIcon,         title: '80 % weniger Aufwand',    desc: 'Stichpunkte eingeben — Claude AI formuliert in Sekunden professionellen IHK-Text.',      color: BRAND.purple, glow: 'rgba(156,39,176,0.2)',   bg: 'rgba(156,39,176,0.12)',bgLight: '#f3e5f5', colorLight: '#6a1b9a', stat: 'Ø 12 Min.' },
+  { icon: CheckmarkBadge01Icon, title: 'Ausbilder-Cockpit',       desc: 'Alle Berichte, Freigaben und Azubis zentral. Kommentieren und freigeben — sofort.',        color: BRAND.green,  glow: 'rgba(52,168,83,0.2)',    bg: 'rgba(52,168,83,0.12)',  bgLight: '#e6f4ea', colorLight: '#137333', stat: 'Bis 20 Azubis' },
+  { icon: Shield01Icon,         title: 'DSGVO & IHK-konform',     desc: 'Verschlüsselt auf EU-Servern. PDF-Export für die IHK mit einem Klick.',                   color: BRAND.red,    glow: 'rgba(234,67,53,0.2)',    bg: 'rgba(234,67,53,0.12)',  bgLight: '#fce8e6', colorLight: '#c5221f', stat: '100 % EU' },
 ]
 const STATS = [
   { value: 500,   suffix: '+',  label: 'Aktive Nutzer',    color: BRAND.blue   },
@@ -254,7 +259,7 @@ function Logo() {
   const G = useG()
   return (
     <div className="flex items-center gap-2.5">
-      <div className="size-8 rounded-xl flex items-center justify-center" style={{ background: BRAND.blue }}>
+      <div className="size-8 rounded-lg flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${BRAND.blue}, ${BRAND.green})` }}>
         <span className="text-white font-black text-sm leading-none">A</span>
       </div>
       <span className="font-bold text-base tracking-tight" style={{ color: G.text }}>AzubiHub</span>
@@ -262,102 +267,125 @@ function Logo() {
   )
 }
 
-function GButton({ href, children, primary = false, className = '' }: { href: string; children: React.ReactNode; primary?: boolean; className?: string }) {
+/* Google-style pill buttons */
+function GButton({
+  href, children, primary = false, outline = false, className = '',
+  onClick,
+}: {
+  href?: string
+  children: React.ReactNode
+  primary?: boolean
+  outline?: boolean
+  className?: string
+  onClick?: () => void
+}) {
   const { dark } = useTheme()
+  const G = useG()
+
   const base: React.CSSProperties = primary
-    ? { background: BRAND.blue, color: '#fff', boxShadow: '0 0 20px rgba(66,133,244,0.4)' }
-    : dark
-      ? { background: 'rgba(255,255,255,0.06)', color: '#e8eaed', border: '1px solid rgba(255,255,255,0.14)' }
-      : { background: 'rgba(0,0,0,0.04)', color: '#202124', border: '1px solid rgba(0,0,0,0.12)' }
-  return (
-    <Link href={href}>
-      <span className={`inline-flex items-center gap-2 rounded-full font-semibold cursor-pointer select-none transition-all duration-200 ${className}`}
-        style={{ ...base, padding: className ? undefined : '0.875rem 1.75rem', fontSize: '0.875rem' }}
-        onMouseEnter={(e: React.MouseEvent<HTMLSpanElement>) => {
-          const el = e.currentTarget as HTMLSpanElement
-          if (primary) { el.style.transform = 'translateY(-2px)'; el.style.boxShadow = '0 6px 28px rgba(66,133,244,.6)' }
-          else if (dark) { el.style.background = 'rgba(255,255,255,0.1)' }
-          else { el.style.background = 'rgba(0,0,0,0.07)' }
-        }}
-        onMouseLeave={(e: React.MouseEvent<HTMLSpanElement>) => {
-          const el = e.currentTarget as HTMLSpanElement
-          if (primary) { el.style.transform = ''; el.style.boxShadow = '0 0 20px rgba(66,133,244,.4)' }
-          else if (dark) { el.style.background = 'rgba(255,255,255,0.06)' }
-          else { el.style.background = 'rgba(0,0,0,0.04)' }
-        }}>
-        {children}
-      </span>
-    </Link>
+    ? { background: '#1a73e8', color: '#ffffff', border: '1px solid #1a73e8' }
+    : outline
+      ? { background: 'transparent', color: G.link, border: `1px solid ${G.border}` }
+      : dark
+        ? { background: 'rgba(255,255,255,0.08)', color: '#e8eaed', border: '1px solid rgba(255,255,255,0.16)' }
+        : { background: '#ffffff', color: '#3c4043', border: '1px solid #dadce0' }
+
+  const inner = (
+    <span
+      className={`inline-flex items-center gap-2 rounded-full font-medium cursor-pointer select-none transition-all duration-150 ${className}`}
+      style={{ ...base, padding: className ? undefined : '0 24px', height: className ? undefined : '40px', fontSize: '14px', lineHeight: '40px' }}
+      onMouseEnter={(e: React.MouseEvent<HTMLSpanElement>) => {
+        const el = e.currentTarget as HTMLSpanElement
+        if (primary) { el.style.background = '#1765cc'; el.style.boxShadow = '0 1px 3px 1px rgba(66,133,244,0.4)' }
+        else if (outline) { el.style.background = `${G.link}0d`; el.style.borderColor = G.link }
+        else if (dark) { el.style.background = 'rgba(255,255,255,0.14)' }
+        else { el.style.background = '#f8f9fa' }
+      }}
+      onMouseLeave={(e: React.MouseEvent<HTMLSpanElement>) => {
+        const el = e.currentTarget as HTMLSpanElement
+        if (primary) { el.style.background = '#1a73e8'; el.style.boxShadow = '' }
+        else if (outline) { el.style.background = 'transparent'; el.style.borderColor = G.border }
+        else if (dark) { el.style.background = 'rgba(255,255,255,0.08)' }
+        else { el.style.background = '#ffffff' }
+      }}
+      onClick={onClick}>
+      {children}
+    </span>
   )
+
+  if (href) return <Link href={href}>{inner}</Link>
+  return inner
 }
 
+/* Google Antigravity ring particles */
 function OrbitalRings() {
   const { dark } = useTheme()
-  const o = dark ? 1 : 1.8  // opacity multiplier — rings more visible in light mode
+  const o = dark ? 1 : 2.2
   return (
     <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none" style={{ zIndex: 0 }}>
-      <div className="absolute rounded-full" style={{ width: 800, height: 800, background: `radial-gradient(circle, rgba(66,133,244,${dark ? '0.07' : '0.12'}) 0%, transparent 70%)`, top: '50%', left: '50%', transform: 'translate(-50%,-50%)' }} />
-      <div className="absolute rounded-full" style={{ width: 500, height: 500, background: `radial-gradient(circle, rgba(52,168,83,${dark ? '0.05' : '0.07'}) 0%, transparent 70%)`, top: '20%', right: '15%' }} />
+      {/* Ambient glow */}
+      <div className="absolute rounded-full" style={{ width: 900, height: 900, background: `radial-gradient(circle, rgba(66,133,244,${dark ? '0.07' : '0.1'}) 0%, transparent 65%)`, top: '50%', left: '50%', transform: 'translate(-50%,-50%)' }} />
+      <div className="absolute rounded-full" style={{ width: 600, height: 600, background: `radial-gradient(circle, rgba(52,168,83,${dark ? '0.04' : '0.07'}) 0%, transparent 70%)`, top: '15%', right: '10%' }} />
+      <div className="absolute rounded-full" style={{ width: 400, height: 400, background: `radial-gradient(circle, rgba(234,67,53,${dark ? '0.03' : '0.06'}) 0%, transparent 70%)`, bottom: '20%', left: '5%' }} />
 
-      {/* Ring 1 — outer CW 28s */}
-      <div className="absolute rounded-full" style={{ width: 660, height: 660, border: `1px solid rgba(66,133,244,${0.18 * o})`, animation: 'orbit-cw 28s linear infinite' }}>
-        <span className="absolute rounded-full" style={{ width: 12, height: 12, background: BRAND.blue, top: -6, left: '50%', marginLeft: -6, boxShadow: `0 0 18px ${BRAND.blue}, 0 0 36px rgba(66,133,244,0.4)` }} />
-        <span className="absolute rounded-full" style={{ width: 6, height: 6, background: `rgba(66,133,244,0.5)`, bottom: -3, right: '25%', boxShadow: `0 0 10px ${BRAND.blue}` }} />
+      {/* Ring 1 — outermost CW 32s */}
+      <div className="absolute rounded-full" style={{ width: 700, height: 700, border: `1px solid rgba(66,133,244,${0.15 * o})`, animation: 'orbit-cw 32s linear infinite' }}>
+        <span className="absolute rounded-full" style={{ width: 14, height: 14, background: BRAND.blue, top: -7, left: '50%', marginLeft: -7, boxShadow: `0 0 20px ${BRAND.blue}, 0 0 40px rgba(66,133,244,0.4)` }} />
+        <span className="absolute rounded-full" style={{ width: 7, height: 7, background: `rgba(66,133,244,0.6)`, bottom: -3, right: '25%', boxShadow: `0 0 10px ${BRAND.blue}` }} />
       </div>
-      {/* Ring 2 — mid CCW 20s */}
-      <div className="absolute rounded-full" style={{ width: 460, height: 460, border: `1px solid rgba(234,67,53,${0.16 * o})`, animation: 'orbit-ccw 20s linear infinite 2s' }}>
-        <span className="absolute rounded-full" style={{ width: 10, height: 10, background: BRAND.red, bottom: -5, left: '50%', marginLeft: -5, boxShadow: `0 0 14px ${BRAND.red}, 0 0 28px rgba(234,67,53,0.35)` }} />
-        <span className="absolute rounded-full" style={{ width: 5, height: 5, background: `rgba(234,67,53,0.5)`, top: '20%', right: -2, boxShadow: `0 0 8px ${BRAND.red}` }} />
+
+      {/* Ring 2 — CCW 22s */}
+      <div className="absolute rounded-full" style={{ width: 520, height: 520, border: `1px solid rgba(234,67,53,${0.14 * o})`, animation: 'orbit-ccw 22s linear infinite 1.5s' }}>
+        <span className="absolute rounded-full" style={{ width: 11, height: 11, background: BRAND.red, bottom: -5, left: '50%', marginLeft: -5, boxShadow: `0 0 16px ${BRAND.red}, 0 0 32px rgba(234,67,53,0.35)` }} />
+        <span className="absolute rounded-full" style={{ width: 5, height: 5, background: `rgba(234,67,53,0.5)`, top: '20%', right: -2 }} />
       </div>
-      {/* Ring 3 — inner CW 13s */}
-      <div className="absolute rounded-full" style={{ width: 290, height: 290, border: `1px dashed rgba(52,168,83,${0.22 * o})`, animation: 'orbit-cw 13s linear infinite 1s' }}>
-        <span className="absolute rounded-full" style={{ width: 8, height: 8, background: BRAND.green, top: -4, right: '20%', boxShadow: `0 0 12px ${BRAND.green}, 0 0 24px rgba(52,168,83,0.3)` }} />
+
+      {/* Ring 3 — dashed CW 15s */}
+      <div className="absolute rounded-full" style={{ width: 340, height: 340, border: `1px dashed rgba(52,168,83,${0.18 * o})`, animation: 'orbit-cw 15s linear infinite 0.8s' }}>
+        <span className="absolute rounded-full" style={{ width: 9, height: 9, background: BRAND.green, top: -4, right: '20%', boxShadow: `0 0 14px ${BRAND.green}, 0 0 28px rgba(52,168,83,0.3)` }} />
       </div>
-      {/* Ring 4 — tiny CCW 8s */}
-      <div className="absolute rounded-full" style={{ width: 150, height: 150, border: `1px solid rgba(251,188,4,${0.24 * o})`, animation: 'orbit-ccw 8s linear infinite 0.5s' }}>
-        <span className="absolute rounded-full" style={{ width: 6, height: 6, background: BRAND.yellow, top: -3, left: '50%', marginLeft: -3, boxShadow: `0 0 10px ${BRAND.yellow}` }} />
+
+      {/* Ring 4 — innermost CCW 9s */}
+      <div className="absolute rounded-full" style={{ width: 180, height: 180, border: `1px solid rgba(251,188,4,${0.22 * o})`, animation: 'orbit-ccw 9s linear infinite 0.3s' }}>
+        <span className="absolute rounded-full" style={{ width: 7, height: 7, background: BRAND.yellow, top: -3, left: '50%', marginLeft: -3, boxShadow: `0 0 12px ${BRAND.yellow}` }} />
       </div>
+
       {/* Center orb */}
-      <div className="absolute rounded-full" style={{ width: 64, height: 64, background: `radial-gradient(circle, rgba(66,133,244,${dark ? '0.9' : '0.5'}) 0%, rgba(66,133,244,0) 70%)`, animation: 'goog-glow-pulse 3.5s ease-in-out infinite', boxShadow: `0 0 40px rgba(66,133,244,0.5), 0 0 80px rgba(66,133,244,0.2)` }} />
+      <div className="absolute rounded-full" style={{ width: 56, height: 56, background: `radial-gradient(circle, rgba(66,133,244,${dark ? '0.9' : '0.5'}) 0%, rgba(66,133,244,0) 70%)`, animation: 'goog-glow-pulse 3.5s ease-in-out infinite', boxShadow: `0 0 40px rgba(66,133,244,0.5), 0 0 80px rgba(66,133,244,0.2)` }} />
     </div>
   )
 }
 
-/* ─── Nav ─── */
+/* ─── Google-style Navigation ─── */
 function LandingNav() {
   const G = useG()
-  const glass = useGlass()
   const { dark, toggle } = useTheme()
   const [scrolled, setScrolled] = useState(false)
   useEffect(() => {
-    const fn = () => setScrolled(window.scrollY > 30)
+    const fn = () => setScrolled(window.scrollY > 20)
     window.addEventListener('scroll', fn, { passive: true })
     return () => window.removeEventListener('scroll', fn)
   }, [])
 
-  const navBg = scrolled
-    ? dark ? 'rgba(6,9,18,0.88)' : 'rgba(255,255,255,0.88)'
-    : 'transparent'
-
   return (
-    <nav className="fixed top-0 inset-x-0 z-50 transition-all duration-300"
+    <nav className="fixed top-0 inset-x-0 z-50 transition-all duration-200"
       style={{
-        background:           navBg,
-        backdropFilter:       scrolled ? 'blur(20px)' : 'none',
-        WebkitBackdropFilter: scrolled ? 'blur(20px)' : 'none',
-        borderBottom:         scrolled ? `1px solid ${G.border}` : '1px solid transparent',
-        boxShadow:            scrolled ? (dark ? '0 2px 20px rgba(0,0,0,0.4)' : '0 2px 12px rgba(0,0,0,0.08)') : 'none',
+        background:   scrolled ? (dark ? 'rgba(13,15,20,0.95)' : 'rgba(255,255,255,0.97)') : 'transparent',
+        borderBottom: scrolled ? `1px solid ${G.border}` : '1px solid transparent',
+        backdropFilter: scrolled ? 'blur(8px)' : 'none',
+        WebkitBackdropFilter: scrolled ? 'blur(8px)' : 'none',
+        boxShadow: scrolled && !dark ? '0 1px 4px rgba(0,0,0,0.1)' : 'none',
       }}>
-      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-8">
+      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-6">
         <Link href="/"><Logo /></Link>
 
         <div className="hidden md:flex items-center gap-1 text-sm">
           {[['#features','Features'],['#how-it-works','So funktioniert\'s'],['#pricing','Preise'],['#faq','FAQ']].map(([href, label]) => (
             <a key={href} href={href}
-              className="px-4 py-2 rounded-full font-medium transition-all duration-150"
+              className="px-4 py-2 rounded-full text-sm font-medium transition-colors duration-150"
               style={{ color: G.mid }}
-              onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = G.text)}
-              onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = G.mid)}>
+              onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => { e.currentTarget.style.color = G.text; e.currentTarget.style.background = dark ? 'rgba(255,255,255,0.06)' : '#f1f3f4' }}
+              onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => { e.currentTarget.style.color = G.mid; e.currentTarget.style.background = 'transparent' }}>
               {label}
             </a>
           ))}
@@ -365,27 +393,26 @@ function LandingNav() {
 
         <div className="flex items-center gap-2">
           <Link href="/auth/login"
-            className="hidden sm:block px-4 py-2 text-sm font-medium rounded-full transition-all duration-150"
+            className="hidden sm:block px-4 py-2 text-sm font-medium rounded-full transition-colors duration-150"
             style={{ color: G.mid }}
-            onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = G.text)}
-            onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = G.mid)}>
+            onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => { e.currentTarget.style.color = G.text; e.currentTarget.style.background = dark ? 'rgba(255,255,255,0.06)' : '#f1f3f4' }}
+            onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => { e.currentTarget.style.color = G.mid; e.currentTarget.style.background = 'transparent' }}>
             Anmelden
           </Link>
 
-          {/* ── Theme toggle ── */}
+          {/* Theme toggle */}
           <button
             onClick={toggle}
             title={dark ? 'Light Mode' : 'Dark Mode'}
-            className="size-9 rounded-full flex items-center justify-center transition-all duration-200"
-            style={{ ...glass, color: G.mid }}
-            onMouseEnter={(e: React.MouseEvent<HTMLButtonElement>) => { const el = e.currentTarget; el.style.color = G.text; el.style.transform = 'rotate(20deg) scale(1.1)' }}
-            onMouseLeave={(e: React.MouseEvent<HTMLButtonElement>) => { const el = e.currentTarget; el.style.color = G.mid; el.style.transform = '' }}>
+            className="size-9 rounded-full flex items-center justify-center transition-all duration-150"
+            style={{ color: G.mid, border: `1px solid ${G.border}` }}
+            onMouseEnter={(e: React.MouseEvent<HTMLButtonElement>) => { const el = e.currentTarget; el.style.background = dark ? 'rgba(255,255,255,0.08)' : '#f1f3f4'; el.style.color = G.text }}
+            onMouseLeave={(e: React.MouseEvent<HTMLButtonElement>) => { const el = e.currentTarget; el.style.background = 'transparent'; el.style.color = G.mid }}>
             {dark ? <SunSVG /> : <MoonSVG />}
           </button>
 
-          <GButton href="/auth/register" primary className="px-5 py-2.5 text-sm">
+          <GButton href="/auth/register" primary>
             Kostenlos starten
-            <HugeiconsIcon icon={ArrowRight01Icon} size={14} />
           </GButton>
         </div>
       </div>
@@ -393,25 +420,28 @@ function LandingNav() {
   )
 }
 
-/* ─── FAQ item ─── */
+/* ─── Google Material Accordion ─── */
 function FaqItem({ q, a, idx }: { q: string; a: string; idx: number }) {
   const G = useG()
-  const glass = useGlass()
+  const { dark } = useTheme()
   const [open, setOpen] = useState(false)
   const colors = [BRAND.blue, BRAND.red, BRAND.green, BRAND.yellow, BRAND.blue, BRAND.red, BRAND.green, BRAND.yellow]
   const c = colors[idx % colors.length]
   return (
     <button onClick={() => setOpen(o => !o)}
-      className="w-full text-left rounded-2xl px-6 py-5 transition-all duration-200"
-      style={{ ...glass, boxShadow: open ? `0 0 20px ${c}18` : 'none', borderColor: open ? `${c}40` : G.border }}>
+      className="w-full text-left px-6 py-5 transition-all duration-150"
+      style={{
+        background: dark ? (open ? 'rgba(255,255,255,0.05)' : 'transparent') : (open ? '#f8f9fa' : '#ffffff'),
+        borderBottom: `1px solid ${G.border}`,
+      }}>
       <div className="flex items-center justify-between gap-4">
-        <span className="font-semibold text-sm leading-snug" style={{ color: G.text }}>{q}</span>
-        <span className="size-7 rounded-full flex items-center justify-center shrink-0 transition-all duration-200"
-          style={{ background: open ? c : G.border, color: open ? '#fff' : G.mid }}>
-          <HugeiconsIcon icon={open ? MinusSignIcon : Add01Icon} size={13} />
+        <span className="font-medium text-sm leading-snug" style={{ color: G.text }}>{q}</span>
+        <span className="size-6 rounded-full flex items-center justify-center shrink-0 transition-all duration-200"
+          style={{ background: open ? c : 'transparent', color: open ? '#fff' : G.muted, border: `1px solid ${open ? c : G.border}` }}>
+          <HugeiconsIcon icon={open ? MinusSignIcon : Add01Icon} size={12} />
         </span>
       </div>
-      <div style={{ maxHeight: open ? '160px' : '0', overflow: 'hidden', transition: 'max-height 0.35s cubic-bezier(0.16,1,0.3,1)', marginTop: open ? '12px' : '0' }}>
+      <div style={{ maxHeight: open ? '160px' : '0', overflow: 'hidden', transition: 'max-height 0.3s cubic-bezier(0.4,0,0.2,1)', marginTop: open ? '10px' : '0' }}>
         <p className="text-sm leading-relaxed" style={{ color: G.mid }}>{a}</p>
       </div>
     </button>
@@ -419,16 +449,24 @@ function FaqItem({ q, a, idx }: { q: string; a: string; idx: number }) {
 }
 
 function SectionLabel({ text, color }: { text: string; color: string }) {
-  return <p className="g-reveal text-xs font-bold uppercase tracking-[0.2em] mb-4" style={{ color }}>{text}</p>
+  return (
+    <div className="g-reveal flex justify-center mb-5">
+      <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.15em] px-4 py-1.5 rounded-full"
+        style={{ color, background: `${color}14`, border: `1px solid ${color}30` }}>
+        {text}
+      </span>
+    </div>
+  )
 }
 
 /* ═══════════════════════════════════════
    LANDING PAGE
 ═══════════════════════════════════════ */
 function LandingPage() {
+  /* Default LIGHT — matching antigravity.google */
   const [dark, setDark] = useState<boolean>(() => {
-    if (typeof window !== 'undefined') return localStorage.getItem('azubihub-theme') !== 'light'
-    return true
+    if (typeof window !== 'undefined') return localStorage.getItem('azubihub-theme') === 'dark'
+    return false
   })
   const toggle = () => {
     const next = !dark; setDark(next)
@@ -441,77 +479,101 @@ function LandingPage() {
   const glass = makeGlass(dark)
   const gradText = makeGradText(dark)
 
+  /* Material card hover helpers */
+  const cardHoverIn = (el: HTMLElement, color?: string) => {
+    el.style.boxShadow = dark
+      ? `0 8px 32px rgba(0,0,0,0.5)`
+      : `0 1px 3px 0 rgba(60,64,67,0.3), 0 4px 8px 3px rgba(60,64,67,0.15)`
+    el.style.transform = 'translateY(-2px)'
+    if (color && !dark) el.style.borderColor = `${color}50`
+  }
+  const cardHoverOut = (el: HTMLElement) => {
+    el.style.boxShadow = dark
+      ? 'none'
+      : '0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15)'
+    el.style.transform = ''
+    if (!dark) el.style.borderColor = '#dadce0'
+  }
+
   return (
     <ThemeCtx.Provider value={{ dark, toggle }}>
-      <div style={{ background: G.bg, color: G.text, fontFamily: '"Google Sans","Segoe UI",system-ui,sans-serif', transition: 'background 0.4s ease, color 0.3s ease' }} className="min-h-screen overflow-x-hidden">
+      <div style={{ background: G.bg, color: G.text, fontFamily: '"Google Sans","Roboto","Segoe UI",system-ui,sans-serif', transition: 'background 0.3s, color 0.3s' }} className="min-h-screen overflow-x-hidden">
         <LandingNav />
 
         {/* ════ 1. HERO ════ */}
-        <section className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-16 pb-24 overflow-hidden"
-          style={dark ? {} : { background: 'linear-gradient(180deg, #f4f7ff 0%, #ffffff 60%)' }}>
+        <section className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-20 pb-28 overflow-hidden"
+          style={dark ? {} : { background: 'linear-gradient(180deg,#f8f9ff 0%,#ffffff 55%)' }}>
           <OrbitalRings />
+
           <div className="relative z-10 max-w-3xl mx-auto text-center">
-            {/* Badge */}
-            <div className="g-reveal inline-flex items-center gap-3 rounded-full px-5 py-2.5 mb-10 text-sm font-medium" style={{ ...glass, color: G.mid }}>
-              <span className="flex gap-1.5">
-                {[BRAND.blue, BRAND.red, BRAND.yellow, BRAND.green].map(c => (
-                  <span key={c} className="size-2 rounded-full" style={{ background: c, boxShadow: `0 0 6px ${c}` }} />
-                ))}
-              </span>
-              Für Betriebe · Ausbilder · Auszubildende
+            {/* Google-style pill badge */}
+            <div className="g-reveal inline-flex items-center gap-2 rounded-full px-5 py-2 mb-10 text-sm font-medium"
+              style={{
+                background: dark ? 'rgba(138,180,248,0.12)' : '#e8f0fe',
+                border: dark ? '1px solid rgba(138,180,248,0.25)' : '1px solid #c5d7fd',
+                color: dark ? '#8ab4f8' : '#1967d2',
+              }}>
+              <HugeiconsIcon icon={SparklesIcon} size={13} />
+              Neu · KI-Formulierung mit Claude AI
             </div>
-            {/* Headline */}
+
+            {/* Display headline */}
             <h1 className="g-reveal font-black tracking-tight leading-none mb-8"
-              style={{ ...gradText, fontSize: 'clamp(52px, 9vw, 96px)', letterSpacing: '-3px', transitionDelay: '0.1s' }}>
-              Ausbildung, neu gedacht.
+              style={{ ...gradText, fontSize: 'clamp(52px,8.5vw,92px)', letterSpacing: '-3px', transitionDelay: '0.1s' }}>
+              Ausbildung,<br />neu gedacht.
             </h1>
+
             <p className="g-reveal text-xl leading-relaxed mb-12 max-w-2xl mx-auto" style={{ color: G.mid, transitionDelay: '0.2s' }}>
-              AzubiHub digitalisiert Berichtshefte, Ausbilder-Freigaben und die gesamte Ausbildungsdokumentation.
-              KI-gestützt, IHK-konform und dauerhaft kostenlos.
+              AzubiHub digitalisiert Berichtshefte, Ausbilder-Freigaben und die gesamte
+              Ausbildungsdokumentation — KI-gestützt, IHK-konform, kostenlos.
             </p>
-            <div className="g-reveal flex flex-col sm:flex-row gap-4 justify-center mb-14" style={{ transitionDelay: '0.3s' }}>
-              <GButton href="/auth/register" primary className="text-base px-9 py-4">
-                Kostenlos starten <HugeiconsIcon icon={ArrowRight01Icon} size={18} />
+
+            {/* CTA row */}
+            <div className="g-reveal flex flex-col sm:flex-row gap-3 justify-center mb-14" style={{ transitionDelay: '0.3s' }}>
+              <GButton href="/auth/register" primary className="text-[15px] px-8 py-3 h-auto leading-none">
+                Kostenlos starten <HugeiconsIcon icon={ArrowRight01Icon} size={16} />
               </GButton>
-              <a href="#features">
-                <span className="inline-flex items-center gap-2 px-9 py-4 rounded-full text-base font-semibold cursor-pointer transition-all duration-200"
-                  style={{ ...glass, color: G.text }}
-                  onMouseEnter={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.background = dark ? 'rgba(255,255,255,0.09)' : '#f0f4ff' }}
-                  onMouseLeave={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.background = dark ? 'rgba(255,255,255,0.04)' : '#ffffff' }}>
-                  Features entdecken
-                </span>
-              </a>
+              <GButton href="#features" outline className="text-[15px] px-8 py-3 h-auto leading-none">
+                Features entdecken
+              </GButton>
             </div>
-            {/* Trust chips */}
-            <div className="g-reveal flex flex-wrap items-center justify-center gap-3" style={{ transitionDelay: '0.4s' }}>
+
+            {/* Trust row */}
+            <div className="g-reveal flex flex-wrap items-center justify-center gap-2.5" style={{ transitionDelay: '0.4s' }}>
               {[
                 { icon: Shield01Icon,         label: 'DSGVO-konform',  color: BRAND.blue   },
                 { icon: CheckmarkBadge01Icon, label: 'IHK-konform',    color: BRAND.green  },
                 { icon: SparklesIcon,         label: 'KI-gestützt',    color: BRAND.purple },
-                { icon: LockPasswordIcon,     label: 'EU-Datenschutz', color: BRAND.red    },
+                { icon: LockPasswordIcon,     label: 'EU-Server',      color: BRAND.red    },
               ].map(t => (
-                <span key={t.label} className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium" style={{ ...glass, color: G.mid }}>
-                  <HugeiconsIcon icon={t.icon} size={13} style={{ color: t.color }} />
+                <span key={t.label} className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium"
+                  style={{
+                    background: dark ? 'rgba(255,255,255,0.06)' : `${t.color}0f`,
+                    border: `1px solid ${dark ? 'rgba(255,255,255,0.1)' : `${t.color}28`}`,
+                    color: dark ? G.mid : t.color,
+                  }}>
+                  <HugeiconsIcon icon={t.icon} size={12} style={{ color: t.color }} />
                   {t.label}
                 </span>
               ))}
             </div>
           </div>
-          {/* Scroll cue */}
-          <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center" style={{ color: G.muted, opacity: 0.4, animation: 'goog-float4 2.8s ease-in-out infinite' }}>
-            <div className="size-6 rounded-full border border-current flex items-center justify-center">
-              <div className="size-1.5 rounded-full bg-current" />
+
+          {/* Scroll indicator */}
+          <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5" style={{ opacity: 0.35 }}>
+            <div className="size-6 rounded-full border flex items-center justify-center" style={{ borderColor: G.muted }}>
+              <div className="size-1.5 rounded-full" style={{ background: G.muted, animation: 'goog-float4 2.5s ease-in-out infinite' }} />
             </div>
           </div>
         </section>
 
         {/* ════ 2. STATS ════ */}
         <section className="py-20 px-6" style={{ background: G.surface, borderTop: `1px solid ${G.border}`, borderBottom: `1px solid ${G.border}` }}>
-          <div className="max-w-5xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-8">
+          <div className="max-w-5xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-10">
             {STATS.map((s, i) => (
-              <div key={s.label} className="g-reveal text-center" style={{ transitionDelay: `${i * 0.1}s` }}>
-                <div className="size-2 rounded-full mx-auto mb-4" style={{ background: s.color, boxShadow: `0 0 12px ${s.color}` }} />
-                <div className="text-5xl sm:text-6xl font-black mb-2 tabular-nums" style={{ color: s.color, filter: dark ? `drop-shadow(0 0 16px ${s.color}60)` : 'none' }}>
+              <div key={s.label} className="g-reveal text-center" style={{ transitionDelay: `${i * 0.08}s` }}>
+                <div className="size-2 rounded-full mx-auto mb-4" style={{ background: s.color }} />
+                <div className="text-5xl sm:text-6xl font-black mb-2 tabular-nums" style={{ color: s.color }}>
                   <AnimatedNumber target={s.value} suffix={s.suffix} />
                 </div>
                 <p className="text-sm font-medium" style={{ color: G.mid }}>{s.label}</p>
@@ -521,32 +583,31 @@ function LandingPage() {
         </section>
 
         {/* ════ 3. FEATURES ════ */}
-        <section id="features" className="py-28 px-6 relative overflow-hidden" style={{ background: G.bg }}>
-          <div className="absolute pointer-events-none rounded-full" style={{ width: 600, height: 600, background: `radial-gradient(circle, rgba(66,133,244,${dark ? '0.06' : '0.09'}) 0%, transparent 70%)`, top: '0%', left: '-10%' }} />
-          <div className="max-w-6xl mx-auto relative z-10">
-            <div className="text-center mb-16">
+        <section id="features" className="py-28 px-6" style={{ background: G.bg }}>
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-14">
               <SectionLabel text="Was AzubiHub leistet" color={BRAND.blue} />
-              <h2 className="g-reveal text-5xl sm:text-6xl font-black tracking-tight" style={{ ...gradText, letterSpacing: '-2px', transitionDelay: '0.1s' }}>
-                Vier Gründe,<br />die überzeugen.
+              <h2 className="g-reveal text-4xl sm:text-5xl font-black tracking-tight" style={{ ...gradText, letterSpacing: '-1.5px', transitionDelay: '0.1s' }}>
+                Vier Gründe, die überzeugen.
               </h2>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {FEATURES.map((f, i) => (
                 <div key={f.title}
-                  className="g-reveal rounded-3xl p-8 relative overflow-hidden transition-all duration-300 cursor-default group"
-                  style={{ ...glass, transitionDelay: `${i * 0.08}s` }}
-                  onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.background = dark ? 'rgba(255,255,255,0.07)' : '#f6faff'; el.style.borderColor = `${f.color}35`; el.style.transform = 'translateY(-4px)'; el.style.boxShadow = dark ? `0 20px 60px ${f.glow}` : `0 12px 40px ${f.glow}, 0 4px 16px rgba(0,0,0,0.08)` }}
-                  onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.background = dark ? 'rgba(255,255,255,0.04)' : '#ffffff'; el.style.borderColor = G.border; el.style.transform = ''; el.style.boxShadow = dark ? '' : '0 2px 16px rgba(0,0,0,0.07)' }}>
-                  <div className="absolute top-0 right-0 w-40 h-40 rounded-full pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                    style={{ background: `radial-gradient(circle, ${f.color}20 0%, transparent 70%)` }} />
-                  <div className="flex items-start justify-between mb-6 relative z-10">
-                    <div className="size-14 rounded-2xl flex items-center justify-center" style={{ background: dark ? f.bg : f.bgLight }}>
-                      <HugeiconsIcon icon={f.icon} size={26} style={{ color: dark ? f.color : f.colorLight }} />
+                  className="g-reveal rounded-2xl p-7 relative overflow-hidden cursor-default"
+                  style={{ ...glass, transitionDelay: `${i * 0.08}s`, transition: 'box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease' }}
+                  onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => cardHoverIn(e.currentTarget, f.color)}
+                  onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => cardHoverOut(e.currentTarget)}>
+                  <div className="flex items-start justify-between mb-5">
+                    <div className="size-12 rounded-xl flex items-center justify-center" style={{ background: dark ? f.bg : f.bgLight }}>
+                      <HugeiconsIcon icon={f.icon} size={24} style={{ color: dark ? f.color : f.colorLight }} />
                     </div>
-                    <span className="text-xs font-bold px-3 py-1.5 rounded-full" style={{ background: dark ? f.bg : f.bgLight, color: dark ? f.color : f.colorLight }}>{f.stat}</span>
+                    <span className="text-xs font-semibold px-3 py-1 rounded-full" style={{ background: dark ? f.bg : f.bgLight, color: dark ? f.color : f.colorLight }}>
+                      {f.stat}
+                    </span>
                   </div>
-                  <h3 className="text-lg font-bold mb-2 relative z-10" style={{ color: G.text }}>{f.title}</h3>
-                  <p className="text-sm leading-relaxed relative z-10" style={{ color: G.mid }}>{f.desc}</p>
+                  <h3 className="text-base font-semibold mb-2" style={{ color: G.text }}>{f.title}</h3>
+                  <p className="text-sm leading-relaxed" style={{ color: G.mid }}>{f.desc}</p>
                 </div>
               ))}
             </div>
@@ -554,68 +615,70 @@ function LandingPage() {
         </section>
 
         {/* ════ 4. PROBLEM / LÖSUNG ════ */}
-        <section className="py-28 px-6 relative overflow-hidden" style={{ background: G.surface }}>
-          <div className="max-w-6xl mx-auto relative z-10">
-            <div className="text-center mb-16">
+        <section className="py-28 px-6" style={{ background: G.surface, borderTop: `1px solid ${G.border}`, borderBottom: `1px solid ${G.border}` }}>
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-14">
               <SectionLabel text="Die Ausgangslage" color={BRAND.red} />
-              <h2 className="g-reveal text-5xl sm:text-6xl font-black tracking-tight" style={{ ...gradText, letterSpacing: '-2px', transitionDelay: '0.1s' }}>
-                So war es bisher.<br /><span style={{ color: BRAND.green }}>So geht es besser.</span>
+              <h2 className="g-reveal text-4xl sm:text-5xl font-black tracking-tight" style={{ ...gradText, letterSpacing: '-1.5px', transitionDelay: '0.1s' }}>
+                So war es bisher.{' '}
+                <span style={{ WebkitTextFillColor: BRAND.green, background: 'none' }}>So geht es besser.</span>
               </h2>
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-              <div className="g-reveal-left rounded-3xl p-8" style={{ ...glass, borderColor: `rgba(234,67,53,${dark ? '0.15' : '0.25'})` }}>
-                <div className="flex items-center gap-3 mb-7">
-                  <div className="size-10 rounded-xl flex items-center justify-center" style={{ background: dark ? 'rgba(234,67,53,0.15)' : '#fce8e6' }}>
-                    <HugeiconsIcon icon={Cancel01Icon} size={18} style={{ color: BRAND.red }} />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {/* WITHOUT */}
+              <div className="g-reveal-left rounded-2xl p-7" style={{ ...glass, borderColor: dark ? 'rgba(234,67,53,0.2)' : '#fad2cf' }}>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="size-9 rounded-lg flex items-center justify-center" style={{ background: dark ? 'rgba(234,67,53,0.15)' : '#fce8e6' }}>
+                    <HugeiconsIcon icon={Cancel01Icon} size={17} style={{ color: BRAND.red }} />
                   </div>
                   <div>
-                    <p className="font-bold text-sm" style={{ color: G.text }}>Ohne AzubiHub</p>
+                    <p className="font-semibold text-sm" style={{ color: G.text }}>Ohne AzubiHub</p>
                     <p className="text-xs" style={{ color: G.mid }}>Der Ausbildungsalltag heute</p>
                   </div>
                 </div>
-                <ul className="space-y-5">
+                <ul className="space-y-4">
                   {[
                     { t: '3+ Stunden Schreibaufwand/Woche',  d: 'Für Berichte, die nur der Ausbilder liest.' },
                     { t: 'Papierdokumente gehen verloren',    d: 'Kein Ablagesystem, kein Backup, alles im Ordner.' },
                     { t: 'Freigabe per E-Mail & Telefon',     d: 'Hin- und herschicken, Korrekturen, erneut senden.' },
                     { t: 'IHK-Fristen werden übersehen',      d: 'Kein Überblick, keine automatischen Erinnerungen.' },
                   ].map(item => (
-                    <li key={item.t} className="flex items-start gap-3.5">
+                    <li key={item.t} className="flex items-start gap-3">
                       <div className="size-5 rounded-full flex items-center justify-center shrink-0 mt-0.5" style={{ background: dark ? 'rgba(234,67,53,0.15)' : '#fce8e6' }}>
                         <HugeiconsIcon icon={Cancel01Icon} size={9} style={{ color: BRAND.red }} />
                       </div>
                       <div>
-                        <p className="text-sm font-semibold" style={{ color: dark ? '#f28b82' : '#c5221f' }}>{item.t}</p>
+                        <p className="text-sm font-medium" style={{ color: dark ? '#f28b82' : '#c5221f' }}>{item.t}</p>
                         <p className="text-xs mt-0.5 leading-relaxed" style={{ color: G.mid }}>{item.d}</p>
                       </div>
                     </li>
                   ))}
                 </ul>
               </div>
-              <div className="g-reveal-right rounded-3xl p-8 relative overflow-hidden" style={{ ...glass, borderColor: `rgba(52,168,83,${dark ? '0.2' : '0.35'})` }}>
-                <div className="absolute top-0 right-0 w-48 h-48 rounded-full pointer-events-none" style={{ background: `radial-gradient(circle, rgba(52,168,83,${dark ? '0.08' : '0.05'}) 0%, transparent 70%)` }} />
-                <div className="flex items-center gap-3 mb-7 relative z-10">
-                  <div className="size-10 rounded-xl flex items-center justify-center" style={{ background: dark ? 'rgba(52,168,83,0.15)' : '#e6f4ea' }}>
-                    <HugeiconsIcon icon={CheckmarkBadge01Icon} size={18} style={{ color: BRAND.green }} />
+              {/* WITH */}
+              <div className="g-reveal-right rounded-2xl p-7" style={{ ...glass, borderColor: dark ? 'rgba(52,168,83,0.25)' : '#ceead6' }}>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="size-9 rounded-lg flex items-center justify-center" style={{ background: dark ? 'rgba(52,168,83,0.15)' : '#e6f4ea' }}>
+                    <HugeiconsIcon icon={CheckmarkBadge01Icon} size={17} style={{ color: BRAND.green }} />
                   </div>
                   <div>
-                    <p className="font-bold text-sm" style={{ color: G.text }}>Mit AzubiHub</p>
+                    <p className="font-semibold text-sm" style={{ color: G.text }}>Mit AzubiHub</p>
                     <p className="text-xs" style={{ color: G.mid }}>Digitaler Workflow der funktioniert</p>
                   </div>
                 </div>
-                <ul className="space-y-5 relative z-10">
+                <ul className="space-y-4">
                   {[
                     { t: '15 Minuten statt 3 Stunden',  d: 'KI formuliert IHK-Text aus Stichpunkten — in Sekunden.' },
                     { t: 'Alles zentral in der Cloud',   d: 'Sicheres Ablagesystem, Backup, auf allen Geräten.' },
                     { t: 'Digitaler Freigabe-Workflow',  d: 'Einreichen, kommentieren, freigeben — ein Klick.' },
                     { t: 'Keine Frist mehr verpassen',   d: 'Erinnerungen und Live-Statusübersicht für Ausbilder.' },
                   ].map(item => (
-                    <li key={item.t} className="flex items-start gap-3.5">
+                    <li key={item.t} className="flex items-start gap-3">
                       <div className="size-5 rounded-full flex items-center justify-center shrink-0 mt-0.5" style={{ background: dark ? 'rgba(52,168,83,0.15)' : '#e6f4ea' }}>
                         <HugeiconsIcon icon={CheckmarkCircle01Icon} size={9} style={{ color: BRAND.green }} />
                       </div>
                       <div>
-                        <p className="text-sm font-semibold" style={{ color: dark ? '#81c995' : '#137333' }}>{item.t}</p>
+                        <p className="text-sm font-medium" style={{ color: dark ? '#81c995' : '#137333' }}>{item.t}</p>
                         <p className="text-xs mt-0.5 leading-relaxed" style={{ color: G.mid }}>{item.d}</p>
                       </div>
                     </li>
@@ -627,30 +690,32 @@ function LandingPage() {
         </section>
 
         {/* ════ 5. TESTIMONIALS ════ */}
-        <section className="py-28 px-6 relative overflow-hidden" style={{ background: G.bg }}>
-          <div className="max-w-6xl mx-auto relative z-10">
-            <div className="text-center mb-16">
+        <section className="py-28 px-6" style={{ background: G.bg }}>
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-14">
               <SectionLabel text="Echte Meinungen" color={BRAND.yellow} />
-              <h2 className="g-reveal text-5xl sm:text-6xl font-black tracking-tight" style={{ ...gradText, letterSpacing: '-2px', transitionDelay: '0.1s' }}>Was andere sagen.</h2>
+              <h2 className="g-reveal text-4xl sm:text-5xl font-black tracking-tight" style={{ ...gradText, letterSpacing: '-1.5px', transitionDelay: '0.1s' }}>
+                Was andere sagen.
+              </h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {TESTIMONIALS.map((t, i) => (
                 <div key={t.name}
-                  className="g-reveal rounded-3xl p-6 flex flex-col transition-all duration-300"
-                  style={{ ...glass, transitionDelay: `${i * 0.07}s` }}
-                  onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.background = dark ? 'rgba(255,255,255,0.07)' : '#f6faff'; el.style.borderColor = `${t.color}30`; el.style.transform = 'translateY(-4px)'; el.style.boxShadow = dark ? `0 20px 50px rgba(0,0,0,0.3)` : `0 12px 40px rgba(0,0,0,0.1)` }}
-                  onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.background = dark ? 'rgba(255,255,255,0.04)' : '#ffffff'; el.style.borderColor = G.border; el.style.transform = ''; el.style.boxShadow = dark ? '' : '0 2px 16px rgba(0,0,0,0.07)' }}>
-                  <div className="flex gap-0.5 mb-4">
-                    {[...Array(5)].map((_, j) => <HugeiconsIcon key={j} icon={StarIcon} size={13} style={{ color: BRAND.yellow }} />)}
+                  className="g-reveal rounded-2xl p-6 flex flex-col"
+                  style={{ ...glass, transitionDelay: `${i * 0.07}s`, transition: 'box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease' }}
+                  onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => cardHoverIn(e.currentTarget, t.color)}
+                  onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => cardHoverOut(e.currentTarget)}>
+                  <div className="flex gap-0.5 mb-3">
+                    {[...Array(5)].map((_, j) => <HugeiconsIcon key={j} icon={StarIcon} size={12} style={{ color: BRAND.yellow }} />)}
                   </div>
-                  <HugeiconsIcon icon={QuoteUpIcon} size={20} style={{ color: `${t.color}${dark ? '35' : '50'}`, marginBottom: 10 }} />
-                  <p className="text-sm leading-relaxed flex-1 mb-6" style={{ color: G.mid }}>{t.text}</p>
+                  <HugeiconsIcon icon={QuoteUpIcon} size={18} style={{ color: `${t.color}${dark ? '40' : '55'}`, marginBottom: 8 }} />
+                  <p className="text-sm leading-relaxed flex-1 mb-5" style={{ color: G.mid }}>{t.text}</p>
                   <div className="flex items-center gap-3 pt-4" style={{ borderTop: `1px solid ${G.border}` }}>
-                    <div className="size-9 rounded-xl flex items-center justify-center font-bold text-xs text-white shrink-0" style={{ background: t.color }}>
+                    <div className="size-8 rounded-lg flex items-center justify-center font-bold text-xs text-white shrink-0" style={{ background: t.color }}>
                       {t.name.split(' ').map(n => n[0]).join('')}
                     </div>
                     <div>
-                      <p className="font-bold text-sm" style={{ color: G.text }}>{t.name}</p>
+                      <p className="font-semibold text-sm" style={{ color: G.text }}>{t.name}</p>
                       <p className="text-[10px]" style={{ color: G.muted }}>{t.role}</p>
                     </div>
                   </div>
@@ -661,89 +726,93 @@ function LandingPage() {
         </section>
 
         {/* ════ 6. HOW IT WORKS ════ */}
-        <section id="how-it-works" className="py-28 px-6 relative overflow-hidden" style={{ background: G.surface }}>
-          <div className="max-w-5xl mx-auto relative z-10">
-            <div className="text-center mb-16">
+        <section id="how-it-works" className="py-28 px-6" style={{ background: G.surface, borderTop: `1px solid ${G.border}`, borderBottom: `1px solid ${G.border}` }}>
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-14">
               <SectionLabel text="Der Einstieg" color={BRAND.green} />
-              <h2 className="g-reveal text-5xl sm:text-6xl font-black tracking-tight" style={{ ...gradText, letterSpacing: '-2px', transitionDelay: '0.1s' }}>In 3 Schritten startklar.</h2>
-              <p className="g-reveal text-lg mt-5 max-w-lg mx-auto" style={{ color: G.mid, transitionDelay: '0.2s' }}>Kein Onboarding-Aufwand. Kein IT-Projekt. Einfach loslegen.</p>
+              <h2 className="g-reveal text-4xl sm:text-5xl font-black tracking-tight" style={{ ...gradText, letterSpacing: '-1.5px', transitionDelay: '0.1s' }}>
+                In 3 Schritten startklar.
+              </h2>
+              <p className="g-reveal text-lg mt-4 max-w-lg mx-auto" style={{ color: G.mid, transitionDelay: '0.2s' }}>
+                Kein Onboarding-Aufwand. Kein IT-Projekt. Einfach loslegen.
+              </p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 relative">
-              <div className="absolute top-10 hidden sm:block" style={{ left: 'calc(16.7% + 2.5rem)', right: 'calc(16.7% + 2.5rem)', height: 1, background: `linear-gradient(90deg, ${BRAND.blue}50, ${BRAND.red}50, ${BRAND.green}50)` }} />
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 relative">
+              {/* Connector line */}
+              <div className="absolute top-10 hidden sm:block" style={{ left: 'calc(16.7% + 2.5rem)', right: 'calc(16.7% + 2.5rem)', height: '1px', background: `linear-gradient(90deg, ${BRAND.blue}60, ${BRAND.red}60, ${BRAND.green}60)` }} />
               {STEPS.map((s, i) => (
                 <div key={s.num} className="g-reveal flex flex-col items-center text-center" style={{ transitionDelay: `${i * 0.12}s` }}>
-                  <div className="size-20 rounded-3xl flex items-center justify-center mb-6 text-3xl font-black text-white relative z-10"
-                    style={{ background: s.color, boxShadow: `0 0 30px ${s.color}40, 0 8px 24px rgba(0,0,0,0.2)` }}>
+                  <div className="size-20 rounded-2xl flex items-center justify-center mb-6 text-3xl font-black text-white relative z-10"
+                    style={{ background: s.color, boxShadow: dark ? `0 0 24px ${s.color}50` : `0 4px 16px ${s.color}40` }}>
                     {s.num}
-                    <div className="absolute inset-0 rounded-3xl" style={{ border: `1px solid ${s.color}`, animation: 'goog-pulse-ring 3s ease-out infinite', animationDelay: `${i * 0.8}s` }} />
                   </div>
-                  <h3 className="font-bold text-lg mb-3" style={{ color: G.text }}>{s.title}</h3>
+                  <h3 className="font-semibold text-base mb-2.5" style={{ color: G.text }}>{s.title}</h3>
                   <p className="text-sm leading-relaxed" style={{ color: G.mid }}>{s.desc}</p>
                 </div>
               ))}
             </div>
-            <div className="text-center mt-14">
-              <GButton href="/auth/register" primary className="text-base px-9 py-4">
-                Jetzt kostenlos starten <HugeiconsIcon icon={ArrowRight01Icon} size={18} />
+            <div className="text-center mt-12">
+              <GButton href="/auth/register" primary className="text-[15px] px-8 py-3 h-auto leading-none">
+                Jetzt kostenlos starten <HugeiconsIcon icon={ArrowRight01Icon} size={16} />
               </GButton>
             </div>
           </div>
         </section>
 
         {/* ════ 7. PRICING ════ */}
-        <section id="pricing" className="py-28 px-6 relative overflow-hidden" style={{ background: G.bg }}>
-          <div className="absolute pointer-events-none rounded-full" style={{ width: 600, height: 600, background: `radial-gradient(circle, rgba(66,133,244,${dark ? '0.06' : '0.03'}) 0%, transparent 70%)`, top: '50%', left: '50%', transform: 'translate(-50%,-50%)' }} />
-          <div className="max-w-4xl mx-auto relative z-10">
-            <div className="text-center mb-16">
+        <section id="pricing" className="py-28 px-6" style={{ background: G.bg }}>
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-14">
               <SectionLabel text="Preise" color={BRAND.blue} />
-              <h2 className="g-reveal text-5xl sm:text-6xl font-black tracking-tight" style={{ ...gradText, letterSpacing: '-2px', transitionDelay: '0.1s' }}>Einfach. Kostenlos.</h2>
-              <p className="g-reveal text-lg mt-5 max-w-lg mx-auto" style={{ color: G.mid, transitionDelay: '0.2s' }}>Kein Abo. Keine Kreditkarte. Keine versteckten Kosten.</p>
+              <h2 className="g-reveal text-4xl sm:text-5xl font-black tracking-tight" style={{ ...gradText, letterSpacing: '-1.5px', transitionDelay: '0.1s' }}>
+                Einfach. Kostenlos.
+              </h2>
+              <p className="g-reveal text-lg mt-4 max-w-lg mx-auto" style={{ color: G.mid, transitionDelay: '0.2s' }}>
+                Kein Abo. Keine Kreditkarte. Keine versteckten Kosten.
+              </p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 max-w-2xl mx-auto">
-              <div className="g-reveal rounded-3xl p-8 transition-all duration-300" style={{ ...glass }}
-                onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.background = dark ? 'rgba(255,255,255,0.07)' : '#f6faff'; el.style.transform = 'translateY(-4px)'; el.style.boxShadow = dark ? '' : '0 12px 40px rgba(0,0,0,0.1)' }}
-                onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.background = dark ? 'rgba(255,255,255,0.04)' : '#ffffff'; el.style.transform = ''; el.style.boxShadow = dark ? '' : '0 2px 16px rgba(0,0,0,0.07)' }}>
-                <p className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: G.muted }}>Kostenlos</p>
+              {/* Free */}
+              <div className="g-reveal rounded-2xl p-8" style={{ ...glass, transition: 'box-shadow 0.2s, transform 0.2s' }}
+                onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => cardHoverIn(e.currentTarget)}
+                onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => cardHoverOut(e.currentTarget)}>
+                <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: G.muted }}>Kostenlos</p>
                 <div className="flex items-end gap-1.5 mb-2">
-                  <span className="text-6xl font-black" style={{ color: G.text }}>0€</span>
-                  <span className="mb-2 text-sm" style={{ color: G.mid }}>/ für immer</span>
+                  <span className="text-5xl font-black" style={{ color: G.text }}>0€</span>
+                  <span className="mb-1.5 text-sm" style={{ color: G.mid }}>/ für immer</span>
                 </div>
-                <p className="text-sm mb-7 leading-relaxed" style={{ color: G.mid }}>Alles für eine vollständige Ausbildungsdokumentation.</p>
-                <ul className="space-y-3 mb-8">
+                <p className="text-sm mb-6 leading-relaxed" style={{ color: G.mid }}>Alles für eine vollständige Ausbildungsdokumentation.</p>
+                <ul className="space-y-3 mb-7">
                   {['Unbegrenzte Wochenberichte','KI-Formulierung','Ausbilder-Freigabe','PDF-Export','Kalender & Statistiken','Cloud-Sync'].map(f => (
-                    <li key={f} className="flex items-center gap-3 text-sm" style={{ color: G.text }}>
-                      <HugeiconsIcon icon={CheckmarkCircle01Icon} size={16} style={{ color: BRAND.green, flexShrink: 0 }} />{f}
+                    <li key={f} className="flex items-center gap-2.5 text-sm" style={{ color: G.text }}>
+                      <HugeiconsIcon icon={CheckmarkCircle01Icon} size={15} style={{ color: BRAND.green, flexShrink: 0 }} />{f}
                     </li>
                   ))}
                 </ul>
-                <Link href="/auth/register" className="block">
-                  <span className="flex items-center justify-center w-full py-3.5 rounded-full text-sm font-semibold cursor-pointer transition-all duration-200"
-                    style={{ border: `1px solid ${G.border}`, color: G.text }}
-                    onMouseEnter={(e: React.MouseEvent<HTMLSpanElement>) => (e.currentTarget as HTMLSpanElement).style.background = dark ? 'rgba(255,255,255,0.06)' : '#f0f4ff'}
-                    onMouseLeave={(e: React.MouseEvent<HTMLSpanElement>) => (e.currentTarget as HTMLSpanElement).style.background = ''}>
-                    Jetzt registrieren
-                  </span>
-                </Link>
+                <GButton href="/auth/register" outline className="w-full justify-center text-sm px-6 py-2.5 h-auto leading-none">
+                  Jetzt registrieren
+                </GButton>
               </div>
-              <div className="g-reveal rounded-3xl p-[1px]" style={{ background: `linear-gradient(135deg,${BRAND.blue},${BRAND.green})`, transitionDelay: '0.1s' }}>
-                <div className="rounded-[23px] p-8 h-full" style={{ background: G.surface2 }}>
+              {/* Pro */}
+              <div className="g-reveal rounded-2xl p-[1px]" style={{ background: `linear-gradient(135deg, ${BRAND.blue}, ${BRAND.green})`, transitionDelay: '0.1s' }}>
+                <div className="rounded-[15px] p-8 h-full" style={{ background: dark ? G.surface2 : '#ffffff' }}>
                   <div className="flex items-start justify-between mb-4">
-                    <p className="text-xs font-bold uppercase tracking-widest" style={{ color: BRAND.blue }}>Pro</p>
-                    <span className="text-[10px] font-bold px-3 py-1 rounded-full" style={{ background: BRAND.blue, color: '#fff' }}>Demnächst</span>
+                    <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: BRAND.blue }}>Pro</p>
+                    <span className="text-[10px] font-bold px-2.5 py-1 rounded-full" style={{ background: BRAND.blue, color: '#fff' }}>Demnächst</span>
                   </div>
                   <div className="flex items-end gap-1.5 mb-2">
-                    <span className="text-6xl font-black" style={{ color: G.text }}>4,99€</span>
-                    <span className="mb-2 text-sm" style={{ color: G.mid }}>/ Monat</span>
+                    <span className="text-5xl font-black" style={{ color: G.text }}>4,99€</span>
+                    <span className="mb-1.5 text-sm" style={{ color: G.mid }}>/ Monat</span>
                   </div>
-                  <p className="text-sm mb-7 leading-relaxed" style={{ color: G.mid }}>Für Betriebe mit mehreren Auszubildenden.</p>
-                  <ul className="space-y-3 mb-8">
+                  <p className="text-sm mb-6 leading-relaxed" style={{ color: G.mid }}>Für Betriebe mit mehreren Auszubildenden.</p>
+                  <ul className="space-y-3 mb-7">
                     {['Alles aus Kostenlos','Unbegrenzte KI-Nutzung','Team-Verwaltung (20 Azubis)','Vorlagen-Bibliothek','Prioritäts-Support','Native App'].map(f => (
-                      <li key={f} className="flex items-center gap-3 text-sm" style={{ color: G.text }}>
-                        <HugeiconsIcon icon={CheckmarkCircle01Icon} size={16} style={{ color: BRAND.blue, flexShrink: 0 }} />{f}
+                      <li key={f} className="flex items-center gap-2.5 text-sm" style={{ color: G.text }}>
+                        <HugeiconsIcon icon={CheckmarkCircle01Icon} size={15} style={{ color: BRAND.blue, flexShrink: 0 }} />{f}
                       </li>
                     ))}
                   </ul>
-                  <button disabled className="w-full py-3.5 rounded-full text-sm font-semibold opacity-40 cursor-not-allowed" style={{ background: BRAND.blue, color: '#fff' }}>
+                  <button disabled className="w-full py-2.5 rounded-full text-sm font-medium opacity-40 cursor-not-allowed" style={{ background: BRAND.blue, color: '#fff' }}>
                     Benachrichtigen wenn verfügbar
                   </button>
                 </div>
@@ -753,116 +822,130 @@ function LandingPage() {
         </section>
 
         {/* ════ 8. FAQ ════ */}
-        <section id="faq" className="py-28 px-6 relative overflow-hidden" style={{ background: G.surface }}>
-          <div className="max-w-3xl mx-auto relative z-10">
-            <div className="text-center mb-16">
+        <section id="faq" className="py-28 px-6" style={{ background: G.surface, borderTop: `1px solid ${G.border}`, borderBottom: `1px solid ${G.border}` }}>
+          <div className="max-w-3xl mx-auto">
+            <div className="text-center mb-14">
               <SectionLabel text="FAQ" color={BRAND.red} />
-              <h2 className="g-reveal text-5xl sm:text-6xl font-black tracking-tight" style={{ ...gradText, letterSpacing: '-2px', transitionDelay: '0.1s' }}>Häufige Fragen.</h2>
+              <h2 className="g-reveal text-4xl sm:text-5xl font-black tracking-tight" style={{ ...gradText, letterSpacing: '-1.5px', transitionDelay: '0.1s' }}>
+                Häufige Fragen.
+              </h2>
             </div>
-            <div className="space-y-2">
+            <div className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${G.border}`, background: dark ? G.surface2 : '#ffffff' }}>
               {FAQS.map((f, i) => <FaqItem key={f.q} q={f.q} a={f.a} idx={i} />)}
             </div>
-            <p className="text-center text-sm mt-10" style={{ color: G.muted }}>
+            <p className="text-center text-sm mt-8" style={{ color: G.muted }}>
               Noch Fragen?{' '}
-              <a href="mailto:kontakt@azubihub.app" className="font-semibold transition-colors" style={{ color: BRAND.blue }}>Schreib uns direkt.</a>
+              <a href="mailto:kontakt@azubihub.app" className="font-semibold transition-colors" style={{ color: G.link }}>Schreib uns direkt.</a>
             </p>
           </div>
         </section>
 
         {/* ════ 9. CTA ════ */}
-        <section className="relative py-40 px-6 overflow-hidden" style={{ background: G.bg }}>
+        <section className="relative py-36 px-6 overflow-hidden" style={{ background: G.bg }}>
+          {/* Background rings (CTA) */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="absolute rounded-full" style={{ width: 700, height: 700, background: `radial-gradient(circle, rgba(66,133,244,${dark ? '0.08' : '0.1'}) 0%, transparent 65%)` }} />
-            <div className="absolute rounded-full" style={{ width: 480, height: 480, border: `1px solid rgba(66,133,244,${dark ? '0.12' : '0.2'})`, animation: 'orbit-cw 22s linear infinite' }}>
+            <div className="absolute rounded-full" style={{ width: 700, height: 700, background: `radial-gradient(circle, rgba(66,133,244,${dark ? '0.07' : '0.09'}) 0%, transparent 65%)` }} />
+            <div className="absolute rounded-full" style={{ width: 500, height: 500, border: `1px solid rgba(66,133,244,${dark ? '0.12' : '0.18'})`, animation: 'orbit-cw 24s linear infinite' }}>
               <span className="absolute rounded-full" style={{ width: 10, height: 10, background: BRAND.blue, top: -5, left: '50%', marginLeft: -5, boxShadow: `0 0 16px ${BRAND.blue}` }} />
             </div>
-            <div className="absolute rounded-full" style={{ width: 320, height: 320, border: `1px solid rgba(52,168,83,${dark ? '0.14' : '0.22'})`, animation: 'orbit-ccw 16s linear infinite 1s' }}>
+            <div className="absolute rounded-full" style={{ width: 340, height: 340, border: `1px solid rgba(52,168,83,${dark ? '0.14' : '0.2'})`, animation: 'orbit-ccw 17s linear infinite 1s' }}>
               <span className="absolute rounded-full" style={{ width: 8, height: 8, background: BRAND.green, bottom: -4, right: '30%', boxShadow: `0 0 12px ${BRAND.green}` }} />
             </div>
           </div>
+
           <div className="relative z-10 max-w-2xl mx-auto text-center">
-            <div className="g-reveal inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold mb-10" style={{ ...glass, color: G.mid }}>
-              <HugeiconsIcon icon={CheckmarkBadge01Icon} size={14} style={{ color: BRAND.green }} />
+            <div className="g-reveal inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-medium mb-10"
+              style={{
+                background: dark ? 'rgba(52,168,83,0.12)' : '#e6f4ea',
+                border: dark ? '1px solid rgba(52,168,83,0.25)' : '1px solid #ceead6',
+                color: dark ? '#81c995' : '#137333',
+              }}>
+              <HugeiconsIcon icon={CheckmarkBadge01Icon} size={13} style={{ color: BRAND.green }} />
               Kostenlos · Keine Kreditkarte · Sofort startklar
             </div>
             <h2 className="g-reveal font-black tracking-tight leading-none mb-6"
-              style={{ ...gradText, fontSize: 'clamp(48px, 8vw, 88px)', letterSpacing: '-2px', transitionDelay: '0.1s' }}>
+              style={{ ...gradText, fontSize: 'clamp(48px,7.5vw,84px)', letterSpacing: '-2px', transitionDelay: '0.1s' }}>
               Bereit?
             </h2>
             <p className="g-reveal text-xl mb-12 leading-relaxed" style={{ color: G.mid, transitionDelay: '0.2s' }}>
-              Hunderte Betriebe haben bereits gewechselt.<br />Der erste Bericht ist in unter 15 Minuten fertig.
+              Hunderte Betriebe haben bereits gewechselt.<br />
+              Der erste Bericht ist in unter 15 Minuten fertig.
             </p>
-            <div className="g-reveal flex flex-col sm:flex-row gap-4 justify-center" style={{ transitionDelay: '0.3s' }}>
-              <GButton href="/auth/register" primary className="text-base px-10 py-4">
-                Kostenlos starten <HugeiconsIcon icon={ArrowRight01Icon} size={18} />
+            <div className="g-reveal flex flex-col sm:flex-row gap-3 justify-center" style={{ transitionDelay: '0.3s' }}>
+              <GButton href="/auth/register" primary className="text-[15px] px-9 py-3 h-auto leading-none">
+                Kostenlos starten <HugeiconsIcon icon={ArrowRight01Icon} size={16} />
               </GButton>
-              <a href="mailto:kontakt@azubihub.app">
-                <span className="inline-flex items-center gap-2 px-10 py-4 rounded-full text-base font-semibold cursor-pointer transition-all duration-200"
-                  style={{ ...glass, color: G.text }}
-                  onMouseEnter={(e: React.MouseEvent<HTMLSpanElement>) => (e.currentTarget as HTMLSpanElement).style.background = dark ? 'rgba(255,255,255,0.09)' : '#f0f4ff'}
-                  onMouseLeave={(e: React.MouseEvent<HTMLSpanElement>) => (e.currentTarget as HTMLSpanElement).style.background = dark ? 'rgba(255,255,255,0.04)' : '#ffffff'}>
-                  <HugeiconsIcon icon={Mail01Icon} size={16} />Kontakt aufnehmen
-                </span>
-              </a>
+              <GButton href="mailto:kontakt@azubihub.app" outline className="text-[15px] px-9 py-3 h-auto leading-none">
+                <HugeiconsIcon icon={Mail01Icon} size={15} /> Kontakt aufnehmen
+              </GButton>
             </div>
           </div>
         </section>
 
         {/* ════ FOOTER ════ */}
-        <footer className="py-14 px-6" style={{ background: G.surface, borderTop: `1px solid ${G.border}` }}>
+        <footer className="py-14 px-6" style={{ background: dark ? G.surface : '#202124', borderTop: `1px solid ${dark ? G.border : 'rgba(255,255,255,0.1)'}` }}>
           <div className="max-w-6xl mx-auto">
-            <div className="grid grid-cols-1 sm:grid-cols-12 gap-10 mb-12">
+            <div className="grid grid-cols-1 sm:grid-cols-12 gap-10 mb-10">
               <div className="sm:col-span-5">
-                <Logo />
-                <p className="text-sm leading-relaxed mt-4 max-w-xs" style={{ color: G.mid }}>
+                {/* Footer logo — always use white text in footer */}
+                <div className="flex items-center gap-2.5">
+                  <div className="size-8 rounded-lg flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${BRAND.blue}, ${BRAND.green})` }}>
+                    <span className="text-white font-black text-sm leading-none">A</span>
+                  </div>
+                  <span className="font-bold text-base tracking-tight text-white">AzubiHub</span>
+                </div>
+                <p className="text-sm leading-relaxed mt-4 max-w-xs" style={{ color: '#9aa0a6' }}>
                   Die digitale Ausbildungsplattform für moderne Betriebe. KI-gestützt, IHK-konform, kostenlos.
                 </p>
-                <div className="flex gap-2 mt-5 flex-wrap">
+                <div className="flex gap-2 mt-4 flex-wrap">
                   {[{ label: 'DSGVO', c: BRAND.blue }, { label: 'IHK-konform', c: BRAND.green }, { label: 'KI-gestützt', c: BRAND.purple }].map(b => (
-                    <span key={b.label} className="text-xs font-semibold px-3 py-1 rounded-full" style={{ border: `1px solid ${b.c}30`, color: b.c, background: `${b.c}12` }}>{b.label}</span>
+                    <span key={b.label} className="text-xs font-medium px-3 py-1 rounded-full"
+                      style={{ border: `1px solid ${b.c}40`, color: b.c, background: `${b.c}15` }}>
+                      {b.label}
+                    </span>
                   ))}
                 </div>
-                <div className="flex gap-2 mt-5">
+                <div className="flex gap-2 mt-4">
                   {[{ href: 'mailto:kontakt@azubihub.app', icon: Mail01Icon, label: 'E-Mail' }, { href: 'https://github.com', icon: Github01Icon, label: 'GitHub' }].map(s => (
                     <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer" aria-label={`AzubiHub auf ${s.label}`}
-                      className="size-10 rounded-xl flex items-center justify-center transition-all duration-150"
-                      style={{ ...glass, color: G.muted }}
-                      onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => { const el = e.currentTarget; el.style.background = dark ? 'rgba(255,255,255,0.1)' : '#f0f4ff'; el.style.color = G.text }}
-                      onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => { const el = e.currentTarget; el.style.background = dark ? 'rgba(255,255,255,0.04)' : '#ffffff'; el.style.color = G.muted }}>
-                      <HugeiconsIcon icon={s.icon} size={16} />
+                      className="size-9 rounded-lg flex items-center justify-center transition-all duration-150"
+                      style={{ background: 'rgba(255,255,255,0.08)', color: '#9aa0a6', border: '1px solid rgba(255,255,255,0.1)' }}
+                      onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => { const el = e.currentTarget; el.style.background = 'rgba(255,255,255,0.14)'; el.style.color = '#e8eaed' }}
+                      onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => { const el = e.currentTarget; el.style.background = 'rgba(255,255,255,0.08)'; el.style.color = '#9aa0a6' }}>
+                      <HugeiconsIcon icon={s.icon} size={15} />
                     </a>
                   ))}
                 </div>
               </div>
               <div className="sm:col-span-3">
-                <p className="text-xs font-bold uppercase tracking-widest mb-5" style={{ color: G.muted }}>Produkt</p>
+                <p className="text-xs font-semibold uppercase tracking-widest mb-5" style={{ color: '#5f6368' }}>Produkt</p>
                 <nav className="space-y-3">
                   {[['#features','Features'],['#pricing','Preise'],['#faq','FAQ'],['/auth/register','Registrieren'],['/auth/login','Anmelden']].map(([href, label]) => (
-                    <a key={label} href={href} className="block text-sm transition-colors duration-150" style={{ color: G.mid }}
-                      onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = G.text)}
-                      onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = G.mid)}>
+                    <a key={label} href={href} className="block text-sm transition-colors duration-150" style={{ color: '#9aa0a6' }}
+                      onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = '#e8eaed')}
+                      onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = '#9aa0a6')}>
                       {label}
                     </a>
                   ))}
                 </nav>
               </div>
               <div className="sm:col-span-4">
-                <p className="text-xs font-bold uppercase tracking-widest mb-5" style={{ color: G.muted }}>Rechtliches</p>
+                <p className="text-xs font-semibold uppercase tracking-widest mb-5" style={{ color: '#5f6368' }}>Rechtliches</p>
                 <nav className="space-y-3">
                   {[{ href: '/impressum', label: 'Impressum' }, { href: '/datenschutz', label: 'Datenschutzerklärung' }, { href: 'mailto:kontakt@azubihub.app', label: 'kontakt@azubihub.app' }].map(({ href, label }) => (
-                    <Link key={label} href={href} className="block text-sm transition-colors duration-150" style={{ color: G.mid }}
-                      onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = G.text)}
-                      onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = G.mid)}>
+                    <Link key={label} href={href} className="block text-sm transition-colors duration-150" style={{ color: '#9aa0a6' }}
+                      onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = '#e8eaed')}
+                      onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = '#9aa0a6')}>
                       {label}
                     </Link>
                   ))}
-                  <span className="block text-sm" style={{ color: G.muted }}>AGB (in Vorbereitung)</span>
+                  <span className="block text-sm" style={{ color: '#5f6368' }}>AGB (in Vorbereitung)</span>
                 </nav>
               </div>
             </div>
-            <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3" style={{ borderTop: `1px solid ${G.border}` }}>
-              <span className="text-xs" style={{ color: G.muted }}>© {new Date().getFullYear()} AzubiHub. Alle Rechte vorbehalten.</span>
-              <span className="text-xs" style={{ color: G.muted }}>Gebaut für Auszubildende und Ausbilder in Deutschland</span>
+            <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+              <span className="text-xs" style={{ color: '#5f6368' }}>© {new Date().getFullYear()} AzubiHub. Alle Rechte vorbehalten.</span>
+              <span className="text-xs" style={{ color: '#5f6368' }}>Gebaut für Auszubildende und Ausbilder in Deutschland</span>
             </div>
           </div>
         </footer>
