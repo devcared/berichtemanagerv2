@@ -214,31 +214,61 @@ function useScrollReveal() {
    COMPONENTS
 ═══════════════════════════════════════ */
 
-/* Fixed full-screen animated background — replaces video */
+/* Fixed full-screen animated background */
 function FixedBackground() {
+  // Dot helper — no shadows, just opacity + breathe animation
+  const dot = (size: number, color: string, pos: React.CSSProperties, delay = '0s'): React.CSSProperties => ({
+    position: 'absolute', width: size, height: size, borderRadius: '50%',
+    background: color, animation: `dot-breathe 3s ease-in-out infinite ${delay}`,
+    ...pos,
+  })
+
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: -1, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', background: '#ffffff' }}>
-      <div style={{ position: 'absolute', width: 900, height: 900, borderRadius: '50%', background: 'radial-gradient(circle, rgba(66,133,244,0.07) 0%, transparent 65%)', top: '50%', left: '50%', transform: 'translate(-50%,-50%)' }} />
-      {/* Ring 1 CW */}
-      <div style={{ position: 'absolute', width: 680, height: 680, borderRadius: '50%', border: '1px solid rgba(66,133,244,0.14)', animation: 'orbit-cw 30s linear infinite' }}>
-        <span style={{ position: 'absolute', width: 13, height: 13, borderRadius: '50%', background: C.blue, top: -6, left: '50%', marginLeft: -6, boxShadow: `0 0 18px ${C.blue}, 0 0 36px rgba(66,133,244,0.4)` }} />
-        <span style={{ position: 'absolute', width: 6, height: 6, borderRadius: '50%', background: 'rgba(66,133,244,0.5)', bottom: -3, right: '28%' }} />
+    <div style={{ position: 'fixed', inset: 0, zIndex: -1, overflow: 'hidden', background: '#ffffff' }}>
+
+      {/* Multi-layer center glow — no shadow, pure gradient */}
+      <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: '80vmin', height: '80vmin', borderRadius: '50%', background: 'radial-gradient(circle, rgba(66,133,244,0.06) 0%, rgba(52,168,83,0.025) 45%, transparent 70%)', pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-52%,-48%)', width: '50vmin', height: '50vmin', borderRadius: '50%', background: 'radial-gradient(circle, rgba(156,39,176,0.03) 0%, transparent 65%)', pointerEvents: 'none' }} />
+
+      {/* Ring system — gentle drift wraps all rings */}
+      <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', animation: 'ring-drift 22s ease-in-out infinite', willChange: 'transform' }}>
+
+        {/* Ring 1 — outermost, blue, CW */}
+        <div style={{ position: 'absolute', top: '50%', left: '50%', marginTop: 'min(-340px,-35vmin)', marginLeft: 'min(-340px,-35vmin)', width: 'min(680px,70vmin)', height: 'min(680px,70vmin)', borderRadius: '50%', border: '1px solid rgba(66,133,244,0.13)', animation: 'orbit-cw 38s linear infinite' }}>
+          <span style={dot(10, 'rgba(66,133,244,0.75)', { top: -5, left: '50%', marginLeft: -5 }, '0s')} />
+          <span style={dot(5,  'rgba(66,133,244,0.35)', { bottom: -2, right: '28%' }, '1.2s')} />
+          <span style={dot(4,  'rgba(66,133,244,0.2)',  { top: '22%', right: -2 }, '2.1s')} />
+        </div>
+
+        {/* Ring 2 — red, CCW */}
+        <div style={{ position: 'absolute', top: '50%', left: '50%', marginTop: 'min(-255px,-26vmin)', marginLeft: 'min(-255px,-26vmin)', width: 'min(510px,52vmin)', height: 'min(510px,52vmin)', borderRadius: '50%', border: '1px solid rgba(234,67,53,0.1)', animation: 'orbit-ccw 25s linear infinite 1.5s' }}>
+          <span style={dot(8,  'rgba(234,67,53,0.7)',  { bottom: -4, left: '50%', marginLeft: -4 }, '0.5s')} />
+          <span style={dot(4,  'rgba(234,67,53,0.3)',  { top: '18%', right: -2 }, '1.8s')} />
+        </div>
+
+        {/* Ring 3 — green, CW */}
+        <div style={{ position: 'absolute', top: '50%', left: '50%', marginTop: 'min(-185px,-19vmin)', marginLeft: 'min(-185px,-19vmin)', width: 'min(370px,38vmin)', height: 'min(370px,38vmin)', borderRadius: '50%', border: '1px solid rgba(52,168,83,0.13)', animation: 'orbit-cw 16s linear infinite 0.7s' }}>
+          <span style={dot(7,  'rgba(52,168,83,0.7)',  { top: -3, right: '24%' }, '0.3s')} />
+          <span style={dot(3,  'rgba(52,168,83,0.3)',  { bottom: -1, left: '38%' }, '2.4s')} />
+        </div>
+
+        {/* Ring 4 — yellow, CCW */}
+        <div style={{ position: 'absolute', top: '50%', left: '50%', marginTop: 'min(-115px,-12vmin)', marginLeft: 'min(-115px,-12vmin)', width: 'min(230px,24vmin)', height: 'min(230px,24vmin)', borderRadius: '50%', border: '1px solid rgba(251,188,4,0.18)', animation: 'orbit-ccw 10s linear infinite 0.2s' }}>
+          <span style={dot(6,  'rgba(251,188,4,0.8)',  { top: -3, left: '50%', marginLeft: -3 }, '1s')} />
+          <span style={dot(3,  'rgba(251,188,4,0.3)',  { bottom: -1, right: '32%' }, '2.7s')} />
+        </div>
+
+        {/* Ring 5 — innermost, blue, CW */}
+        <div style={{ position: 'absolute', top: '50%', left: '50%', marginTop: 'min(-55px,-5.5vmin)', marginLeft: 'min(-55px,-5.5vmin)', width: 'min(110px,11vmin)', height: 'min(110px,11vmin)', borderRadius: '50%', border: '1px solid rgba(66,133,244,0.16)', animation: 'orbit-cw 6s linear infinite 0.4s' }}>
+          <span style={dot(5,  'rgba(66,133,244,0.65)', { top: -2, left: '50%', marginLeft: -2 }, '0.8s')} />
+        </div>
+
+        {/* Center orb — pure gradient, no shadow */}
+        <div style={{ position: 'absolute', top: '50%', left: '50%', marginTop: -22, marginLeft: -22, width: 44, height: 44, borderRadius: '50%', background: 'radial-gradient(circle, rgba(66,133,244,0.5) 0%, rgba(66,133,244,0.15) 50%, transparent 75%)', animation: 'goog-glow-pulse 4s ease-in-out infinite' }} />
       </div>
-      {/* Ring 2 CCW */}
-      <div style={{ position: 'absolute', width: 490, height: 490, borderRadius: '50%', border: '1px solid rgba(234,67,53,0.13)', animation: 'orbit-ccw 21s linear infinite 1s' }}>
-        <span style={{ position: 'absolute', width: 10, height: 10, borderRadius: '50%', background: C.red, bottom: -5, left: '50%', marginLeft: -5, boxShadow: `0 0 14px ${C.red}, 0 0 28px rgba(234,67,53,0.35)` }} />
-        <span style={{ position: 'absolute', width: 5, height: 5, borderRadius: '50%', background: 'rgba(234,67,53,0.5)', top: '22%', right: -2 }} />
-      </div>
-      {/* Ring 3 dashed CW */}
-      <div style={{ position: 'absolute', width: 320, height: 320, borderRadius: '50%', border: '1px dashed rgba(52,168,83,0.16)', animation: 'orbit-cw 13s linear infinite 0.5s' }}>
-        <span style={{ position: 'absolute', width: 8, height: 8, borderRadius: '50%', background: C.green, top: -4, right: '22%', boxShadow: `0 0 12px ${C.green}` }} />
-      </div>
-      {/* Ring 4 CCW */}
-      <div style={{ position: 'absolute', width: 170, height: 170, borderRadius: '50%', border: '1px solid rgba(251,188,4,0.2)', animation: 'orbit-ccw 8s linear infinite 0.3s' }}>
-        <span style={{ position: 'absolute', width: 7, height: 7, borderRadius: '50%', background: C.yellow, top: -3, left: '50%', marginLeft: -3, boxShadow: `0 0 10px ${C.yellow}` }} />
-      </div>
-      {/* Center orb */}
-      <div style={{ position: 'absolute', width: 52, height: 52, borderRadius: '50%', background: 'radial-gradient(circle, rgba(66,133,244,0.5) 0%, transparent 70%)', animation: 'goog-glow-pulse 3.5s ease-in-out infinite', boxShadow: '0 0 40px rgba(66,133,244,0.5)' }} />
+
+      {/* Soft edge vignette — fades rings at viewport edges */}
+      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 85% 85% at 50% 50%, transparent 55%, rgba(255,255,255,0.75) 80%, #ffffff 100%)', pointerEvents: 'none' }} />
     </div>
   )
 }
