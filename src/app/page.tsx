@@ -358,7 +358,7 @@ function Nav() {
             <button
               onClick={() => setMenuOpen(o => !o)}
               className="flex md:hidden"
-              style={{ width: 40, height: 40, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 5, background: 'none', border: 'none', cursor: 'pointer', padding: 8, borderRadius: 6 }}
+              style={{ width: 40, height: 40, flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 5, background: 'none', border: 'none', cursor: 'pointer', padding: 8, borderRadius: 6 }}
               aria-label="Menü">
               <span style={{ width: 22, height: 1.5, background: C.textPrimary, borderRadius: 2, transition: 'all 250ms ease', transform: menuOpen ? 'rotate(45deg) translateY(4.5px)' : 'none' }} />
               <span style={{ width: 22, height: 1.5, background: C.textPrimary, borderRadius: 2, transition: 'all 250ms ease', opacity: menuOpen ? 0 : 1 }} />
