@@ -187,3 +187,8 @@ body {
               transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .g-reveal-scale.g-visible { opacity: 1; transform: scale(1); }
+
+@keyframes ag-blink {
+  0%, 49.9% { opacity: 1; }
+  50%, 100%  { opacity: 0; }
+}
