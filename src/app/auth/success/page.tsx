@@ -1,7 +1,7 @@
 'use client'
 
 import { useSearchParams, useRouter } from 'next/navigation'
-import { AuthLogo, ThemeToggle } from '@/components/auth-ui'
+import { AuthLogo, ThemeToggle, HomeButton } from '@/components/auth-ui'
 
 export default function SuccessPage() {
   const searchParams = useSearchParams()
@@ -33,8 +33,9 @@ export default function SuccessPage() {
   return (
     <div className="min-h-[100svh] bg-background flex flex-col items-center justify-center p-6 text-foreground selection:bg-primary/20">
       
-      {/* Theme Toggle in Corner */}
-      <div className="fixed top-6 right-6 z-50">
+      {/* Top Navigation */}
+      <div className="fixed top-6 right-6 z-50 flex items-center gap-2">
+        <HomeButton />
         <ThemeToggle />
       </div>
 
@@ -47,7 +48,7 @@ export default function SuccessPage() {
         <div className="bg-card border border-border sm:rounded-2xl p-8 transition-all relative overflow-hidden text-center">
           
           <div className="mx-auto size-20 rounded-full bg-green-500/10 flex items-center justify-center mb-6 mt-4">
-            <svg width="40" height="40" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-green-500">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-green-500">
               <path d="M7 13l3 3 7-7" />
               <circle cx="12" cy="12" r="10" />
             </svg>

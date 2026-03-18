@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
-import { AuthLogo, ThemeToggle } from '@/components/auth-ui'
+import { AuthLogo, ThemeToggle, HomeButton } from '@/components/auth-ui'
 
 export default function UpdatePasswordPage() {
   const { updatePassword } = useAuth()
@@ -36,8 +36,9 @@ export default function UpdatePasswordPage() {
   return (
     <div className="min-h-[100svh] bg-background flex flex-col items-center justify-center p-6 text-foreground selection:bg-primary/20">
       
-      {/* Theme Toggle in Corner */}
-      <div className="fixed top-6 right-6 z-50">
+      {/* Top Navigation */}
+      <div className="fixed top-6 right-6 z-50 flex items-center gap-2">
+        <HomeButton />
         <ThemeToggle />
       </div>
 
