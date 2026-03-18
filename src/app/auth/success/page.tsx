@@ -1,25 +1,10 @@
 'use client'
 
 import { useSearchParams, useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { useTheme } from '@/contexts/ThemeContext'
-
-function Logo({ size = 32 }: { size?: number }) {
-  const fs = size * 0.57
-  return (
-    <div className="flex items-center gap-2 select-none">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/App Icon.png" alt="AzubiHub" width={size} height={size} className="rounded-lg object-cover" />
-      <span className="text-foreground tracking-tight" style={{ fontSize: fs, fontWeight: 500 }}>
-        Azubi<span className="text-muted-foreground">Hub</span>
-      </span>
-    </div>
-  )
-}
+import { AuthLogo, ThemeToggle } from '@/components/auth-ui'
 
 export default function SuccessPage() {
   const searchParams = useSearchParams()
-  const { theme, toggleTheme } = useTheme()
   const router = useRouter()
   const type = searchParams.get('type')
 
@@ -48,56 +33,44 @@ export default function SuccessPage() {
   return (
     <div className="min-h-[100svh] bg-background flex flex-col items-center justify-center p-6 font-sans antialiased text-foreground selection:bg-primary/20">
       
-      {/* Theme Toggle in Corner */}
-      <button 
-        onClick={toggleTheme}
-        className="fixed top-6 right-6 p-2 rounded-full hover:bg-muted transition-colors text-muted-foreground"
-        title={theme === 'dark' ? 'Helles Design' : 'Dunkles Design'}
-      >
-        {theme === 'dark' ? (
-          <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-        ) : (
-          <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-        )}
-      </button>
+      {/* Theme Toggle Top Right */}
+      <div className="fixed top-8 right-8 z-50">
+        <ThemeToggle />
+      </div>
 
-      <div className="w-full max-w-[400px]">
+      <div className="w-full max-w-[420px] py-12">
         
-        <div className="flex justify-center mb-10">
-          <Logo size={42} />
+        <div className="flex justify-center mb-12">
+          <AuthLogo size={56} />
         </div>
 
-        <div className="bg-card border border-border sm:shadow-xl sm:shadow-green-500/5 rounded-2xl p-8 transition-all relative overflow-hidden text-center">
-          {/* Success Accent Line */}
-          <div className="absolute inset-x-0 top-0 h-1 bg-green-500" />
-
-          <div className="mx-auto size-20 rounded-full bg-green-500/10 flex items-center justify-center mb-6 mt-4">
-            <svg width="40" height="40" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-green-500">
-              <path d="M7 13l3 3 7-7" />
-              <circle cx="12" cy="12" r="10" />
+        <div className="bg-card border-none sm:border sm:border-border rounded-[2rem] p-8 sm:p-10 transition-all duration-500 text-center">
+          
+          <div className="mx-auto size-24 rounded-full bg-green-500/10 flex items-center justify-center mb-8 border border-green-500/20">
+            <svg width="48" height="48" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-green-500 drop-shadow-sm">
+              <path d="M10 24l8 8 20-20" />
             </svg>
           </div>
 
-          <h1 className="text-[1.5rem] font-semibold text-foreground mb-2 tracking-tight">
+          <h1 className="text-[1.75rem] font-bold text-foreground mb-4 tracking-tight">
             {title}
           </h1>
-          <p className="text-[0.9375rem] text-muted-foreground mb-8 px-2 leading-relaxed">
+          <p className="text-[0.9375rem] text-muted-foreground mb-10 leading-relaxed px-4">
             {description}
           </p>
 
           <button
             onClick={() => router.push(targetPath)}
-            className="w-full py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg text-[0.9375rem] font-semibold transition-all shadow-sm active:scale-[0.98]"
+            className="w-full py-3.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl text-[1rem] font-bold transition-all duration-300 active:scale-[0.985] group"
           >
             {buttonText}
           </button>
         </div>
 
-        <p className="text-center mt-12 text-[0.8125rem] text-muted-foreground/60 font-medium">
-          © {new Date().getFullYear()} AzubiHub — Alle Rechte vorbehalten.
+        <p className="text-center mt-12 text-[0.8125rem] text-muted-foreground/40 font-bold uppercase tracking-widest select-none">
+          © {new Date().getFullYear()} AzubiHub — Digital Excellence
         </p>
       </div>
     </div>
   )
 }
-

@@ -3,32 +3,18 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useAuth } from '@/contexts/AuthContext'
-import { useTheme } from '@/contexts/ThemeContext'
-
-function Logo({ size = 32 }: { size?: number }) {
-  const fs = size * 0.57
-  return (
-    <div className="flex items-center gap-2 select-none">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/App Icon.png" alt="AzubiHub" width={size} height={size} className="rounded-lg object-cover" />
-      <span className="text-foreground tracking-tight" style={{ fontSize: fs, fontWeight: 500 }}>
-        Azubi<span className="text-muted-foreground">Hub</span>
-      </span>
-    </div>
-  )
-}
+import { AuthLogo, ThemeToggle } from '@/components/auth-ui'
 
 const GoogleIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 18 18"><path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285f4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34a853"/><path d="M3.964 10.706c-.18-.54-.282-1.117-.282-1.706 0-.589.102-1.166.282-1.706V4.962H.957C.347 6.177 0 7.55 0 9s.347 2.823.957 4.038l3.007-2.332z" fill="#fbbc05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.962L3.964 7.294C4.672 5.167 6.656 3.58 9 3.58z" fill="#ea4335"/></svg>
+  <svg width="20" height="20" viewBox="0 0 18 18"><path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285f4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34a853"/><path d="M3.964 10.706c-.18-.54-.282-1.117-.282-1.706 0-.589.102-1.166.282-1.706V4.962H.957C.347 6.177 0 7.55 0 9s.347 2.823.957 4.038l3.007-2.332z" fill="#fbbc05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.962L3.964 7.294C4.672 5.167 6.656 3.58 9 3.58z" fill="#ea4335"/></svg>
 )
 
 const AppleIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor"><path d="M14.94 9c0 2.22 1.44 3.53 1.5 3.57-.01.03-.23.83-.8 1.66-.49.72-1 1.44-1.8 1.45-.78.01-1.03-.47-1.92-.47-.89 0-1.17.46-1.9.47-.74.01-1.31-.72-1.82-1.45-1.03-1.48-1.82-4.18-.76-6.02.53-.91 1.47-1.49 2.49-1.5 1.15-.02 2.1.77 2.8.77.7 0 1.65-.79 2.8-.79 1.15 0 2.1.58 2.39 1.41.01.03-.02.04-.04.04-.1-.01-1.8.01-1.8 1.86zm-5-3.52c.03-2.13 1.77-3.83 3.86-3.83.03 0 .05.02.05.04s-.01.04-.03.04c-1.93.04-3.54 1.7-3.88 3.75 0 2.05-1.6 3.71-3.53 3.75-.02 0-.04-.02-.04-.04 0-.02 0-.04.02-.04 1.85-.04 3.52-1.63 3.55-3.67z" /></svg>
+  <svg width="20" height="20" viewBox="0 0 18 18" fill="currentColor"><path d="M14.94 9c0 2.22 1.44 3.53 1.5 3.57-.01.03-.23.83-.8 1.66-.49.72-1 1.44-1.8 1.45-.78.01-1.03-.47-1.92-.47-.89 0-1.17.46-1.9.47-.74.01-1.31-.72-1.82-1.45-1.03-1.48-1.82-4.18-.76-6.02.53-.91 1.47-1.49 2.49-1.5 1.15-.02 2.1.77 2.8.77.7 0 1.65-.79 2.8-.79 1.15 0 2.1.58 2.39 1.41.01.03-.02.04-.04.04-.1-.01-1.8.01-1.8 1.86zm-5-3.52c.03-2.13 1.77-3.83 3.86-3.83.03 0 .05.02.05.04s-.01.04-.03.04c-1.93.04-3.54 1.7-3.88 3.75 0 2.05-1.6 3.71-3.53 3.75-.02 0-.04-.02-.04-.04 0-.02 0-.04.02-.04 1.85-.04 3.52-1.63 3.55-3.67z" /></svg>
 )
 
 export default function LoginPage() {
   const { login, signInWithGoogle, signInWithApple } = useAuth()
-  const { theme, toggleTheme } = useTheme()
   const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -51,94 +37,86 @@ export default function LoginPage() {
     justifyContent: 'center',
     gap: '0.75rem',
     width: '100%',
-    padding: '0.625rem 1rem',
-    border: '1px solid hsl(var(--border))',
-    borderRadius: '8px',
+    padding: '0.75rem 1rem',
+    border: '1.5px solid hsl(var(--border))',
+    borderRadius: '12px',
     backgroundColor: 'transparent',
     color: 'hsl(var(--foreground))',
-    fontSize: '0.875rem',
+    fontSize: '0.9375rem',
     fontWeight: 500,
     cursor: 'pointer',
-    transition: 'background-color 0.2s, box-shadow 0.2s',
+    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
   }
 
   return (
     <div className="min-h-[100svh] bg-background flex flex-col items-center justify-center p-6 font-sans antialiased text-foreground selection:bg-primary/20">
       
-      {/* Theme Toggle in Corner */}
-      <button 
-        onClick={toggleTheme}
-        className="fixed top-6 right-6 p-2 rounded-full hover:bg-muted transition-colors text-muted-foreground"
-        title={theme === 'dark' ? 'Helles Design' : 'Dunkles Design'}
-      >
-        {theme === 'dark' ? (
-          <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-        ) : (
-          <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-        )}
-      </button>
+      {/* Theme Toggle Top Right */}
+      <div className="fixed top-8 right-8 z-50">
+        <ThemeToggle />
+      </div>
 
-      <div className="w-full max-w-[400px]">
+      <div className="w-full max-w-[420px] py-12">
         
-        <div className="flex justify-center mb-10">
-          <Logo size={42} />
+        <div className="flex justify-center mb-12">
+          <AuthLogo size={56} />
         </div>
 
-        <div className="bg-card border border-border sm:shadow-xl sm:shadow-primary/5 rounded-2xl p-8 transition-all">
-          <h1 className="text-[1.5rem] font-semibold text-foreground mb-1 text-center tracking-tight">
-            Anmelden
-          </h1>
-          <p className="text-[0.9375rem] text-muted-foreground text-center mb-8">
-            Wähle eine Methode zum Fortfahren
-          </p>
+        <div className="bg-card border-none sm:border sm:border-border rounded-[2rem] p-8 sm:p-10 transition-all duration-500">
+          <div className="text-center mb-10">
+            <h1 className="text-[1.75rem] font-bold text-foreground mb-2 tracking-tight">
+              Anmelden
+            </h1>
+            <p className="text-[0.9375rem] text-muted-foreground">
+              Dein persönlicher Assistent erwartet dich.
+            </p>
+          </div>
 
-          <div className="flex flex-col gap-3 mb-8">
+          <div className="flex flex-col gap-4 mb-10">
             <button 
               onClick={() => signInWithGoogle()}
               style={ssoButtonStyle}
-              onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'hsl(var(--muted))')}
-              onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
+              className="hover:bg-muted hover:border-muted-foreground/20 active:scale-[0.985]"
             >
               <GoogleIcon />
-              Weiter mit Google
+              Mit Google anmelden
             </button>
             <button 
               onClick={() => signInWithApple()}
               style={ssoButtonStyle}
-              onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'hsl(var(--muted))')}
-              onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
+              className="hover:bg-muted hover:border-muted-foreground/20 active:scale-[0.985]"
             >
               <AppleIcon />
-              Weiter mit Apple
+              Mit Apple anmelden
             </button>
           </div>
 
-          <div className="relative mb-8 text-center">
+          <div className="relative mb-10 text-center">
             <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-border"></span>
+              <span className="w-full border-t border-border/80"></span>
             </div>
-            <span className="relative px-4 bg-card text-[0.8125rem] text-muted-foreground font-medium uppercase tracking-wider">
-              oder E-Mail
+            <span className="relative px-6 bg-card text-[0.8125rem] text-muted-foreground/80 font-semibold uppercase tracking-widest pointer-events-none">
+              Oder via E-Mail
             </span>
           </div>
 
-          <form onSubmit={handleLogin} className="flex flex-col gap-4">
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="email" className="text-[0.8125rem] font-semibold text-foreground/80 ml-0.5">
-                E-Mail-Adresse
+          <form onSubmit={handleLogin} className="flex flex-col gap-5">
+            <div className="flex flex-col gap-2">
+              <label htmlFor="email" className="text-[0.8125rem] font-bold text-foreground/85 ml-1">
+                E-Mail
               </label>
               <input
                 id="email" type="email" required
-                placeholder="name@beispiel.de"
+                placeholder="max@mustermann.de"
                 value={email} onChange={e => setEmail(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-lg border border-border bg-input focus:bg-background focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-[0.9375rem] transition-all placeholder:text-muted-foreground/50"
+                className="w-full px-4 py-3 rounded-xl border border-border bg-input focus:bg-background focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none text-[0.9375rem] transition-all duration-200 placeholder:text-muted-foreground/40"
               />
             </div>
 
-            <div className="flex flex-col gap-1.5">
-              <div className="flex justify-between items-center ml-0.5">
-                <label htmlFor="password" className="text-[0.8125rem] font-semibold text-foreground/80">Passwort</label>
-                <Link href="/auth/forgot-password" className="text-[0.8125rem] text-primary hover:underline font-medium">
+            <div className="flex flex-col gap-2">
+              <div className="flex justify-between items-center px-1">
+                <label htmlFor="password" className="text-[0.8125rem] font-bold text-foreground/85">Passwort</label>
+                <Link href="/auth/forgot-password" title="Passwort vergessen?" className="text-[0.8125rem] text-primary hover:text-primary/80 font-bold transition-colors">
                   Vergessen?
                 </Link>
               </div>
@@ -146,40 +124,49 @@ export default function LoginPage() {
                 id="password" type="password" required
                 placeholder="••••••••"
                 value={password} onChange={e => setPassword(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-lg border border-border bg-input focus:bg-background focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-[0.9375rem] transition-all placeholder:text-muted-foreground/50"
+                className="w-full px-4 py-3 rounded-xl border border-border bg-input focus:bg-background focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none text-[0.9375rem] transition-all duration-200 placeholder:text-muted-foreground/40"
               />
             </div>
 
             {errorMsg && (
-              <div className="mt-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-[0.875rem] text-center font-medium animate-in fade-in slide-in-from-top-1">
+              <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-xl text-destructive text-[0.875rem] text-center font-semibold animate-in fade-in zoom-in-95">
                 {errorMsg}
               </div>
             )}
 
             <button
               type="submit" disabled={isLoading}
-              className="mt-4 w-full py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg text-[0.9375rem] font-semibold transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm active:scale-[0.98]"
+              className="mt-4 w-full py-3.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl text-[1rem] font-bold transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-3 active:scale-[0.985] group"
             >
               {isLoading ? (
                 <>
-                  <span className="size-4 rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground animate-spin" />
+                  <span className="size-5 rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground animate-spin" />
                   Wird angemeldet...
                 </>
-              ) : 'Anmelden'}
+              ) : (
+                <>
+                  Anmelden
+                  <svg className="size-4 opacity-0 transition-all duration-300 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </>
+              )}
             </button>
           </form>
         </div>
 
-        <p className="text-center mt-8 text-[0.9375rem] text-muted-foreground">
-          Noch kein Mitglied?{' '}
-          <Link href="/auth/register" className="text-primary font-semibold hover:underline">
-            Konto erstellen
-          </Link>
-        </p>
+        <div className="flex flex-col items-center gap-6 mt-12 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+          <p className="text-[0.9375rem] text-muted-foreground font-medium">
+            Du hast noch kein Konto?{' '}
+            <Link href="/auth/register" className="text-primary font-bold hover:underline underline-offset-4 decoration-2">
+              Kostenlos registrieren
+            </Link>
+          </p>
 
-        <p className="text-center mt-12 text-[0.8125rem] text-muted-foreground/60 font-medium">
-          © {new Date().getFullYear()} AzubiHub — Alle Rechte vorbehalten.
-        </p>
+          <p className="text-[0.8125rem] text-muted-foreground/40 font-bold uppercase tracking-widest select-none">
+            © {new Date().getFullYear()} AzubiHub — Digital Excellence
+          </p>
+        </div>
       </div>
     </div>
   )
