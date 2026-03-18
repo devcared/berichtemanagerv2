@@ -214,6 +214,37 @@ function useScrollReveal() {
    COMPONENTS
 ═══════════════════════════════════════ */
 
+/* Logo — Google-style 4-color icon mark + colored wordmark */
+function Logo({ size = 28, dark = false }: { size?: number; dark?: boolean }) {
+  const textColor = dark ? 'rgba(255,255,255,0.85)' : C.textPrimary
+  const hubColor  = dark ? 'rgba(255,255,255,0.5)'  : C.textSec
+  const fs = size * 0.57
+  return (
+    <div style={{ display: 'inline-flex', alignItems: 'center', gap: size * 0.36 }}>
+      {/* Icon mark — "A" built from 4 colored strokes */}
+      <svg width={size} height={size} viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        {/* Left leg — blue */}
+        <path d="M7.5 26.5L16 5.5" stroke={C.blue}   strokeWidth="3.6" strokeLinecap="round"/>
+        {/* Right leg — green */}
+        <path d="M16 5.5L24.5 26.5" stroke={C.green}  strokeWidth="3.6" strokeLinecap="round"/>
+        {/* Crossbar left — red */}
+        <path d="M11.4 19.8H16"    stroke={C.red}    strokeWidth="2.8" strokeLinecap="round"/>
+        {/* Crossbar right — yellow */}
+        <path d="M16 19.8H20.6"    stroke={C.yellow}  strokeWidth="2.8" strokeLinecap="round"/>
+      </svg>
+      {/* Wordmark */}
+      <span style={{ fontSize: fs, fontWeight: 500, letterSpacing: '-0.01em', lineHeight: 1, userSelect: 'none' }}>
+        <span style={{ color: C.blue   }}>A</span>
+        <span style={{ color: textColor }}>z</span>
+        <span style={{ color: textColor }}>u</span>
+        <span style={{ color: textColor }}>b</span>
+        <span style={{ color: textColor }}>i</span>
+        <span style={{ color: hubColor  }}>Hub</span>
+      </span>
+    </div>
+  )
+}
+
 /* Fixed full-screen animated background */
 function FixedBackground() {
   // Dot helper — no shadows, just opacity + breathe animation
@@ -300,11 +331,8 @@ function Nav() {
     }}>
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 2rem', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         {/* Logo */}
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-          <div style={{ width: 32, height: 32, borderRadius: 8, background: `linear-gradient(135deg, ${C.blue}, ${C.green})`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span style={{ color: 'white', fontWeight: 900, fontSize: 14, lineHeight: 1 }}>A</span>
-          </div>
-          <span style={{ fontWeight: 700, fontSize: '1.125rem', color: C.textPrimary }}>AzubiHub</span>
+        <Link href="/" style={{ textDecoration: 'none' }}>
+          <Logo size={26} />
         </Link>
 
         {/* Nav links */}
@@ -674,11 +702,8 @@ function LandingPage() {
 
             {/* Brand */}
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: '0.875rem' }}>
-                <div style={{ width: 28, height: 28, borderRadius: 6, background: `linear-gradient(135deg, ${C.blue}, ${C.green})`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <span style={{ color: 'white', fontWeight: 900, fontSize: 12, lineHeight: 1 }}>A</span>
-                </div>
-                <span style={{ fontWeight: 600, fontSize: '1rem' }}>AzubiHub</span>
+              <div style={{ marginBottom: '0.875rem' }}>
+                <Logo size={22} dark />
               </div>
               <p style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1.65, fontSize: '0.875rem', marginBottom: '1.25rem', maxWidth: 280 }}>
                 Digitale Ausbildungsplattform für Deutschland. KI-gestützt, IHK-konform, kostenlos.
