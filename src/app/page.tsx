@@ -120,8 +120,6 @@ const C = {
   bgSecondary: '#f8f9fa',
   bgDark:      '#202124',
   border:      '#dadce0',
-  shadowSm:    '0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15)',
-  shadowMd:    '0 1px 3px 0 rgba(60,64,67,0.3), 0 4px 8px 3px rgba(60,64,67,0.15)',
 }
 
 /* ═══════════════════════════════════════
@@ -301,8 +299,8 @@ function Nav() {
           </Link>
           <Link href="/auth/register">
             <span style={{ background: C.blue, color: 'white', padding: '10px 24px', borderRadius: 9999, fontWeight: 450, fontSize: '0.875rem', cursor: 'pointer', transition: 'all 150ms ease', display: 'inline-block' }}
-              onMouseEnter={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.background = C.blueDark; el.style.boxShadow = C.shadowSm }}
-              onMouseLeave={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.background = C.blue; el.style.boxShadow = 'none' }}>
+              onMouseEnter={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.background = C.blueDark }}
+              onMouseLeave={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.background = C.blue }}>
               Kostenlos starten
             </span>
           </Link>
@@ -316,7 +314,7 @@ function Nav() {
 function FaqItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false)
   return (
-    <div style={{ background: '#ffffff', border: `1px solid ${C.border}`, borderRadius: 12, overflow: 'hidden', transition: 'box-shadow 250ms ease', boxShadow: open ? C.shadowMd : 'none' }}>
+    <div style={{ background: '#ffffff', border: `1px solid ${C.border}`, borderRadius: 12, overflow: 'hidden' }}>
       <button onClick={() => setOpen(o => !o)}
         style={{ width: '100%', padding: '1.25rem 1.5rem', background: 'none', border: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', cursor: 'pointer', textAlign: 'left', fontSize: '1rem', fontWeight: 500, color: C.textPrimary, transition: 'color 150ms ease' }}
         onMouseEnter={e => (e.currentTarget.style.color = C.blue)}
@@ -350,7 +348,7 @@ function LandingPage() {
       <section style={{ minHeight: '100svh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 'calc(5rem + 64px) 0 5rem', background: 'transparent', position: 'relative', textAlign: 'center' }}>
         <div style={{ maxWidth: 860, margin: '0 auto', padding: '0 2rem', position: 'relative' }}>
           {/* Badge */}
-          <div className="g-reveal" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '0.5rem 1.25rem', background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(8px)', borderRadius: 9999, boxShadow: C.shadowSm, marginBottom: '2rem', fontSize: '0.875rem', fontWeight: 450, color: C.textSec }}>
+          <div className="g-reveal" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '0.5rem 1.25rem', background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(8px)', borderRadius: 9999, marginBottom: '2rem', fontSize: '0.875rem', fontWeight: 450, color: C.textSec }}>
             <HugeiconsIcon icon={SparklesIcon} size={16} style={{ color: C.yellow }} />
             Für Betriebe · Ausbilder · Auszubildende
           </div>
@@ -375,17 +373,17 @@ function LandingPage() {
           {/* CTA buttons — exact antigravity.google pill style */}
           <div className="g-reveal" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center', marginBottom: '3rem', transitionDelay: '0.2s' }}>
             <Link href="/auth/register">
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 24px', background: C.blue, color: 'white', borderRadius: 9999, fontWeight: 450, fontSize: '1rem', cursor: 'pointer', boxShadow: C.shadowSm, transition: 'all 250ms ease' }}
-                onMouseEnter={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.background = C.blueDark; el.style.boxShadow = C.shadowMd; el.style.transform = 'translateY(-2px)' }}
-                onMouseLeave={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.background = C.blue; el.style.boxShadow = C.shadowSm; el.style.transform = '' }}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 24px', background: C.blue, color: 'white', borderRadius: 9999, fontWeight: 450, fontSize: '1rem', cursor: 'pointer', transition: 'all 250ms ease' }}
+                onMouseEnter={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.background = C.blueDark; el.style.transform = 'translateY(-2px)' }}
+                onMouseLeave={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.background = C.blue; el.style.transform = '' }}>
                 Kostenlos starten
                 <HugeiconsIcon icon={ArrowRight01Icon} size={18} />
               </span>
             </Link>
             <a href="#features">
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 24px', background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(6px)', color: C.textPrimary, border: `1px solid ${C.border}`, borderRadius: 9999, fontWeight: 450, fontSize: '1rem', cursor: 'pointer', transition: 'all 250ms ease' }}
-                onMouseEnter={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.background = 'rgba(255,255,255,0.95)'; el.style.boxShadow = C.shadowSm }}
-                onMouseLeave={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.background = 'rgba(255,255,255,0.8)'; el.style.boxShadow = 'none' }}>
+                onMouseEnter={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.background = 'rgba(255,255,255,0.95)' }}
+                onMouseLeave={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.background = 'rgba(255,255,255,0.8)' }}>
                 Demo ansehen
               </span>
             </a>
@@ -398,7 +396,7 @@ function LandingPage() {
               { icon: CheckmarkBadge01Icon, label: 'IHK-konform'   },
               { icon: SparklesIcon,         label: 'KI-gestützt'   },
             ].map(t => (
-              <span key={t.label} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '0.5rem 1rem', background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(6px)', borderRadius: 9999, boxShadow: C.shadowSm, color: C.textSec, fontWeight: 450, fontSize: '0.875rem' }}>
+              <span key={t.label} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '0.5rem 1rem', background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(6px)', borderRadius: 9999, color: C.textSec, fontWeight: 450, fontSize: '0.875rem' }}>
                 <HugeiconsIcon icon={t.icon} size={16} style={{ color: C.blue }} />
                 {t.label}
               </span>
@@ -433,9 +431,9 @@ function LandingPage() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: '1.5rem' }}>
             {FEATURES.map((f, i) => (
               <div key={f.title} className="g-reveal"
-                style={{ padding: '2rem', background: '#ffffff', border: `1px solid ${C.border}`, borderRadius: 12, boxShadow: C.shadowSm, transition: 'all 250ms ease', transitionDelay: `${i * 0.07}s` }}
-                onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.boxShadow = C.shadowMd; el.style.transform = 'translateY(-4px)' }}
-                onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.boxShadow = C.shadowSm; el.style.transform = '' }}>
+                style={{ padding: '2rem', background: '#ffffff', border: `1px solid ${C.border}`, borderRadius: 12, transition: 'all 250ms ease', transitionDelay: `${i * 0.07}s` }}
+                onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.transform = 'translateY(-4px)' }}
+                onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.transform = '' }}>
                 <div style={{ width: 56, height: 56, background: featureIconBg, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.25rem' }}>
                   <HugeiconsIcon icon={f.icon} size={26} style={{ color: 'white' }} />
                 </div>
@@ -489,9 +487,9 @@ function LandingPage() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: '1.5rem' }}>
             {TESTIMONIALS.map((t, i) => (
               <div key={t.name} className="g-reveal"
-                style={{ padding: '1.75rem', background: '#ffffff', border: `1px solid ${C.border}`, borderRadius: 12, boxShadow: C.shadowSm, display: 'flex', flexDirection: 'column', transition: 'all 250ms ease', transitionDelay: `${i * 0.07}s` }}
-                onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.boxShadow = C.shadowMd; el.style.transform = 'translateY(-4px)' }}
-                onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.boxShadow = C.shadowSm; el.style.transform = '' }}>
+                style={{ padding: '1.75rem', background: '#ffffff', border: `1px solid ${C.border}`, borderRadius: 12, display: 'flex', flexDirection: 'column', transition: 'all 250ms ease', transitionDelay: `${i * 0.07}s` }}
+                onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.transform = 'translateY(-4px)' }}
+                onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.transform = '' }}>
                 <div style={{ display: 'flex', gap: 2, marginBottom: '0.875rem' }}>
                   {[...Array(5)].map((_, j) => <HugeiconsIcon key={j} icon={StarIcon} size={14} style={{ color: C.yellow }} />)}
                 </div>
@@ -522,9 +520,9 @@ function LandingPage() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: '1.5rem', maxWidth: 700, margin: '0 auto' }}>
             {/* Free */}
             <div className="g-reveal"
-              style={{ padding: '2rem', background: '#ffffff', border: `1px solid ${C.border}`, borderRadius: 12, boxShadow: C.shadowSm, transition: 'all 250ms ease' }}
-              onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.boxShadow = C.shadowMd; el.style.transform = 'translateY(-4px)' }}
-              onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.boxShadow = C.shadowSm; el.style.transform = '' }}>
+              style={{ padding: '2rem', background: '#ffffff', border: `1px solid ${C.border}`, borderRadius: 12, transition: 'all 250ms ease' }}
+              onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.transform = 'translateY(-4px)' }}
+              onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.transform = '' }}>
               <p style={{ fontSize: '0.75rem', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.1em', color: C.textLight, marginBottom: '1rem' }}>Kostenlos</p>
               <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, marginBottom: '0.5rem' }}>
                 <span style={{ fontSize: '3.5rem', fontWeight: 700, color: C.textPrimary, lineHeight: 1 }}>0€</span>
@@ -609,7 +607,7 @@ function LandingPage() {
             </p>
             <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
               <Link href="/auth/register">
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 24px', background: 'white', color: C.blue, borderRadius: 9999, fontWeight: 450, fontSize: '1rem', cursor: 'pointer', boxShadow: C.shadowSm, transition: 'all 250ms ease' }}
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 24px', background: 'white', color: C.blue, borderRadius: 9999, fontWeight: 450, fontSize: '1rem', cursor: 'pointer', transition: 'all 250ms ease' }}
                   onMouseEnter={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.background = C.bgSecondary; el.style.transform = 'translateY(-2px)' }}
                   onMouseLeave={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.background = 'white'; el.style.transform = '' }}>
                   Jetzt kostenlos starten
