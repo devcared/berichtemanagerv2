@@ -313,7 +313,7 @@ function ModuleCard({ mod, icon: I, isDark, cardBg, borderC, fg, fgMuted, primar
       }}
     >
 
-      {/* Header row: icon + drag handle */}
+      {/* Header row: icon + drag handle*/}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
         <div style={{
           width: 48, height: 48, borderRadius: 14,
