@@ -343,64 +343,64 @@ function LandingPage() {
       <FixedBackground />
       <Nav />
 
-      {/* ══ 1. HERO — transparent, shows fixed bg ══ */}
-      <section style={{ minHeight: '100svh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 'calc(5rem + 64px) 0 5rem', background: 'transparent', position: 'relative', textAlign: 'center' }}>
-        <div style={{ maxWidth: 860, margin: '0 auto', padding: '0 2rem', position: 'relative' }}>
-          {/* Badge */}
-          <div className="g-reveal" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '0.5rem 1.25rem', background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(8px)', borderRadius: 9999, marginBottom: '2rem', fontSize: '0.875rem', fontWeight: 450, color: C.textSec }}>
-            <HugeiconsIcon icon={SparklesIcon} size={16} style={{ color: C.yellow }} />
-            Für Betriebe · Ausbilder · Auszubildende
+      {/* ══ 1. HERO ══ */}
+      <section style={{ minHeight: '100svh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 'calc(4rem + 64px) 0 4rem', background: 'transparent', position: 'relative', textAlign: 'center' }}>
+        <div style={{ maxWidth: 800, margin: '0 auto', padding: '0 2rem' }}>
+
+          {/* Eyebrow chip */}
+          <div className="g-reveal" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 14px', border: `1px solid ${C.border}`, borderRadius: 9999, marginBottom: '2.25rem', fontSize: '0.8125rem', fontWeight: 500, color: C.textSec, background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)' }}>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: C.blue, display: 'inline-block', flexShrink: 0 }} />
+            Ausbildungsplattform für Deutschland
           </div>
 
-          {/* H1 — two lines, exact antigravity.google sizes */}
-          <h1 className="g-reveal" style={{ fontWeight: 450, lineHeight: 1.1, marginBottom: '1.5rem', transitionDelay: '0.1s' }}>
-            <span style={{ display: 'block', fontSize: 'clamp(2.5rem,5vw,5rem)', color: C.textPrimary }}>
+          {/* H1 */}
+          <h1 className="g-reveal" style={{ fontWeight: 450, lineHeight: 1.08, marginBottom: '1.75rem', transitionDelay: '0.08s' }}>
+            <span style={{ display: 'block', fontSize: 'clamp(2.75rem,5.5vw,5rem)', color: C.textPrimary, letterSpacing: '-0.01em' }}>
               Deine Ausbildung,
             </span>
-            <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: '0.125em', fontSize: 'clamp(1.75rem,3.5vw,3.5rem)', color: C.textSec }}>
+            <span style={{ display: 'inline-flex', alignItems: 'baseline', fontSize: 'clamp(2rem,4vw,3.75rem)', color: C.textSec, letterSpacing: '-0.01em' }}>
               neu gedacht.
-              <span style={{ display: 'inline-block', animation: 'ag-blink 1s step-end infinite', color: C.blue, fontWeight: 300 }}>|</span>
+              <span style={{ marginLeft: '0.1em', animation: 'ag-blink 1.1s step-end infinite', color: C.blue, fontWeight: 200, lineHeight: 1 }}>|</span>
             </span>
           </h1>
 
           {/* Subtitle */}
-          <p className="g-reveal" style={{ fontSize: '1.125rem', lineHeight: 1.8, color: C.textSec, maxWidth: 640, margin: '0 auto 2.5rem', transitionDelay: '0.15s' }}>
-            AzubiHub digitalisiert Berichtshefte, Ausbilder-Freigaben und die gesamte
-            Ausbildungsdokumentation. KI-gestützt, IHK-konform und dauerhaft kostenlos.
+          <p className="g-reveal" style={{ fontSize: '1.125rem', lineHeight: 1.75, color: C.textSec, maxWidth: 560, margin: '0 auto 2.75rem', transitionDelay: '0.14s' }}>
+            Wochenberichte, KI-Formulierung und Ausbilder-Freigabe —
+            digital, IHK-konform und dauerhaft kostenlos.
           </p>
 
-          {/* CTA buttons — exact antigravity.google pill style */}
-          <div className="g-reveal" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center', marginBottom: '3rem', transitionDelay: '0.2s' }}>
+          {/* CTAs */}
+          <div className="g-reveal" style={{ display: 'flex', gap: '0.875rem', flexWrap: 'wrap', justifyContent: 'center', transitionDelay: '0.2s' }}>
             <Link href="/auth/register">
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 24px', background: C.blue, color: 'white', borderRadius: 9999, fontWeight: 450, fontSize: '1rem', cursor: 'pointer', transition: 'all 250ms ease' }}
-                onMouseEnter={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.background = C.blueDark; el.style.transform = 'translateY(-2px)' }}
-                onMouseLeave={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.background = C.blue; el.style.transform = '' }}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '12px 28px', background: C.blue, color: 'white', borderRadius: 9999, fontWeight: 450, fontSize: '0.9375rem', cursor: 'pointer', transition: 'background 150ms ease' }}
+                onMouseEnter={(e: React.MouseEvent<HTMLSpanElement>) => { (e.currentTarget as HTMLSpanElement).style.background = C.blueDark }}
+                onMouseLeave={(e: React.MouseEvent<HTMLSpanElement>) => { (e.currentTarget as HTMLSpanElement).style.background = C.blue }}>
                 Kostenlos starten
-                <HugeiconsIcon icon={ArrowRight01Icon} size={18} />
+                <HugeiconsIcon icon={ArrowRight01Icon} size={16} />
               </span>
             </Link>
-            <a href="#features">
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 24px', background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(6px)', color: C.textPrimary, border: `1px solid ${C.border}`, borderRadius: 9999, fontWeight: 450, fontSize: '1rem', cursor: 'pointer', transition: 'all 250ms ease' }}
-                onMouseEnter={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.background = 'rgba(255,255,255,0.95)' }}
-                onMouseLeave={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.background = 'rgba(255,255,255,0.8)' }}>
-                Demo ansehen
+            <a href="#features" style={{ textDecoration: 'none' }}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', padding: '12px 28px', background: 'rgba(255,255,255,0.72)', backdropFilter: 'blur(8px)', color: C.textPrimary, border: `1px solid ${C.border}`, borderRadius: 9999, fontWeight: 450, fontSize: '0.9375rem', cursor: 'pointer', transition: 'border-color 150ms ease' }}
+                onMouseEnter={(e: React.MouseEvent<HTMLSpanElement>) => { (e.currentTarget as HTMLSpanElement).style.borderColor = '#bdc1c6' }}
+                onMouseLeave={(e: React.MouseEvent<HTMLSpanElement>) => { (e.currentTarget as HTMLSpanElement).style.borderColor = C.border }}>
+                Mehr erfahren
               </span>
             </a>
           </div>
 
-          {/* Trust pills */}
-          <div className="g-reveal" style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap', transitionDelay: '0.25s' }}>
-            {[
-              { icon: Shield01Icon,         label: 'DSGVO-konform' },
-              { icon: CheckmarkBadge01Icon, label: 'IHK-konform'   },
-              { icon: SparklesIcon,         label: 'KI-gestützt'   },
-            ].map(t => (
-              <span key={t.label} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '0.5rem 1rem', background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(6px)', borderRadius: 9999, color: C.textSec, fontWeight: 450, fontSize: '0.875rem' }}>
-                <HugeiconsIcon icon={t.icon} size={16} style={{ color: C.blue }} />
-                {t.label}
-              </span>
-            ))}
-          </div>
+          {/* Subtle trust line */}
+          <p className="g-reveal" style={{ marginTop: '3rem', fontSize: '0.8125rem', color: C.textLight, transitionDelay: '0.26s' }}>
+            DSGVO-konform &nbsp;·&nbsp; IHK-konform &nbsp;·&nbsp; KI-gestützt &nbsp;·&nbsp; 100 % kostenlos
+          </p>
+        </div>
+
+        {/* Scroll indicator */}
+        <div className="g-reveal" style={{ position: 'absolute', bottom: '2.5rem', left: '50%', transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, transitionDelay: '0.35s' }}>
+          <span style={{ fontSize: '0.75rem', letterSpacing: '0.06em', textTransform: 'uppercase', color: C.textLight }}>Scroll</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.textLight} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ animation: 'goog-float4 2s ease-in-out infinite' }}>
+            <path d="M12 5v14M5 12l7 7 7-7" />
+          </svg>
         </div>
       </section>
 
