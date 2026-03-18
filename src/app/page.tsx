@@ -137,7 +137,6 @@ function AppHome() {
         background: scrolled ? (isDark ? 'rgba(30,31,36,0.85)' : 'rgba(255,255,255,0.85)') : 'transparent',
         backdropFilter: 'blur(16px)',
         WebkitBackdropFilter: 'blur(16px)',
-        borderBottom: !scrolled ? `1px solid ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'}` : undefined,
         borderRadius: scrolled ? 9999 : 0,
         boxShadow: scrolled ? '0 10px 30px rgba(0,0,0,0.03)' : 'none',
         transition: 'all 400ms cubic-bezier(0.4, 0, 0.2, 1)',
