@@ -34,15 +34,15 @@ function getGreeting() {
   const h = new Date().getHours()
   return h < 12 ? 'Guten Morgen' : h < 18 ? 'Guten Tag' : 'Guten Abend'
 }
-function SunIcon() { return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg> }
-function MoonIcon() { return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg> }
+function SunIcon() { return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" /></svg> }
+function MoonIcon() { return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /></svg> }
 
 function GripIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
-      <circle cx="5" cy="4" r="1.2"/><circle cx="11" cy="4" r="1.2"/>
-      <circle cx="5" cy="8" r="1.2"/><circle cx="11" cy="8" r="1.2"/>
-      <circle cx="5" cy="12" r="1.2"/><circle cx="11" cy="12" r="1.2"/>
+      <circle cx="5" cy="4" r="1.2" /><circle cx="11" cy="4" r="1.2" />
+      <circle cx="5" cy="8" r="1.2" /><circle cx="11" cy="8" r="1.2" />
+      <circle cx="5" cy="12" r="1.2" /><circle cx="11" cy="12" r="1.2" />
     </svg>
   )
 }
@@ -53,13 +53,19 @@ function AppHome() {
   const { logout } = useAuth()
   const { theme, toggleTheme } = useTheme()
   const [isMounted, setIsMounted] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
 
   const enabledIds = modules.filter(m => m.isEnabled).map(m => m.id)
   const [order, setOrder] = useState<string[]>(enabledIds)
   const draggedId = useRef<string | null>(null)
   const [dragOverId, setDragOverId] = useState<string | null>(null)
 
-  useEffect(() => { setIsMounted(true) }, [])
+  useEffect(() => { 
+    setIsMounted(true) 
+    const handleScroll = () => setScrolled(window.scrollY > 0)
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
   useEffect(() => {
     const saved = localStorage.getItem('azubihub-module-order')
     if (saved) {
@@ -70,17 +76,17 @@ function AppHome() {
         setOrder([...valid, ...missing])
       } catch { /* ignore */ }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const today    = isMounted ? format(new Date(), "EEEE, d. MMMM yyyy", { locale: de }) : ''
+  const today = isMounted ? format(new Date(), "EEEE, d. MMMM yyyy", { locale: de }) : ''
   const greeting = `${getGreeting()}${profile ? `, ${profile.firstName}` : ''}!`
-  const isDark   = theme === 'dark'
+  const isDark = theme === 'dark'
 
-  const fg      = 'hsl(var(--foreground))'
+  const fg = 'hsl(var(--foreground))'
   const fgMuted = 'hsl(var(--muted-foreground))'
-  const bg      = 'hsl(var(--background))'
-  const cardBg  = 'hsl(var(--card))'
+  const bg = 'hsl(var(--background))'
+  const cardBg = 'hsl(var(--card))'
   const borderC = 'hsl(var(--border))'
   const primary = isDark ? '#8ab4f8' : '#4285f4'
 
@@ -89,7 +95,7 @@ function AppHome() {
     : 'AZ'
 
   const enabledModules = order.map(id => modules.find(m => m.id === id)!).filter(Boolean)
-  const comingModules  = modules.filter(m => !m.isEnabled)
+  const comingModules = modules.filter(m => !m.isEnabled)
 
   function handleDragStart(id: string) { draggedId.current = id }
   function handleDragOver(e: React.DragEvent, id: string) {
@@ -122,24 +128,20 @@ function AppHome() {
 
       {/* ══ Sticky Topbar ══ */}
       <header style={{
-        position: 'sticky', top: 0, zIndex: 20,
-        height: 60,
+        position: 'sticky', top: 0, zIndex: 100,
+        height: 64,
         display: 'flex', alignItems: 'center',
-        padding: '0 clamp(1rem, 3vw, 2rem)',
-        background: navBg,
-        backdropFilter: 'blur(14px)',
-        WebkitBackdropFilter: 'blur(14px)',
-        borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)'}`,
+        padding: '0 1.5rem',
+        background: scrolled ? (isDark ? 'rgba(30,31,36,0.85)' : 'rgba(255,255,255,0.85)') : 'transparent',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        borderBottom: `1px solid ${scrolled ? (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)') : 'transparent'}`,
+        transition: 'all 240ms ease',
         gap: 12,
       }}>
         {/* Logo */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 9, flex: 1 }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/App Icon.png" alt="AzubiHub" width={28} height={28} style={{ borderRadius: 7, objectFit: 'cover', display: 'block' }} />
-          <div style={{ lineHeight: 1 }}>
-            <span style={{ fontSize: '0.9375rem', fontWeight: 600, color: fg, letterSpacing: '-0.01em' }}>AzubiHub</span>
-            <span style={{ fontSize: '0.6875rem', color: fgMuted, display: 'block', marginTop: 1 }}>Übersicht</span>
-          </div>
+        <div style={{ flex: 1 }}>
+          <Logo size={28} />
         </div>
 
         {/* Right cluster */}
@@ -241,11 +243,11 @@ function AppHome() {
                   {...sharedCardProps}
                   draggable={false}
                   isDragOver={false}
-                  onOpen={() => {}}
-                  onDragStart={() => {}}
-                  onDragOver={() => {}}
-                  onDrop={() => {}}
-                  onDragEnd={() => {}}
+                  onOpen={() => { }}
+                  onDragStart={() => { }}
+                  onDragOver={() => { }}
+                  onDrop={() => { }}
+                  onDragEnd={() => { }}
                 />
               ))}
             </div>
@@ -298,9 +300,9 @@ function ModuleCard({ mod, icon: I, isDark, cardBg, borderC, fg, fgMuted, primar
         border: `1px solid ${isDragOver ? primary : hovered && enabled ? primary : borderC}`,
         borderRadius: 24,
         padding: '1.75rem',
-        background: isDragOver 
-          ? (isDark ? 'rgba(138,180,248,0.08)' : 'rgba(66,133,244,0.05)') 
-          : hovered && enabled 
+        background: isDragOver
+          ? (isDark ? 'rgba(138,180,248,0.08)' : 'rgba(66,133,244,0.05)')
+          : hovered && enabled
             ? (isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.01)')
             : cardBg,
         cursor: draggable ? 'grab' : enabled ? 'pointer' : 'default',
@@ -379,19 +381,19 @@ function ModuleCard({ mod, icon: I, isDark, cardBg, borderC, fg, fgMuted, primar
 ═══════════════════════════════════════ */
 
 const C = {
-  blue:        '#4285f4',
-  blueDark:    '#1967d2',
-  green:       '#34a853',
-  yellow:      '#fbbc04',
-  red:         '#ea4335',
-  purple:      '#9c27b0',
+  blue: '#4285f4',
+  blueDark: '#1967d2',
+  green: '#34a853',
+  yellow: '#fbbc04',
+  red: '#ea4335',
+  purple: '#9c27b0',
   textPrimary: '#202124',
-  textSec:     '#5f6368',
-  textLight:   '#80868b',
-  bgPrimary:   '#ffffff',
+  textSec: '#5f6368',
+  textLight: '#80868b',
+  bgPrimary: '#ffffff',
   bgSecondary: '#f8f9fa',
-  bgDark:      '#202124',
-  border:      '#dadce0',
+  bgDark: '#202124',
+  border: '#dadce0',
 }
 
 /* ═══════════════════════════════════════
@@ -438,31 +440,31 @@ const FEATURES = [
 ]
 
 const STATS = [
-  { value: '500+',  label: 'Aktive Nutzer',    color: C.blue   },
-  { value: '12K+',  label: 'Berichte erstellt', color: C.red    },
-  { value: '80 %',  label: 'Zeitersparnis',     color: C.yellow },
-  { value: '4,9 ★', label: 'Nutzerbewertung',   color: C.green  },
+  { value: '500+', label: 'Aktive Nutzer', color: C.blue },
+  { value: '12K+', label: 'Berichte erstellt', color: C.red },
+  { value: '80 %', label: 'Zeitersparnis', color: C.yellow },
+  { value: '4,9 ★', label: 'Nutzerbewertung', color: C.green },
 ]
 
 
 const TESTIMONIALS = [
-  { name: 'Lena M.',    role: 'Auszubildende · Fachinformatikerin',      text: 'Ich tippe Stichpunkte ein und die KI macht den Rest. Absoluter Game Changer!',             color: C.blue   },
-  { name: 'Thomas K.',  role: 'Ausbilder · IT-Systemkaufmann',           text: 'Endlich alle Berichte zentral. Kein E-Mail-Chaos — alles übersichtlich an einem Ort.',      color: C.red    },
-  { name: 'Sara B.',    role: 'Auszubildende · Kauffrau Büromanagement', text: 'So aufgeräumt und modern. Man merkt, dass es jemand gebaut hat, der Ausbildung kennt.',      color: C.green  },
-  { name: 'Marcus D.',  role: 'Ausbilder · Mechatronik',                 text: 'E-Mail schicken, Azubis sind in Minuten drin. Das Einladungssystem ist wirklich genial.',   color: C.yellow },
-  { name: 'Jana F.',    role: 'Auszubildende · Industriekauffrau',       text: 'Direkte Kommentare am Bericht — keine E-Mail-Threads mehr. Einfach direkt im System.',      color: C.blue   },
-  { name: 'Florian R.', role: 'Ausbildungsleiter · Großbetrieb',         text: '12 Azubis über AzubiHub. Die Zeitersparnis verglichen mit Papier ist wirklich enorm.',       color: C.purple },
+  { name: 'Lena M.', role: 'Auszubildende · Fachinformatikerin', text: 'Ich tippe Stichpunkte ein und die KI macht den Rest. Absoluter Game Changer!', color: C.blue },
+  { name: 'Thomas K.', role: 'Ausbilder · IT-Systemkaufmann', text: 'Endlich alle Berichte zentral. Kein E-Mail-Chaos — alles übersichtlich an einem Ort.', color: C.red },
+  { name: 'Sara B.', role: 'Auszubildende · Kauffrau Büromanagement', text: 'So aufgeräumt und modern. Man merkt, dass es jemand gebaut hat, der Ausbildung kennt.', color: C.green },
+  { name: 'Marcus D.', role: 'Ausbilder · Mechatronik', text: 'E-Mail schicken, Azubis sind in Minuten drin. Das Einladungssystem ist wirklich genial.', color: C.yellow },
+  { name: 'Jana F.', role: 'Auszubildende · Industriekauffrau', text: 'Direkte Kommentare am Bericht — keine E-Mail-Threads mehr. Einfach direkt im System.', color: C.blue },
+  { name: 'Florian R.', role: 'Ausbildungsleiter · Großbetrieb', text: '12 Azubis über AzubiHub. Die Zeitersparnis verglichen mit Papier ist wirklich enorm.', color: C.purple },
 ]
 
 const FAQS = [
-  { q: 'Was ist AzubiHub?',                                  a: 'AzubiHub ist eine digitale Ausbildungsplattform, die Wochenberichte, Ausbilder-Freigaben und die gesamte Ausbildungsdokumentation digitalisiert — KI-gestützt und kostenlos.' },
+  { q: 'Was ist AzubiHub?', a: 'AzubiHub ist eine digitale Ausbildungsplattform, die Wochenberichte, Ausbilder-Freigaben und die gesamte Ausbildungsdokumentation digitalisiert — KI-gestützt und kostenlos.' },
   { q: 'Wie unterscheidet sich AzubiHub von anderen Tools?', a: 'AzubiHub ist speziell für die Ausbildung in Deutschland entwickelt. IHK-konform, DSGVO-sicher und dauerhaft kostenlos — kein Abo, keine versteckten Kosten.' },
-  { q: 'Ist AzubiHub wirklich kostenlos?',                   a: 'Ja, vollständig kostenlos — für Auszubildende und Ausbilder. Der Kern bleibt dauerhaft gratis. Eine Pro-Version für Großbetriebe ist in Planung.' },
-  { q: 'Wie funktioniert die KI-Formulierung?',              a: 'Stichpunkte eingeben, Länge und Stil wählen — Claude AI formuliert IHK-konformen Text in Sekunden. Der fertige Bericht kann direkt eingereicht werden.' },
-  { q: 'Welche Ausbildungsberufe werden unterstützt?',       a: 'Alle Berufe mit wöchentlichem Ausbildungsnachweis — nahezu alle IHK- und HWK-Berufe. Der Export entspricht den offiziellen IHK-Vorgaben.' },
-  { q: 'Kann mein Ausbilder die Berichte kommentieren?',     a: 'Ja. Direkt am Bericht kommentieren, Revisionen anfordern oder freigeben — alles in AzubiHub, ohne E-Mail hin und her.' },
-  { q: 'Sind meine Daten sicher und DSGVO-konform?',         a: 'Ja. Alle Daten liegen verschlüsselt auf EU-Servern. Wir verarbeiten keine Daten außerhalb der EU und halten alle DSGVO-Anforderungen ein.' },
-  { q: 'Funktioniert AzubiHub auf dem Smartphone?',          a: 'Ja, vollständig responsive — läuft auf jedem Gerät im Browser. Eine native App für iOS und Android ist in Planung.' },
+  { q: 'Ist AzubiHub wirklich kostenlos?', a: 'Ja, vollständig kostenlos — für Auszubildende und Ausbilder. Der Kern bleibt dauerhaft gratis. Eine Pro-Version für Großbetriebe ist in Planung.' },
+  { q: 'Wie funktioniert die KI-Formulierung?', a: 'Stichpunkte eingeben, Länge und Stil wählen — Claude AI formuliert IHK-konformen Text in Sekunden. Der fertige Bericht kann direkt eingereicht werden.' },
+  { q: 'Welche Ausbildungsberufe werden unterstützt?', a: 'Alle Berufe mit wöchentlichem Ausbildungsnachweis — nahezu alle IHK- und HWK-Berufe. Der Export entspricht den offiziellen IHK-Vorgaben.' },
+  { q: 'Kann mein Ausbilder die Berichte kommentieren?', a: 'Ja. Direkt am Bericht kommentieren, Revisionen anfordern oder freigeben — alles in AzubiHub, ohne E-Mail hin und her.' },
+  { q: 'Sind meine Daten sicher und DSGVO-konform?', a: 'Ja. Alle Daten liegen verschlüsselt auf EU-Servern. Wir verarbeiten keine Daten außerhalb der EU und halten alle DSGVO-Anforderungen ein.' },
+  { q: 'Funktioniert AzubiHub auf dem Smartphone?', a: 'Ja, vollständig responsive — läuft auf jedem Gerät im Browser. Eine native App für iOS und Android ist in Planung.' },
 ]
 
 /* ═══════════════════════════════════════
@@ -521,20 +523,20 @@ function FixedBackground() {
         {/* Ring 1 — outermost, blue, CW */}
         <div style={{ position: 'absolute', top: '50%', left: '50%', marginTop: 'min(-340px,-35vmin)', marginLeft: 'min(-340px,-35vmin)', width: 'min(680px,70vmin)', height: 'min(680px,70vmin)', borderRadius: '50%', border: '1px solid rgba(66,133,244,0.13)', animation: 'orbit-cw 38s linear infinite' }}>
           <span style={dot(10, 'rgba(66,133,244,0.75)', { top: -5, left: '50%', marginLeft: -5 }, '0s')} />
-          <span style={dot(5,  'rgba(66,133,244,0.35)', { bottom: -2, right: '28%' }, '1.2s')} />
-          <span style={dot(4,  'rgba(66,133,244,0.2)',  { top: '22%', right: -2 }, '2.1s')} />
+          <span style={dot(5, 'rgba(66,133,244,0.35)', { bottom: -2, right: '28%' }, '1.2s')} />
+          <span style={dot(4, 'rgba(66,133,244,0.2)', { top: '22%', right: -2 }, '2.1s')} />
         </div>
 
         {/* Ring 2 — red, CCW */}
         <div style={{ position: 'absolute', top: '50%', left: '50%', marginTop: 'min(-255px,-26vmin)', marginLeft: 'min(-255px,-26vmin)', width: 'min(510px,52vmin)', height: 'min(510px,52vmin)', borderRadius: '50%', border: '1px solid rgba(234,67,53,0.1)', animation: 'orbit-ccw 25s linear infinite 1.5s' }}>
-          <span style={dot(8,  'rgba(234,67,53,0.7)',  { bottom: -4, left: '50%', marginLeft: -4 }, '0.5s')} />
-          <span style={dot(4,  'rgba(234,67,53,0.3)',  { top: '18%', right: -2 }, '1.8s')} />
+          <span style={dot(8, 'rgba(234,67,53,0.7)', { bottom: -4, left: '50%', marginLeft: -4 }, '0.5s')} />
+          <span style={dot(4, 'rgba(234,67,53,0.3)', { top: '18%', right: -2 }, '1.8s')} />
         </div>
 
         {/* Ring 3 — green, CW */}
         <div style={{ position: 'absolute', top: '50%', left: '50%', marginTop: 'min(-185px,-19vmin)', marginLeft: 'min(-185px,-19vmin)', width: 'min(370px,38vmin)', height: 'min(370px,38vmin)', borderRadius: '50%', border: '1px solid rgba(52,168,83,0.13)', animation: 'orbit-cw 16s linear infinite 0.7s' }}>
-          <span style={dot(7,  'rgba(52,168,83,0.7)',  { top: -3, right: '24%' }, '0.3s')} />
-          <span style={dot(3,  'rgba(52,168,83,0.3)',  { bottom: -1, left: '38%' }, '2.4s')} />
+          <span style={dot(7, 'rgba(52,168,83,0.7)', { top: -3, right: '24%' }, '0.3s')} />
+          <span style={dot(3, 'rgba(52,168,83,0.3)', { bottom: -1, left: '38%' }, '2.4s')} />
         </div>
 
         {/* Ring 4 — yellow, CCW */}
@@ -553,59 +555,71 @@ function FixedBackground() {
 
 function Nav() {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
   const links = [['#features', 'Features'], ['#pricing', 'Preise'], ['#faq', 'FAQ']] as const
+
+  useEffect(() => {
+    const handleS = () => setScrolled(window.scrollY > 20)
+    window.addEventListener('scroll', handleS)
+    return () => window.removeEventListener('scroll', handleS)
+  }, [])
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-[100] bg-white/80 backdrop-blur-md border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="no-underline" onClick={() => setMenuOpen(false)}>
-            <Logo size={30} />
-          </Link>
+      <nav className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ${scrolled ? 'h-16 bg-white/80 backdrop-blur-xl border-b border-gray-200/50' : 'h-20 bg-transparent'}`}>
+        <div className="max-w-7xl mx-auto px-6 h-full flex items-center justify-between relative">
+          
+          <div className="flex-1 flex justify-start">
+            <Link href="/" className="no-underline active:scale-95 transition-transform" onClick={() => setMenuOpen(false)}>
+              <Logo size={28} />
+            </Link>
+          </div>
 
-          <div className="hidden md:flex items-center gap-1">
+          <div className={`hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-1 transition-all duration-300 ${scrolled ? 'bg-gray-50/70 p-1 px-1.5' : 'bg-transparent p-0'} backdrop-blur-sm rounded-full ${scrolled ? 'border border-gray-200/50 shadow-sm' : 'border-transparent shadow-none'}`}>
             {links.map(([href, label]) => (
-              <a key={href} href={href} className="text-[0.9375rem] font-medium text-gray-500 px-4 py-2 rounded-lg hover:text-gray-900 hover:bg-gray-100/50 transition-all duration-200 no-underline">
+              <a key={href} href={href} className="text-[0.875rem] font-medium text-gray-600 px-5 py-2 rounded-full hover:text-blue-600 hover:bg-white/80 transition-all duration-240 no-underline">
                 {label}
               </a>
             ))}
           </div>
 
-          <div className="flex items-center gap-3">
-            <Link href="/auth/login" className="hidden sm:inline-flex text-[0.9375rem] font-medium text-gray-500 px-4 py-2 hover:text-gray-900 transition-colors no-underline">
+          <div className="flex-1 flex justify-end items-center gap-2">
+            <Link href="/auth/login" className="hidden sm:inline-flex text-[0.875rem] font-medium text-gray-500 px-4 py-2 hover:text-gray-900 transition-colors no-underline">
               Anmelden
             </Link>
             <Link href="/auth/register" className="hidden sm:inline-flex no-underline">
-              <span className="bg-[#4285f4] hover:bg-[#1967d2] text-white px-6 py-2.5 rounded-full text-[0.9375rem] font-semibold transition-all duration-200 active:scale-95 shadow-sm">
-                Kostenlos starten
+              <span className="bg-[#4285f4] hover:bg-[#1a73e8] text-white px-6 py-2.5 rounded-full text-[0.875rem] font-semibold transition-all duration-240 active:scale-95 shadow-sm hover:shadow-md">
+                Loslegen
               </span>
             </Link>
 
             <button
               onClick={() => setMenuOpen(o => !o)}
-              className="md:hidden flex flex-col items-center justify-center p-2 rounded-lg hover:bg-gray-100 transition-colors"
+              className="md:hidden flex flex-col items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition-colors"
             >
-              <div className={`w-5 h-0.5 bg-gray-900 rounded-full transition-transform duration-200 ${menuOpen ? 'rotate-45 translate-y-1' : ''}`} />
-              <div className={`w-5 h-0.5 bg-gray-900 rounded-full mt-1.5 transition-opacity duration-200 ${menuOpen ? 'opacity-0' : ''}`} />
-              <div className={`w-5 h-0.5 bg-gray-900 rounded-full mt-1.5 transition-transform duration-200 ${menuOpen ? '-rotate-45 -translate-y-1' : ''}`} />
+              <div className={`w-5 h-0.5 bg-gray-900 rounded-full transition-all duration-300 ${menuOpen ? 'rotate-45 translate-y-1' : ''}`} />
+              <div className={`w-5 h-0.5 bg-gray-900 rounded-full mt-1.5 transition-all duration-200 ${menuOpen ? 'opacity-0' : ''}`} />
+              <div className={`w-5 h-0.5 bg-gray-900 rounded-full mt-1.5 transition-all duration-300 ${menuOpen ? '-rotate-45 -translate-y-1' : ''}`} />
             </button>
           </div>
         </div>
       </nav>
 
-      <div className={`fixed inset-x-0 top-16 bg-white/95 backdrop-blur-xl border-b border-gray-200 z-[99] md:hidden transition-all duration-300 overflow-hidden ${menuOpen ? 'max-h-screen opacity-100 py-6' : 'max-h-0 opacity-0'}`}>
-        <div className="flex flex-col gap-1 px-6">
-          {links.map(([href, label]) => (
-            <a key={href} href={href} onClick={() => setMenuOpen(false)} className="text-lg font-medium text-gray-900 py-4 border-b border-gray-100 no-underline first:pt-0">
-              {label}
-            </a>
-          ))}
-          <div className="pt-6 flex flex-col gap-4">
-            <Link href="/auth/login" onClick={() => setMenuOpen(false)} className="text-base font-medium text-gray-500 no-underline">
+      <div className={`fixed inset-x-0 top-0 bg-white/98 backdrop-blur-2xl z-[99] md:hidden transition-all duration-500 ease-in-out border-b border-gray-200 ${menuOpen ? 'h-[100dvh] opacity-100' : 'h-0 opacity-0 overflow-hidden'}`}>
+        <div className="flex flex-col h-full pt-24 px-8 pb-12">
+          <div className="flex flex-col gap-2">
+            {links.map(([href, label]) => (
+              <a key={href} href={href} onClick={() => setMenuOpen(false)} className="text-4xl font-semibold text-gray-900 py-4 no-underline tracking-tight active:text-blue-600 transition-colors">
+                {label}
+              </a>
+            ))}
+          </div>
+          <div className="mt-auto flex flex-col gap-4">
+            <Link href="/auth/login" onClick={() => setMenuOpen(false)} className="text-xl font-medium text-gray-500 no-underline py-4 border-t border-gray-100 text-center">
               Anmelden
             </Link>
             <Link href="/auth/register" onClick={() => setMenuOpen(false)} className="no-underline">
-              <span className="block text-center py-4 bg-[#4285f4] text-white rounded-2xl font-semibold">
+              <span className="block text-center py-5 bg-[#4285f4] text-white rounded-3xl font-semibold text-xl shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-transform">
                 Kostenlos starten
               </span>
             </Link>
@@ -766,8 +780,8 @@ function LandingPage() {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(160px,1fr))', gap: '2.5rem' }}>
             {[
-              { value: '10×',    label: 'Schneller als Papier' },
-              { value: 'IHK',    label: 'Konform & Exportierbar' },
+              { value: '10×', label: 'Schneller als Papier' },
+              { value: 'IHK', label: 'Konform & Exportierbar' },
               { value: '99,9 %', label: 'Uptime-Garantie' },
             ].map((s, i) => (
               <div key={s.label} className="g-reveal" style={{ textAlign: 'center', transitionDelay: `${i * 0.1}s` }}>
@@ -829,7 +843,7 @@ function LandingPage() {
               </div>
               <p style={{ fontSize: '1rem', color: C.textSec, marginBottom: '2rem', lineHeight: 1.6 }}>Alles für eine vollständige Ausbildungsdokumentation.</p>
               <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 2.25rem', display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
-                {['Unbegrenzte Wochenberichte','KI-Formulierung','Ausbilder-Freigabe','PDF-Export','Kalender & Fristen','Cloud-Sync'].map(f => (
+                {['Unbegrenzte Wochenberichte', 'KI-Formulierung', 'Ausbilder-Freigabe', 'PDF-Export', 'Kalender & Fristen', 'Cloud-Sync'].map(f => (
                   <li key={f} style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: '0.9375rem', color: C.textPrimary }}>
                     <HugeiconsIcon icon={CheckmarkCircle01Icon} size={18} style={{ color: C.green, flexShrink: 0 }} />{f}
                   </li>
@@ -857,7 +871,7 @@ function LandingPage() {
                 </div>
                 <p style={{ fontSize: '1rem', color: C.textSec, marginBottom: '2rem', lineHeight: 1.6 }}>Für Betriebe mit mehreren Auszubildenden.</p>
                 <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 2.25rem', display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
-                  {['Alles aus Kostenlos','Unbegrenzte KI-Nutzung','Team-Verwaltung (20 Azubis)','Vorlagen-Bibliothek','Prioritäts-Support','Native App'].map(f => (
+                  {['Alles aus Kostenlos', 'Unbegrenzte KI-Nutzung', 'Team-Verwaltung (20 Azubis)', 'Vorlagen-Bibliothek', 'Prioritäts-Support', 'Native App'].map(f => (
                     <li key={f} style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: '0.9375rem', color: C.textPrimary }}>
                       <HugeiconsIcon icon={CheckmarkCircle01Icon} size={18} style={{ color: C.blue, flexShrink: 0 }} />{f}
                     </li>
@@ -935,10 +949,10 @@ function LandingPage() {
         {/* Ring animation — antigravity.google signature */}
         <div style={{ height: 'calc(14vw + 200px)', position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
           {[
-            { size: 'calc(14vw + 200px)', border: 'rgba(66,133,244,0.08)',  anim: 'orbit-cw 70s linear infinite' },
-            { size: 'calc(10vw + 160px)', border: 'rgba(234,67,53,0.05)',  anim: 'orbit-ccw 50s linear infinite 2s' },
-            { size: 'calc(6vw + 110px)',  border: 'rgba(52,168,83,0.07)',  anim: 'orbit-cw 32s linear infinite 1s' },
-            { size: 'calc(3vw + 70px)',   border: 'rgba(251,188,4,0.09)',  anim: 'orbit-ccw 18s linear infinite 0.5s' },
+            { size: 'calc(14vw + 200px)', border: 'rgba(66,133,244,0.08)', anim: 'orbit-cw 70s linear infinite' },
+            { size: 'calc(10vw + 160px)', border: 'rgba(234,67,53,0.05)', anim: 'orbit-ccw 50s linear infinite 2s' },
+            { size: 'calc(6vw + 110px)', border: 'rgba(52,168,83,0.07)', anim: 'orbit-cw 32s linear infinite 1s' },
+            { size: 'calc(3vw + 70px)', border: 'rgba(251,188,4,0.09)', anim: 'orbit-ccw 18s linear infinite 0.5s' },
           ].map((r, i) => (
             <div key={i} style={{ position: 'absolute', width: r.size, height: r.size, borderRadius: '50%', border: `1px solid ${r.border}`, animation: r.anim }} />
           ))}
@@ -972,7 +986,7 @@ function LandingPage() {
             <div>
               <p style={{ fontSize: '0.75rem', fontWeight: 600, marginBottom: '1.25rem', color: 'rgba(255,255,255,0.25)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Produkt</p>
               <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                {[['#features','Features'],['#pricing','Preise'],['#faq','FAQ'],['/auth/register','Registrieren'],['/auth/login','Anmelden']].map(([href, label]) => (
+                {[['#features', 'Features'], ['#pricing', 'Preise'], ['#faq', 'FAQ'], ['/auth/register', 'Registrieren'], ['/auth/login', 'Anmelden']].map(([href, label]) => (
                   <li key={label}>
                     <a href={href} style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.9375rem', transition: 'color 200ms ease', textDecoration: 'none' }}
                       onMouseEnter={e => (e.currentTarget.style.color = 'white')}
@@ -1004,8 +1018,8 @@ function LandingPage() {
           <div style={{ paddingTop: '2rem', borderTop: '1px solid rgba(255,255,255,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
             <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: '0.8125rem', fontWeight: 400 }}>© {new Date().getFullYear()} AzubiHub — Digitalisierung für Auszubildende.</span>
             <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-               <span style={{ width: 6, height: 6, borderRadius: '50%', background: C.green, display: 'inline-block' }} />
-               <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: '0.8125rem' }}>System Status: Online</span>
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: C.green, display: 'inline-block' }} />
+              <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: '0.8125rem' }}>System Status: Online</span>
             </div>
           </div>
         </div>
