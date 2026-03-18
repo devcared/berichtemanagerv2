@@ -60,8 +60,8 @@ function AppHome() {
   const draggedId = useRef<string | null>(null)
   const [dragOverId, setDragOverId] = useState<string | null>(null)
 
-  useEffect(() => { 
-    setIsMounted(true) 
+  useEffect(() => {
+    setIsMounted(true)
     const handleScroll = () => setScrolled(window.scrollY > 0)
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
@@ -137,7 +137,6 @@ function AppHome() {
         background: scrolled ? (isDark ? 'rgba(30,31,36,0.85)' : 'rgba(255,255,255,0.85)') : 'transparent',
         backdropFilter: 'blur(16px)',
         WebkitBackdropFilter: 'blur(16px)',
-        border: scrolled ? `1px solid ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'}` : 'none',
         borderBottom: !scrolled ? `1px solid ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'}` : undefined,
         borderRadius: scrolled ? 9999 : 0,
         boxShadow: scrolled ? '0 10px 30px rgba(0,0,0,0.03)' : 'none',
@@ -580,7 +579,7 @@ function Nav() {
     <>
       <nav className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 ease-in-out ${scrolled ? 'top-4 inset-x-4 max-w-5xl mx-auto h-14 bg-white/70 backdrop-blur-2xl border border-gray-200/20 rounded-full shadow-xl shadow-gray-200/10' : 'h-20 bg-transparent'}`}>
         <div className={`h-full flex items-center justify-between relative ${scrolled ? 'px-4' : 'max-w-7xl mx-auto px-6'}`}>
-          
+
           <div className="flex-1 flex justify-start">
             <Link href="/" className="no-underline active:scale-95 transition-transform" onClick={() => setMenuOpen(false)}>
               <Logo size={scrolled ? 24 : 28} />
