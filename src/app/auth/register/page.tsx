@@ -3,33 +3,32 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useAuth } from '@/contexts/AuthContext'
-
-const C = {
-  blue:        '#4285f4',
-  blueDark:    '#1967d2',
-  textPrimary: '#202124',
-  textSec:     '#5f6368',
-  textLight:   '#80868b',
-  border:      '#dadce0',
-  red:         '#ea4335',
-  green:       '#34a853',
-}
+import { useTheme } from '@/contexts/ThemeContext'
 
 function Logo({ size = 32 }: { size?: number }) {
   const fs = size * 0.57
   return (
-    <div style={{ display: 'inline-flex', alignItems: 'center', gap: size * 0.38 }}>
+    <div className="flex items-center gap-2 select-none">
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/App Icon.png" alt="AzubiHub" width={size} height={size} style={{ borderRadius: size * 0.22, display: 'block', objectFit: 'cover' }} />
-      <span style={{ fontSize: fs, fontWeight: 500, letterSpacing: '-0.01em', lineHeight: 1, userSelect: 'none', color: C.textPrimary }}>
-        Azubi<span style={{ color: C.textSec }}>Hub</span>
+      <img src="/App Icon.png" alt="AzubiHub" width={size} height={size} className="rounded-lg object-cover" />
+      <span className="text-foreground tracking-tight" style={{ fontSize: fs, fontWeight: 500 }}>
+        Azubi<span className="text-muted-foreground">Hub</span>
       </span>
     </div>
   )
 }
 
+const GoogleIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 18 18"><path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285f4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34a853"/><path d="M3.964 10.706c-.18-.54-.282-1.117-.282-1.706 0-.589.102-1.166.282-1.706V4.962H.957C.347 6.177 0 7.55 0 9s.347 2.823.957 4.038l3.007-2.332z" fill="#fbbc05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.962L3.964 7.294C4.672 5.167 6.656 3.58 9 3.58z" fill="#ea4335"/></svg>
+)
+
+const AppleIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor"><path d="M14.94 9c0 2.22 1.44 3.53 1.5 3.57-.01.03-.23.83-.8 1.66-.49.72-1 1.44-1.8 1.45-.78.01-1.03-.47-1.92-.47-.89 0-1.17.46-1.9.47-.74.01-1.31-.72-1.82-1.45-1.03-1.48-1.82-4.18-.76-6.02.53-.91 1.47-1.49 2.49-1.5 1.15-.02 2.1.77 2.8.77.7 0 1.65-.79 2.8-.79 1.15 0 2.1.58 2.39 1.41.01.03-.02.04-.04.04-.1-.01-1.8.01-1.8 1.86zm-5-3.52c.03-2.13 1.77-3.83 3.86-3.83.03 0 .05.02.05.04s-.01.04-.03.04c-1.93.04-3.54 1.7-3.88 3.75 0 2.05-1.6 3.71-3.53 3.75-.02 0-.04-.02-.04-.04 0-.02 0-.04.02-.04 1.85-.04 3.52-1.63 3.55-3.67z" /></svg>
+)
+
 export default function RegisterPage() {
-  const { register } = useAuth()
+  const { register, signInWithGoogle, signInWithApple } = useAuth()
+  const { theme, toggleTheme } = useTheme()
   const [email,           setEmail]           = useState('')
   const [password,        setPassword]        = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -43,7 +42,8 @@ export default function RegisterPage() {
     setIsLoading(true); setErrorMsg(''); setSuccessMsg('')
     const { error, needsEmailVerification } = await register(email, password)
     if (error) {
-      setErrorMsg(error); setIsLoading(false)
+      setErrorMsg(error)
+      setIsLoading(false)
     } else if (needsEmailVerification) {
       setSuccessMsg('Erfolgreich! Bitte überprüfe deine E-Mails, um deinen Account zu aktivieren.')
       setIsLoading(false)
@@ -52,119 +52,160 @@ export default function RegisterPage() {
     }
   }
 
-  const inputBase: React.CSSProperties = {
-    width: '100%', padding: '0.625rem 0.875rem',
-    border: `1px solid ${C.border}`, borderRadius: 4,
-    fontSize: '0.9375rem', color: C.textPrimary,
-    background: '#ffffff', outline: 'none', boxSizing: 'border-box',
-    transition: 'border-color 150ms ease',
-    fontFamily: 'inherit',
+  const ssoButtonStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '0.75rem',
+    width: '100%',
+    padding: '0.625rem 1rem',
+    border: '1px solid hsl(var(--border))',
+    borderRadius: '8px',
+    backgroundColor: 'transparent',
+    color: 'hsl(var(--foreground))',
+    fontSize: '0.875rem',
+    fontWeight: 500,
+    cursor: 'pointer',
+    transition: 'background-color 0.2s, box-shadow 0.2s',
   }
 
-  const disabled = isLoading || password !== confirmPassword || password === ''
+  const buttonDisabled = isLoading || password !== confirmPassword || password === ''
 
   return (
-    <div style={{
-      minHeight: '100svh', background: '#ffffff',
-      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-      padding: '1.5rem',
-      fontFamily: '"Google Sans","Roboto",-apple-system,"Segoe UI",sans-serif',
-      WebkitFontSmoothing: 'antialiased', color: C.textPrimary,
-    }}>
-      <div style={{ width: '100%', maxWidth: 400 }}>
+    <div className="min-h-[100svh] bg-background flex flex-col items-center justify-center p-6 font-sans antialiased text-foreground selection:bg-primary/20">
+      
+      {/* Theme Toggle in Corner */}
+      <button 
+        onClick={toggleTheme}
+        className="fixed top-6 right-6 p-2 rounded-full hover:bg-muted transition-colors text-muted-foreground"
+        title={theme === 'dark' ? 'Helles Design' : 'Dunkles Design'}
+      >
+        {theme === 'dark' ? (
+          <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        ) : (
+          <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        )}
+      </button>
 
-        {/* Logo */}
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '2.25rem' }}>
-          <Logo size={34} />
+      <div className="w-full max-w-[400px]">
+        
+        <div className="flex justify-center mb-10">
+          <Logo size={42} />
         </div>
 
-        {/* Card */}
-        <div style={{ border: `1px solid ${C.border}`, borderRadius: 8, padding: '2rem' }}>
-          <h1 style={{ fontSize: '1.375rem', fontWeight: 450, color: C.textPrimary, marginBottom: '0.375rem', textAlign: 'center', lineHeight: 1.3 }}>
+        <div className="bg-card border border-border sm:shadow-xl sm:shadow-primary/5 rounded-2xl p-8 transition-all">
+          <h1 className="text-[1.5rem] font-semibold text-foreground mb-1 text-center tracking-tight">
             Konto erstellen
           </h1>
-          <p style={{ fontSize: '0.9375rem', color: C.textSec, textAlign: 'center', marginBottom: '1.75rem', lineHeight: 1.6 }}>
-            Registriere dich, um loszulegen.
+          <p className="text-[0.9375rem] text-muted-foreground text-center mb-8">
+            Werde Teil von AzubiHub
           </p>
 
-          <form onSubmit={handleRegister} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {/* E-Mail */}
-            <div>
-              <label htmlFor="email" style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 500, color: C.textSec, marginBottom: '0.375rem' }}>E-Mail</label>
+          <div className="flex flex-col gap-3 mb-8">
+            <button 
+              onClick={() => signInWithGoogle()}
+              style={ssoButtonStyle}
+              onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'hsl(var(--muted))')}
+              onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
+            >
+              <GoogleIcon />
+              Weiter mit Google
+            </button>
+            <button 
+              onClick={() => signInWithApple()}
+              style={ssoButtonStyle}
+              onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'hsl(var(--muted))')}
+              onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
+            >
+              <AppleIcon />
+              Weiter mit Apple
+            </button>
+          </div>
+
+          <div className="relative mb-8 text-center">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-border"></span>
+            </div>
+            <span className="relative px-4 bg-card text-[0.8125rem] text-muted-foreground font-medium uppercase tracking-wider">
+              oder E-Mail
+            </span>
+          </div>
+
+          <form onSubmit={handleRegister} className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="email" className="text-[0.8125rem] font-semibold text-foreground/80 ml-0.5">
+                E-Mail-Adresse
+              </label>
               <input
-                id="email" type="email" required placeholder="name@beispiel.de"
+                id="email" type="email" required
+                placeholder="name@beispiel.de"
                 value={email} onChange={e => setEmail(e.target.value)}
-                style={inputBase}
-                onFocus={e => (e.currentTarget.style.borderColor = C.blue)}
-                onBlur={e  => (e.currentTarget.style.borderColor = C.border)}
+                className="w-full px-4 py-2.5 rounded-lg border border-border bg-input focus:bg-background focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-[0.9375rem] transition-all placeholder:text-muted-foreground/50"
               />
             </div>
 
-            {/* Passwort */}
-            <div>
-              <label htmlFor="password" style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 500, color: C.textSec, marginBottom: '0.375rem' }}>Passwort</label>
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="password" className="text-[0.8125rem] font-semibold text-foreground/80 ml-0.5">Passwort</label>
               <input
-                id="password" type="password" required placeholder="••••••••"
+                id="password" type="password" required
+                placeholder="••••••••"
                 value={password} onChange={e => setPassword(e.target.value)}
-                style={inputBase}
-                onFocus={e => (e.currentTarget.style.borderColor = C.blue)}
-                onBlur={e  => (e.currentTarget.style.borderColor = C.border)}
+                className="w-full px-4 py-2.5 rounded-lg border border-border bg-input focus:bg-background focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-[0.9375rem] transition-all placeholder:text-muted-foreground/50"
               />
             </div>
 
-            {/* Bestätigen */}
-            <div>
-              <label htmlFor="confirmPassword" style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 500, color: C.textSec, marginBottom: '0.375rem' }}>Passwort bestätigen</label>
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="confirmPassword" className="text-[0.8125rem] font-semibold text-foreground/80 ml-0.5">Passwort bestätigen</label>
               <input
-                id="confirmPassword" type="password" required placeholder="••••••••"
+                id="confirmPassword" type="password" required
+                placeholder="••••••••"
                 value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
-                style={{ ...inputBase, borderColor: confirmPassword && password !== confirmPassword ? C.red : C.border }}
-                onFocus={e => (e.currentTarget.style.borderColor = C.blue)}
-                onBlur={e  => (e.currentTarget.style.borderColor = confirmPassword && password !== confirmPassword ? C.red : C.border)}
+                className={`w-full px-4 py-2.5 rounded-lg border bg-input focus:bg-background focus:ring-2 outline-none text-[0.9375rem] transition-all placeholder:text-muted-foreground/50 ${
+                  confirmPassword && password !== confirmPassword 
+                    ? 'border-destructive focus:ring-destructive/20 focus:border-destructive' 
+                    : 'border-border focus:ring-primary/20 focus:border-primary'
+                }`}
               />
             </div>
 
-            {/* Error / Success */}
             {errorMsg && (
-              <div style={{ padding: '0.75rem', background: 'rgba(234,67,53,0.08)', border: '1px solid rgba(234,67,53,0.2)', borderRadius: 4, color: C.red, fontSize: '0.875rem', textAlign: 'center' }}>
+              <div className="mt-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-[0.875rem] text-center font-medium animate-in fade-in slide-in-from-top-1">
                 {errorMsg}
               </div>
             )}
+
             {successMsg && (
-              <div style={{ padding: '0.75rem', background: 'rgba(52,168,83,0.08)', border: '1px solid rgba(52,168,83,0.2)', borderRadius: 4, color: C.green, fontSize: '0.875rem', textAlign: 'center' }}>
+              <div className="mt-2 p-3 bg-green-500/10 border border-green-500/20 rounded-lg text-green-600 dark:text-green-400 text-[0.875rem] text-center font-medium animate-in fade-in slide-in-from-top-1">
                 {successMsg}
               </div>
             )}
 
-            {/* Submit */}
             <button
-              type="submit" disabled={disabled}
-              style={{ marginTop: '0.25rem', width: '100%', padding: '0.6875rem 1rem', background: C.blue, color: 'white', border: 'none', borderRadius: 9999, fontSize: '0.9375rem', fontWeight: 450, cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.6 : 1, transition: 'background 150ms ease', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontFamily: 'inherit' }}
-              onMouseEnter={e => { if (!disabled) (e.currentTarget as HTMLButtonElement).style.background = C.blueDark }}
-              onMouseLeave={e => { if (!disabled) (e.currentTarget as HTMLButtonElement).style.background = C.blue }}
+              type="submit" disabled={buttonDisabled}
+              className="mt-4 w-full py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg text-[0.9375rem] font-semibold transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm active:scale-[0.98]"
             >
               {isLoading ? (
                 <>
-                  <span className="animate-spin" style={{ width: 16, height: 16, borderRadius: '50%', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', display: 'inline-block' }} />
-                  Registrieren...
+                  <span className="size-4 rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground animate-spin" />
+                  Wird registriert...
                 </>
               ) : 'Registrieren'}
             </button>
           </form>
         </div>
 
-        {/* Switch */}
-        <p style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.9375rem', color: C.textSec }}>
-          Bereits einen Account?{' '}
-          <Link href="/auth/login" style={{ color: C.blue, fontWeight: 500, textDecoration: 'none' }}>
-            Anmelden
+        <p className="text-center mt-8 text-[0.9375rem] text-muted-foreground">
+          Schon ein Konto?{' '}
+          <Link href="/auth/login" className="text-primary font-semibold hover:underline">
+            Einloggen
           </Link>
         </p>
 
-        <p style={{ textAlign: 'center', marginTop: '3rem', fontSize: '0.8125rem', color: C.textLight }}>
-          © {new Date().getFullYear()} AzubiHub
+        <p className="text-center mt-12 text-[0.8125rem] text-muted-foreground/60 font-medium">
+          © {new Date().getFullYear()} AzubiHub — Alle Rechte vorbehalten.
         </p>
       </div>
     </div>
   )
 }
+

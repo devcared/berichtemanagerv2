@@ -1,15 +1,26 @@
 'use client'
 
 import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { useAuth } from '@/contexts/AuthContext'
+import { useTheme } from '@/contexts/ThemeContext'
 import { useRouter } from 'next/navigation'
+
+function Logo({ size = 32 }: { size?: number }) {
+  const fs = size * 0.57
+  return (
+    <div className="flex items-center gap-2 select-none">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/App Icon.png" alt="AzubiHub" width={size} height={size} className="rounded-lg object-cover" />
+      <span className="text-foreground tracking-tight" style={{ fontSize: fs, fontWeight: 500 }}>
+        Azubi<span className="text-muted-foreground">Hub</span>
+      </span>
+    </div>
+  )
+}
 
 export default function UpdatePasswordPage() {
   const { updatePassword } = useAuth()
+  const { theme, toggleTheme } = useTheme()
   const router = useRouter()
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -18,7 +29,6 @@ export default function UpdatePasswordPage() {
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault()
-    
     if (password !== confirmPassword) {
       setErrorMsg('Die Passwörter stimmen nicht überein.')
       return
@@ -38,89 +48,92 @@ export default function UpdatePasswordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[hsl(var(--background))] flex flex-col items-center justify-center p-6">
-      <div className="w-full max-w-sm">
-        {/* Header / Logo */}
-        <div className="flex flex-col items-center gap-3 mb-8">
-          <div className="size-14 rounded-2xl bg-primary/20 flex items-center justify-center">
-            <span className="text-primary font-extrabold text-2xl">A</span>
-          </div>
-          <div className="text-center">
-            <span className="text-foreground text-xl font-bold tracking-wider uppercase">AzubiHub</span>
-            <p className="text-sm text-muted-foreground mt-1">Sicherheit</p>
-          </div>
+    <div className="min-h-[100svh] bg-background flex flex-col items-center justify-center p-6 font-sans antialiased text-foreground selection:bg-primary/20">
+      
+      {/* Theme Toggle in Corner */}
+      <button 
+        onClick={toggleTheme}
+        className="fixed top-6 right-6 p-2 rounded-full hover:bg-muted transition-colors text-muted-foreground"
+        title={theme === 'dark' ? 'Helles Design' : 'Dunkles Design'}
+      >
+        {theme === 'dark' ? (
+          <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        ) : (
+          <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        )}
+      </button>
+
+      <div className="w-full max-w-[400px]">
+        
+        <div className="flex justify-center mb-10">
+          <Logo size={42} />
         </div>
 
-        {/* Update Card */}
-        <Card className="border border-border bg-card shadow-lg shadow-primary/5 relative overflow-hidden transition-all duration-300">
+        <div className="bg-card border border-border sm:shadow-xl sm:shadow-primary/5 rounded-2xl p-8 transition-all relative overflow-hidden">
+          {/* Accent Line */}
           <div className="absolute inset-x-0 top-0 h-1 bg-primary" />
-          
-          <CardHeader className="space-y-2 pb-6 pt-8 text-center">
-            <CardTitle className="text-2xl font-bold">Neues Passwort setzen</CardTitle>
-            <CardDescription className="text-sm">
-              Gib bitte ein neues, sicheres Passwort ein.
-            </CardDescription>
-          </CardHeader>
-          
-          <form onSubmit={handleUpdate}>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
-                  Neues Passwort
-                </Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="bg-background h-11 transition-shadow hover:border-primary/50 focus-visible:ring-primary/20"
-                />
+
+          <h1 className="text-[1.5rem] font-semibold text-foreground mb-1 text-center tracking-tight">
+            Neues Passwort
+          </h1>
+          <p className="text-[0.9375rem] text-muted-foreground text-center mb-8">
+            Setze ein sicheres Passwort für deinen Account.
+          </p>
+
+          <form onSubmit={handleUpdate} className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="password" className="text-[0.8125rem] font-semibold text-foreground/80 ml-0.5">
+                Neues Passwort
+              </label>
+              <input
+                id="password" type="password" required
+                placeholder="••••••••"
+                value={password} onChange={e => setPassword(e.target.value)}
+                className="w-full px-4 py-2.5 rounded-lg border border-border bg-input focus:bg-background focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-[0.9375rem] transition-all placeholder:text-muted-foreground/50"
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="confirmPassword" className="text-[0.8125rem] font-semibold text-foreground/80 ml-0.5">
+                Passwort bestätigen
+              </label>
+              <input
+                id="confirmPassword" type="password" required
+                placeholder="••••••••"
+                value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
+                className={`w-full px-4 py-2.5 rounded-lg border bg-input focus:bg-background focus:ring-2 outline-none text-[0.9375rem] transition-all placeholder:text-muted-foreground/50 ${
+                  confirmPassword && password !== confirmPassword 
+                    ? 'border-destructive focus:ring-destructive/20 focus:border-destructive' 
+                    : 'border-border focus:ring-primary/20 focus:border-primary'
+                }`}
+              />
+            </div>
+
+            {errorMsg && (
+              <div className="mt-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-[0.875rem] text-center font-medium animate-in fade-in slide-in-from-top-1">
+                {errorMsg}
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword" className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
-                  Passwort bestätigen
-                </Label>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  placeholder="••••••••"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                  className="bg-background h-11 transition-shadow hover:border-primary/50 focus-visible:ring-primary/20"
-                />
-              </div>
-            </CardContent>
-            
-            <CardFooter className="flex flex-col gap-5 pt-2 pb-8">
-              {errorMsg && (
-                <div className="w-full p-3 bg-destructive/15 text-destructive border border-destructive/20 rounded-md text-sm text-center mb-2">
-                  {errorMsg}
-                </div>
-              )}
-              <Button
-                type="submit"
-                className="w-full h-11 text-base font-medium relative overflow-hidden group"
-                disabled={isLoading || !password || password !== confirmPassword}
-              >
-                {isLoading ? (
-                  <div className="flex items-center gap-2">
-                    <span className="size-5 rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground animate-spin" />
-                    <span>Aktualisieren...</span>
-                  </div>
-                ) : (
-                  <span className="relative z-10 flex items-center justify-center gap-2">
-                    Passwort speichern
-                  </span>
-                )}
-                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out" />
-              </Button>
-            </CardFooter>
+            )}
+
+            <button
+              type="submit" disabled={isLoading || !password || password !== confirmPassword}
+              className="mt-4 w-full py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg text-[0.9375rem] font-semibold transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm active:scale-[0.98]"
+            >
+              {isLoading ? (
+                <>
+                  <span className="size-4 rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground animate-spin" />
+                  Aktualisieren...
+                </>
+              ) : 'Passwort speichern'}
+            </button>
           </form>
-        </Card>
+        </div>
+
+        <p className="text-center mt-12 text-[0.8125rem] text-muted-foreground/60 font-medium">
+          © {new Date().getFullYear()} AzubiHub — Alle Rechte vorbehalten.
+        </p>
       </div>
     </div>
   )
 }
+

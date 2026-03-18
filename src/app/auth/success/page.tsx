@@ -1,19 +1,30 @@
 'use client'
 
 import { useSearchParams, useRouter } from 'next/navigation'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { HugeiconsIcon } from '@hugeicons/react'
-import { CheckmarkCircle01Icon, Mail01Icon } from '@hugeicons/core-free-icons'
+import Link from 'next/link'
+import { useTheme } from '@/contexts/ThemeContext'
+
+function Logo({ size = 32 }: { size?: number }) {
+  const fs = size * 0.57
+  return (
+    <div className="flex items-center gap-2 select-none">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/App Icon.png" alt="AzubiHub" width={size} height={size} className="rounded-lg object-cover" />
+      <span className="text-foreground tracking-tight" style={{ fontSize: fs, fontWeight: 500 }}>
+        Azubi<span className="text-muted-foreground">Hub</span>
+      </span>
+    </div>
+  )
+}
 
 export default function SuccessPage() {
   const searchParams = useSearchParams()
+  const { theme, toggleTheme } = useTheme()
   const router = useRouter()
   const type = searchParams.get('type')
 
   let title = 'Erfolgreich!'
   let description = 'Die Aktion wurde erfolgreich durchgeführt.'
-  let icon = CheckmarkCircle01Icon
   let buttonText = 'Zurück zur Startseite'
   let targetPath = '/'
 
@@ -21,14 +32,12 @@ export default function SuccessPage() {
     case 'reset':
       title = 'E-Mail gesendet'
       description = 'Wir haben dir einen Link zum Zurücksetzen deines Passworts an deine E-Mail-Adresse gesendet. Bitte überprüfe auch deinen Spam-Ordner.'
-      icon = Mail01Icon
       buttonText = 'Zurück zum Login'
       targetPath = '/auth/login'
       break
     case 'password-updated':
       title = 'Passwort geändert'
       description = 'Dein Passwort wurde erfolgreich aktualisiert. Du bist nun mit dem neuen Passwort eingeloggt.'
-      icon = CheckmarkCircle01Icon
       buttonText = 'Zum Dashboard'
       targetPath = '/'
       break
@@ -37,46 +46,58 @@ export default function SuccessPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[hsl(var(--background))] flex flex-col items-center justify-center p-6">
-      <div className="w-full max-w-sm">
-        {/* Header / Logo */}
-        <div className="flex flex-col items-center gap-3 mb-8">
-          <div className="size-14 rounded-2xl bg-primary/20 flex items-center justify-center">
-            <span className="text-primary font-extrabold text-2xl">A</span>
-          </div>
-          <div className="text-center">
-            <span className="text-foreground text-xl font-bold tracking-wider uppercase">AzubiHub</span>
-          </div>
+    <div className="min-h-[100svh] bg-background flex flex-col items-center justify-center p-6 font-sans antialiased text-foreground selection:bg-primary/20">
+      
+      {/* Theme Toggle in Corner */}
+      <button 
+        onClick={toggleTheme}
+        className="fixed top-6 right-6 p-2 rounded-full hover:bg-muted transition-colors text-muted-foreground"
+        title={theme === 'dark' ? 'Helles Design' : 'Dunkles Design'}
+      >
+        {theme === 'dark' ? (
+          <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        ) : (
+          <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        )}
+      </button>
+
+      <div className="w-full max-w-[400px]">
+        
+        <div className="flex justify-center mb-10">
+          <Logo size={42} />
         </div>
 
-        {/* Success Card */}
-        <Card className="border border-border bg-card shadow-lg shadow-emerald-500/5 relative overflow-hidden transition-all duration-300">
-          <div className="absolute inset-x-0 top-0 h-1 bg-emerald-500" />
-          
-          <CardHeader className="space-y-4 pb-6 pt-10 text-center">
-            <div className="mx-auto size-16 rounded-full bg-emerald-500/10 flex items-center justify-center mb-2">
-              <HugeiconsIcon icon={icon} size={32} className="text-emerald-500" />
-            </div>
-            <CardTitle className="text-2xl font-bold">{title}</CardTitle>
-            <CardDescription className="text-sm text-center px-2">
-              {description}
-            </CardDescription>
-          </CardHeader>
-          
-          <CardContent className="space-y-4">
-            {/* Space for dynamic content if needed */}
-          </CardContent>
-            
-          <CardFooter className="flex flex-col gap-5 pt-2 pb-8">
-            <Button
-              onClick={() => router.push(targetPath)}
-              className="w-full h-11 text-base font-medium"
-            >
-              {buttonText}
-            </Button>
-          </CardFooter>
-        </Card>
+        <div className="bg-card border border-border sm:shadow-xl sm:shadow-green-500/5 rounded-2xl p-8 transition-all relative overflow-hidden text-center">
+          {/* Success Accent Line */}
+          <div className="absolute inset-x-0 top-0 h-1 bg-green-500" />
+
+          <div className="mx-auto size-20 rounded-full bg-green-500/10 flex items-center justify-center mb-6 mt-4">
+            <svg width="40" height="40" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-green-500">
+              <path d="M7 13l3 3 7-7" />
+              <circle cx="12" cy="12" r="10" />
+            </svg>
+          </div>
+
+          <h1 className="text-[1.5rem] font-semibold text-foreground mb-2 tracking-tight">
+            {title}
+          </h1>
+          <p className="text-[0.9375rem] text-muted-foreground mb-8 px-2 leading-relaxed">
+            {description}
+          </p>
+
+          <button
+            onClick={() => router.push(targetPath)}
+            className="w-full py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg text-[0.9375rem] font-semibold transition-all shadow-sm active:scale-[0.98]"
+          >
+            {buttonText}
+          </button>
+        </div>
+
+        <p className="text-center mt-12 text-[0.8125rem] text-muted-foreground/60 font-medium">
+          © {new Date().getFullYear()} AzubiHub — Alle Rechte vorbehalten.
+        </p>
       </div>
     </div>
   )
 }
+

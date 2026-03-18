@@ -17,9 +17,12 @@ interface AuthContextType extends AuthState {
   updatePassword: (password: string) => Promise<{ error?: string }>
   completeSetup: () => Promise<void>
   logout: () => Promise<void>
+  signInWithGoogle: () => Promise<void>
+  signInWithApple: () => Promise<void>
   isLoading: boolean
   user: User | null
 }
+
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
@@ -171,6 +174,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return {}
   }
 
+  const signInWithGoogle = async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: `${window.location.origin}/auth/callback` }
+    })
+  }
+
+  const signInWithApple = async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: 'apple',
+      options: { redirectTo: `${window.location.origin}/auth/callback` }
+    })
+  }
+
   const logout = async () => {
     await supabase.auth.signOut()
     // Event listener kümmert sich um den Rest
@@ -184,7 +201,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       resetPassword, 
       updatePassword, 
       completeSetup, 
-      logout, 
+      signInWithGoogle,
+      signInWithApple,
+      logout,
       isLoading, 
       user 
     }}>

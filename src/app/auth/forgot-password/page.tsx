@@ -3,26 +3,17 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useAuth } from '@/contexts/AuthContext'
+import { useTheme } from '@/contexts/ThemeContext'
 import { useRouter } from 'next/navigation'
-
-const C = {
-  blue:        '#4285f4',
-  blueDark:    '#1967d2',
-  textPrimary: '#202124',
-  textSec:     '#5f6368',
-  textLight:   '#80868b',
-  border:      '#dadce0',
-  red:         '#ea4335',
-}
 
 function Logo({ size = 32 }: { size?: number }) {
   const fs = size * 0.57
   return (
-    <div style={{ display: 'inline-flex', alignItems: 'center', gap: size * 0.38 }}>
+    <div className="flex items-center gap-2 select-none">
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/App Icon.png" alt="AzubiHub" width={size} height={size} style={{ borderRadius: size * 0.22, display: 'block', objectFit: 'cover' }} />
-      <span style={{ fontSize: fs, fontWeight: 500, letterSpacing: '-0.01em', lineHeight: 1, userSelect: 'none', color: C.textPrimary }}>
-        Azubi<span style={{ color: C.textSec }}>Hub</span>
+      <img src="/App Icon.png" alt="AzubiHub" width={size} height={size} className="rounded-lg object-cover" />
+      <span className="text-foreground tracking-tight" style={{ fontSize: fs, fontWeight: 500 }}>
+        Azubi<span className="text-muted-foreground">Hub</span>
       </span>
     </div>
   )
@@ -30,6 +21,7 @@ function Logo({ size = 32 }: { size?: number }) {
 
 export default function ForgotPasswordPage() {
   const { resetPassword } = useAuth()
+  const { theme, toggleTheme } = useTheme()
   const router = useRouter()
   const [email,     setEmail]     = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -39,61 +31,70 @@ export default function ForgotPasswordPage() {
     e.preventDefault()
     setIsLoading(true); setErrorMsg('')
     const { error } = await resetPassword(email)
-    if (error) { setErrorMsg(error); setIsLoading(false) }
-    else        { router.push('/auth/success?type=reset') }
+    if (error) { 
+      setErrorMsg(error)
+      setIsLoading(false) 
+    } else { 
+      router.push('/auth/success?type=reset') 
+    }
   }
 
   return (
-    <div style={{
-      minHeight: '100svh', background: '#ffffff',
-      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-      padding: '1.5rem',
-      fontFamily: '"Google Sans","Roboto",-apple-system,"Segoe UI",sans-serif',
-      WebkitFontSmoothing: 'antialiased', color: C.textPrimary,
-    }}>
-      <div style={{ width: '100%', maxWidth: 400 }}>
+    <div className="min-h-[100svh] bg-background flex flex-col items-center justify-center p-6 font-sans antialiased text-foreground selection:bg-primary/20">
+      
+      {/* Theme Toggle in Corner */}
+      <button 
+        onClick={toggleTheme}
+        className="fixed top-6 right-6 p-2 rounded-full hover:bg-muted transition-colors text-muted-foreground"
+        title={theme === 'dark' ? 'Helles Design' : 'Dunkles Design'}
+      >
+        {theme === 'dark' ? (
+          <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        ) : (
+          <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        )}
+      </button>
 
-        {/* Logo */}
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '2.25rem' }}>
-          <Logo size={34} />
+      <div className="w-full max-w-[400px]">
+        
+        <div className="flex justify-center mb-10">
+          <Logo size={42} />
         </div>
 
-        {/* Card */}
-        <div style={{ border: `1px solid ${C.border}`, borderRadius: 8, padding: '2rem' }}>
-          <h1 style={{ fontSize: '1.375rem', fontWeight: 450, color: C.textPrimary, marginBottom: '0.375rem', textAlign: 'center', lineHeight: 1.3 }}>
+        <div className="bg-card border border-border sm:shadow-xl sm:shadow-primary/5 rounded-2xl p-8 transition-all">
+          <h1 className="text-[1.5rem] font-semibold text-foreground mb-1 text-center tracking-tight">
             Passwort vergessen?
           </h1>
-          <p style={{ fontSize: '0.9375rem', color: C.textSec, textAlign: 'center', marginBottom: '1.75rem', lineHeight: 1.6 }}>
+          <p className="text-[0.9375rem] text-muted-foreground text-center mb-8">
             Gib deine E-Mail ein und wir senden dir einen Link zum Zurücksetzen.
           </p>
 
-          <form onSubmit={handleReset} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <div>
-              <label htmlFor="email" style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 500, color: C.textSec, marginBottom: '0.375rem' }}>E-Mail</label>
+          <form onSubmit={handleReset} className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="email" className="text-[0.8125rem] font-semibold text-foreground/80 ml-0.5">
+                E-Mail-Adresse
+              </label>
               <input
-                id="email" type="email" required placeholder="name@beispiel.de"
+                id="email" type="email" required
+                placeholder="name@beispiel.de"
                 value={email} onChange={e => setEmail(e.target.value)}
-                style={{ width: '100%', padding: '0.625rem 0.875rem', border: `1px solid ${C.border}`, borderRadius: 4, fontSize: '0.9375rem', color: C.textPrimary, background: '#ffffff', outline: 'none', boxSizing: 'border-box', transition: 'border-color 150ms ease', fontFamily: 'inherit' }}
-                onFocus={e => (e.currentTarget.style.borderColor = C.blue)}
-                onBlur={e  => (e.currentTarget.style.borderColor = C.border)}
+                className="w-full px-4 py-2.5 rounded-lg border border-border bg-input focus:bg-background focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-[0.9375rem] transition-all placeholder:text-muted-foreground/50"
               />
             </div>
 
             {errorMsg && (
-              <div style={{ padding: '0.75rem', background: 'rgba(234,67,53,0.08)', border: '1px solid rgba(234,67,53,0.2)', borderRadius: 4, color: C.red, fontSize: '0.875rem', textAlign: 'center' }}>
+              <div className="mt-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-[0.875rem] text-center font-medium animate-in fade-in slide-in-from-top-1">
                 {errorMsg}
               </div>
             )}
 
             <button
               type="submit" disabled={isLoading || !email}
-              style={{ marginTop: '0.25rem', width: '100%', padding: '0.6875rem 1rem', background: C.blue, color: 'white', border: 'none', borderRadius: 9999, fontSize: '0.9375rem', fontWeight: 450, cursor: isLoading || !email ? 'not-allowed' : 'pointer', opacity: isLoading || !email ? 0.6 : 1, transition: 'background 150ms ease', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontFamily: 'inherit' }}
-              onMouseEnter={e => { if (!isLoading && email) (e.currentTarget as HTMLButtonElement).style.background = C.blueDark }}
-              onMouseLeave={e => { if (!isLoading && email) (e.currentTarget as HTMLButtonElement).style.background = C.blue }}
+              className="mt-4 w-full py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg text-[0.9375rem] font-semibold transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm active:scale-[0.98]"
             >
               {isLoading ? (
                 <>
-                  <span className="animate-spin" style={{ width: 16, height: 16, borderRadius: '50%', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', display: 'inline-block' }} />
+                  <span className="size-4 rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground animate-spin" />
                   Senden...
                 </>
               ) : 'Link anfordern'}
@@ -101,16 +102,18 @@ export default function ForgotPasswordPage() {
           </form>
         </div>
 
-        <p style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.9375rem' }}>
-          <Link href="/auth/login" style={{ color: C.blue, fontWeight: 500, textDecoration: 'none' }}>
+        <p className="text-center mt-8 text-[0.9375rem] text-muted-foreground">
+          <Link href="/auth/login" className="text-primary font-semibold hover:underline flex items-center justify-center gap-2">
+            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
             Zurück zum Login
           </Link>
         </p>
 
-        <p style={{ textAlign: 'center', marginTop: '3rem', fontSize: '0.8125rem', color: C.textLight }}>
-          © {new Date().getFullYear()} AzubiHub
+        <p className="text-center mt-12 text-[0.8125rem] text-muted-foreground/60 font-medium">
+          © {new Date().getFullYear()} AzubiHub — Alle Rechte vorbehalten.
         </p>
       </div>
     </div>
   )
 }
+
