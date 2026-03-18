@@ -214,32 +214,18 @@ function useScrollReveal() {
    COMPONENTS
 ═══════════════════════════════════════ */
 
-/* Logo — Google-style 4-color icon mark + colored wordmark */
+/* Logo — App Icon.png + wordmark */
 function Logo({ size = 28, dark = false }: { size?: number; dark?: boolean }) {
-  const textColor = dark ? 'rgba(255,255,255,0.85)' : C.textPrimary
-  const hubColor  = dark ? 'rgba(255,255,255,0.5)'  : C.textSec
+  const hubColor = dark ? 'rgba(255,255,255,0.55)' : C.textSec
   const fs = size * 0.57
   return (
-    <div style={{ display: 'inline-flex', alignItems: 'center', gap: size * 0.36 }}>
-      {/* Icon mark — "A" built from 4 colored strokes */}
-      <svg width={size} height={size} viewBox="0 0 32 32" fill="none" aria-hidden="true">
-        {/* Left leg — blue */}
-        <path d="M7.5 26.5L16 5.5" stroke={C.blue}   strokeWidth="3.6" strokeLinecap="round"/>
-        {/* Right leg — green */}
-        <path d="M16 5.5L24.5 26.5" stroke={C.green}  strokeWidth="3.6" strokeLinecap="round"/>
-        {/* Crossbar left — red */}
-        <path d="M11.4 19.8H16"    stroke={C.red}    strokeWidth="2.8" strokeLinecap="round"/>
-        {/* Crossbar right — yellow */}
-        <path d="M16 19.8H20.6"    stroke={C.yellow}  strokeWidth="2.8" strokeLinecap="round"/>
-      </svg>
+    <div style={{ display: 'inline-flex', alignItems: 'center', gap: size * 0.38 }}>
+      {/* App icon */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/App Icon.png" alt="AzubiHub" width={size} height={size} style={{ borderRadius: size * 0.22, display: 'block', objectFit: 'cover' }} />
       {/* Wordmark */}
-      <span style={{ fontSize: fs, fontWeight: 500, letterSpacing: '-0.01em', lineHeight: 1, userSelect: 'none' }}>
-        <span style={{ color: C.blue   }}>A</span>
-        <span style={{ color: textColor }}>z</span>
-        <span style={{ color: textColor }}>u</span>
-        <span style={{ color: textColor }}>b</span>
-        <span style={{ color: textColor }}>i</span>
-        <span style={{ color: hubColor  }}>Hub</span>
+      <span style={{ fontSize: fs, fontWeight: 500, letterSpacing: '-0.01em', lineHeight: 1, userSelect: 'none', color: dark ? 'rgba(255,255,255,0.9)' : C.textPrimary }}>
+        Azubi<span style={{ color: hubColor }}>Hub</span>
       </span>
     </div>
   )
