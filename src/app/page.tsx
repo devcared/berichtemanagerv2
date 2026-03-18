@@ -5,10 +5,6 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
 import { useProfile } from '@/hooks/use-profile'
 import { useAuth } from '@/contexts/AuthContext'
 import type { AppModule } from '@/types'
@@ -45,58 +41,86 @@ function AppHome() {
   useEffect(() => { setIsMounted(true) }, [])
   const today = isMounted ? format(new Date(), "EEEE, d. MMMM yyyy", { locale: de }) : ''
   const greeting = `${getGreeting()}${profile ? `, ${profile.firstName}` : ''}!`
+  const textPrimary = '#202124'
+  const textSec     = '#5f6368'
+  const textLight   = '#80868b'
+  const border      = '#dadce0'
+
   return (
-    <div className="min-h-screen bg-[hsl(var(--background))]">
-      <div className="max-w-5xl mx-auto px-6 py-12">
-        <div className="mb-10">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-3">
-              <div className="size-10 rounded-xl bg-primary/20 flex items-center justify-center">
-                <span className="text-primary font-bold text-lg">A</span>
-              </div>
-              <span className="text-muted-foreground text-sm font-medium tracking-wider uppercase">AzubiHub</span>
-            </div>
-            <Button variant="outline" size="sm" onClick={() => logout()} className="text-muted-foreground hover:text-foreground gap-2">
-              <HugeiconsIcon icon={Logout01Icon} size={16} />
-              <span className="hidden sm:inline">Abmelden</span>
-            </Button>
+    <div style={{ minHeight: '100svh', background: '#ffffff', fontFamily: '"Google Sans","Roboto",-apple-system,"Segoe UI",sans-serif', WebkitFontSmoothing: 'antialiased', color: textPrimary }}>
+      <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 1.5rem' }}>
+
+        {/* Header */}
+        <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.25rem 0', borderBottom: `1px solid ${border}` }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/App Icon.png" alt="AzubiHub" width={28} height={28} style={{ borderRadius: 6, display: 'block', objectFit: 'cover' }} />
+            <span style={{ fontSize: 16, fontWeight: 500, letterSpacing: '-0.01em', color: textPrimary }}>
+              Azubi<span style={{ color: textSec }}>Hub</span>
+            </span>
           </div>
-          <h1 className="text-3xl font-bold text-foreground mt-4">{greeting}</h1>
-          <p className="text-muted-foreground mt-1">{today}</p>
+          <button
+            onClick={() => logout()}
+            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0.5rem 1rem', border: `1px solid ${border}`, borderRadius: 9999, background: 'none', color: textSec, fontSize: '0.875rem', cursor: 'pointer', transition: 'border-color 150ms ease', fontFamily: 'inherit' }}
+            onMouseEnter={e => (e.currentTarget.style.borderColor = '#bdc1c6')}
+            onMouseLeave={e => (e.currentTarget.style.borderColor = border)}
+          >
+            <HugeiconsIcon icon={Logout01Icon} size={15} />
+            <span className="hidden sm:inline">Abmelden</span>
+          </button>
+        </header>
+
+        {/* Greeting */}
+        <div style={{ paddingTop: '3rem', paddingBottom: '2.5rem' }}>
+          <h1 style={{ fontSize: 'clamp(1.75rem,4vw,2.5rem)', fontWeight: 450, color: textPrimary, lineHeight: 1.2, marginBottom: '0.375rem' }}>{greeting}</h1>
+          <p style={{ fontSize: '0.9375rem', color: textSec }}>{today}</p>
         </div>
-        <div>
-          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">Module</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {modules.map((mod) => {
-              const I = moduleIconMap[mod.icon]
-              return (
-                <Card key={mod.id} onClick={() => mod.isEnabled && router.push(mod.routePath)}
-                  className={cn('relative overflow-hidden border border-border bg-card transition-all duration-200',
-                    mod.isEnabled ? 'cursor-pointer hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5' : 'opacity-60 cursor-not-allowed')}
-                  style={{ borderTop: `3px solid ${mod.accentColor}` }}>
-                  <CardContent className="p-5">
-                    <div className="flex items-start gap-4">
-                      <div className="size-12 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: `${mod.accentColor}20` }}>
-                        {I && <HugeiconsIcon icon={I} size={22} style={{ color: mod.accentColor }} />}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-semibold text-foreground text-base">{mod.title}</h3>
-                          {!mod.isEnabled && <Badge variant="secondary" className="text-[10px] shrink-0">Bald verfügbar</Badge>}
-                        </div>
-                        <p className="text-sm text-muted-foreground leading-relaxed">{mod.description}</p>
-                        {mod.isEnabled && mod.lastUsed && <p className="text-xs text-muted-foreground/60 mt-2">Zuletzt genutzt heute</p>}
-                      </div>
+
+        {/* Module label */}
+        <p style={{ fontSize: '0.75rem', fontWeight: 600, letterSpacing: '0.09em', textTransform: 'uppercase', color: textSec, marginBottom: '1rem' }}>Module</p>
+
+        {/* Module cards */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: '1rem', marginBottom: '4rem' }}>
+          {modules.map(mod => {
+            const I = moduleIconMap[mod.icon]
+            return (
+              <div
+                key={mod.id}
+                onClick={() => mod.isEnabled && router.push(mod.routePath)}
+                style={{ border: `1px solid ${border}`, borderTop: `3px solid ${mod.isEnabled ? mod.accentColor : border}`, borderRadius: 8, padding: '1.5rem', background: '#ffffff', cursor: mod.isEnabled ? 'pointer' : 'not-allowed', opacity: mod.isEnabled ? 1 : 0.55, transition: 'transform 200ms ease, border-color 200ms ease' }}
+                onMouseEnter={e => { if (mod.isEnabled) { e.currentTarget.style.transform = 'translateY(-2px)' } }}
+                onMouseLeave={e => { e.currentTarget.style.transform = '' }}
+              >
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
+                  <div style={{ width: 44, height: 44, borderRadius: 8, background: `${mod.accentColor}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    {I && <HugeiconsIcon icon={I} size={20} style={{ color: mod.accentColor }} />}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: '0.25rem' }}>
+                      <h3 style={{ fontSize: '0.9375rem', fontWeight: 500, color: textPrimary }}>{mod.title}</h3>
+                      {!mod.isEnabled && (
+                        <span style={{ fontSize: '0.6875rem', padding: '0.2rem 0.5rem', borderRadius: 9999, background: '#f1f3f4', color: textSec, fontWeight: 500, flexShrink: 0 }}>
+                          Bald verfügbar
+                        </span>
+                      )}
                     </div>
-                  </CardContent>
-                </Card>
-              )
-            })}
-          </div>
+                    <p style={{ fontSize: '0.875rem', color: textSec, lineHeight: 1.6, margin: 0 }}>{mod.description}</p>
+                    {mod.isEnabled && mod.lastUsed && (
+                      <p style={{ fontSize: '0.75rem', color: textLight, marginTop: '0.5rem', marginBottom: 0 }}>Zuletzt genutzt heute</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )
+          })}
         </div>
-        <div className="mt-16 pt-8 border-t border-border text-center">
-          <p className="text-xs text-muted-foreground">AzubiHub · Dein persönlicher Ausbildungsassistent</p>
+
+        {/* Footer line */}
+        <div style={{ borderTop: `1px solid ${border}`, paddingTop: '1.5rem', paddingBottom: '2rem', textAlign: 'center' }}>
+          <p style={{ fontSize: '0.8125rem', color: textLight }}>AzubiHub · Dein persönlicher Ausbildungsassistent</p>
         </div>
+
+
       </div>
     </div>
   )
@@ -292,19 +316,7 @@ function FixedBackground() {
 
 /* Nav — exact antigravity.google: min-height 36px, #ffffffd9, blur(5px), hides on scroll-down */
 function Nav() {
-  const [hidden, setHidden] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
-
-  useEffect(() => {
-    let lastY = window.scrollY
-    const fn = () => {
-      const y = window.scrollY
-      setHidden(y > lastY && y > 60)
-      lastY = y
-    }
-    window.addEventListener('scroll', fn, { passive: true })
-    return () => window.removeEventListener('scroll', fn)
-  }, [])
 
   const links = [['#features', 'Features'], ['#pricing', 'Preise'], ['#faq', 'FAQ']] as const
 
@@ -317,8 +329,6 @@ function Nav() {
         backdropFilter: 'blur(5px)',
         WebkitBackdropFilter: 'blur(5px)',
         borderBottom: `1px solid ${C.border}`,
-        transform: hidden ? 'translateY(-100%)' : 'translateY(0)',
-        transition: 'transform 300ms ease',
       }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 1.25rem', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           {/* Logo */}
