@@ -15,6 +15,10 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "AzubiHub",
   description: "Dein persönlicher Ausbildungsassistent",
+  icons: {
+    icon: "/App Icon.png",
+    apple: "/App Icon.png",
+  },
 };
 
 import { AuthProvider } from "@/contexts/AuthContext";
