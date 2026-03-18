@@ -15,9 +15,9 @@ import type { AppModule } from '@/types'
 import {
   BookOpenIcon, CheckListIcon, CalendarIcon, GridViewIcon, Logout01Icon,
   SparklesIcon, CheckmarkBadge01Icon, ArrowRight01Icon,
-  Shield01Icon, StarIcon, QuoteUpIcon, CheckmarkCircle01Icon,
+  Shield01Icon, CheckmarkCircle01Icon,
   Add01Icon, MinusSignIcon,
-  Mail01Icon, Github01Icon, LockPasswordIcon,
+  Mail01Icon, LockPasswordIcon,
 } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 
@@ -476,25 +476,22 @@ function LandingPage() {
       </section>
 
       {/* ══ 5. TESTIMONIALS ══ */}
-      <section style={{ padding: '6rem 0', background: C.bgSecondary, position: 'relative' }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 2rem' }}>
-          <div className="g-reveal" style={{ textAlign: 'center', marginBottom: '4rem' }}>
-            <h2 style={{ fontWeight: 450, fontSize: 'clamp(2rem,4vw,3rem)', color: C.textPrimary, marginBottom: '1rem', lineHeight: 1.2 }}>Was andere sagen.</h2>
-            <p style={{ fontSize: '1.125rem', color: C.textSec, maxWidth: 640, margin: '0 auto' }}>Echte Meinungen von Auszubildenden und Ausbildern.</p>
+      <section style={{ padding: '6rem 0', background: '#ffffff', position: 'relative' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 2rem' }}>
+          <div className="g-reveal" style={{ textAlign: 'center', marginBottom: '4.5rem' }}>
+            <p style={{ fontSize: '0.8125rem', fontWeight: 600, letterSpacing: '0.09em', textTransform: 'uppercase', color: C.blue, margin: '0 0 0.75rem' }}>Stimmen</p>
+            <h2 style={{ fontWeight: 450, fontSize: 'clamp(1.875rem,3.5vw,2.75rem)', color: C.textPrimary, lineHeight: 1.2 }}>Was andere sagen.</h2>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: '1.5rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: '1px', background: C.border }}>
             {TESTIMONIALS.map((t, i) => (
               <div key={t.name} className="g-reveal"
-                style={{ padding: '1.75rem', background: '#ffffff', border: `1px solid ${C.border}`, borderRadius: 12, display: 'flex', flexDirection: 'column', transition: 'all 250ms ease', transitionDelay: `${i * 0.07}s` }}
-                onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.transform = 'translateY(-4px)' }}
-                onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.transform = '' }}>
-                <div style={{ display: 'flex', gap: 2, marginBottom: '0.875rem' }}>
-                  {[...Array(5)].map((_, j) => <HugeiconsIcon key={j} icon={StarIcon} size={14} style={{ color: C.yellow }} />)}
-                </div>
-                <HugeiconsIcon icon={QuoteUpIcon} size={22} style={{ color: `${t.color}50`, marginBottom: 10 }} />
-                <p style={{ color: C.textSec, lineHeight: 1.7, flex: 1, marginBottom: '1.25rem', fontSize: '0.9375rem' }}>{t.text}</p>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, paddingTop: '1rem', borderTop: `1px solid ${C.border}` }}>
-                  <div style={{ width: 36, height: 36, borderRadius: 8, background: t.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 12, color: 'white', flexShrink: 0 }}>
+                style={{ padding: '2rem', background: '#ffffff', display: 'flex', flexDirection: 'column', transition: 'background 180ms ease', transitionDelay: `${i * 0.06}s` }}
+                onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => { e.currentTarget.style.background = C.bgSecondary }}
+                onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => { e.currentTarget.style.background = '#ffffff' }}>
+                <span style={{ fontSize: '3rem', lineHeight: 1, color: t.color, opacity: 0.25, marginBottom: '0.5rem', fontFamily: 'Georgia, serif', display: 'block' }}>"</span>
+                <p style={{ color: C.textSec, lineHeight: 1.7, flex: 1, marginBottom: '1.5rem', fontSize: '0.9375rem' }}>{t.text}</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div style={{ width: 32, height: 32, borderRadius: '50%', background: t.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 600, color: 'white', flexShrink: 0, letterSpacing: '0.02em' }}>
                     {t.name.split(' ').map(n => n[0]).join('')}
                   </div>
                   <div>
@@ -625,57 +622,74 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* ══ FOOTER — antigravity.google: dark + 3-col nav + large ring ══ */}
+      {/* ══ FOOTER ══ */}
       <footer style={{ background: C.bgDark, color: 'white', position: 'relative' }}>
-        {/* 3-column nav links */}
-        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '4rem 2rem 3rem' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: '3rem', marginBottom: '3rem' }}>
-            {/* Brand col */}
+
+        {/* Ring animation — antigravity.google signature */}
+        <div style={{ height: 'calc(16vw + 220px)', position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+          {[
+            { size: 'calc(16vw + 220px)', border: 'rgba(66,133,244,0.1)',  anim: 'orbit-cw 60s linear infinite' },
+            { size: 'calc(11vw + 170px)', border: 'rgba(234,67,53,0.07)',  anim: 'orbit-ccw 44s linear infinite 2s' },
+            { size: 'calc(7vw + 120px)',  border: 'rgba(52,168,83,0.09)',  anim: 'orbit-cw 28s linear infinite 1s' },
+            { size: 'calc(4vw + 76px)',   border: 'rgba(251,188,4,0.11)',  anim: 'orbit-ccw 16s linear infinite 0.5s' },
+          ].map((r, i) => (
+            <div key={i} style={{ position: 'absolute', width: r.size, height: r.size, borderRadius: '50%', border: `1px solid ${r.border}`, animation: r.anim }} />
+          ))}
+          <div style={{ position: 'absolute', width: 48, height: 48, borderRadius: '50%', background: 'radial-gradient(circle, rgba(66,133,244,0.45) 0%, transparent 70%)', animation: 'goog-glow-pulse 3.5s ease-in-out infinite' }} />
+        </div>
+
+        {/* Nav */}
+        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '3.5rem 2rem 2.5rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '4rem', marginBottom: '2.5rem' }} className="footer-grid">
+
+            {/* Brand */}
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: '1rem' }}>
-                <div style={{ width: 32, height: 32, borderRadius: 8, background: `linear-gradient(135deg, ${C.blue}, ${C.green})`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <span style={{ color: 'white', fontWeight: 900, fontSize: 14, lineHeight: 1 }}>A</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: '0.875rem' }}>
+                <div style={{ width: 28, height: 28, borderRadius: 6, background: `linear-gradient(135deg, ${C.blue}, ${C.green})`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <span style={{ color: 'white', fontWeight: 900, fontSize: 12, lineHeight: 1 }}>A</span>
                 </div>
-                <span style={{ fontWeight: 700, fontSize: '1.125rem' }}>AzubiHub</span>
+                <span style={{ fontWeight: 600, fontSize: '1rem' }}>AzubiHub</span>
               </div>
-              <p style={{ color: 'rgba(255,255,255,0.6)', lineHeight: 1.6, marginBottom: '1.25rem', fontSize: '0.9375rem' }}>
-                Die digitale Ausbildungsplattform für moderne Betriebe. KI-gestützt, IHK-konform, kostenlos.
+              <p style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1.65, fontSize: '0.875rem', marginBottom: '1.25rem', maxWidth: 280 }}>
+                Digitale Ausbildungsplattform für Deutschland. KI-gestützt, IHK-konform, kostenlos.
               </p>
-              <div style={{ display: 'flex', gap: 8 }}>
-                {[{ href: 'mailto:kontakt@azubihub.app', icon: Mail01Icon, label: 'E-Mail' }, { href: 'https://github.com', icon: Github01Icon, label: 'GitHub' }].map(s => (
+              <div style={{ display: 'flex', gap: '1.25rem' }}>
+                {[{ href: 'mailto:kontakt@azubihub.app', label: 'E-Mail' }, { href: 'https://github.com', label: 'GitHub' }].map(s => (
                   <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer"
-                    style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.6)', transition: 'all 150ms ease', textDecoration: 'none' }}
-                    onMouseEnter={e => { e.currentTarget.style.color = C.blue; e.currentTarget.style.background = 'rgba(255,255,255,0.14)' }}
-                    onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.6)'; e.currentTarget.style.background = 'rgba(255,255,255,0.08)' }}>
-                    <HugeiconsIcon icon={s.icon} size={15} />
+                    style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.875rem', textDecoration: 'none', transition: 'color 150ms ease' }}
+                    onMouseEnter={e => (e.currentTarget.style.color = 'white')}
+                    onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.45)')}>
+                    {s.label}
                   </a>
                 ))}
               </div>
             </div>
-            {/* Produkt col */}
+
+            {/* Produkt */}
             <div>
-              <p style={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'rgba(255,255,255,0.5)' }}>Produkt</p>
-              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <p style={{ fontSize: '0.8125rem', fontWeight: 500, marginBottom: '1rem', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Produkt</p>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
                 {[['#features','Features'],['#pricing','Preise'],['#faq','FAQ'],['/auth/register','Registrieren'],['/auth/login','Anmelden']].map(([href, label]) => (
                   <li key={label}>
-                    <a href={href} style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.9375rem', transition: 'color 150ms ease', textDecoration: 'none' }}
+                    <a href={href} style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.9rem', transition: 'color 150ms ease', textDecoration: 'none' }}
                       onMouseEnter={e => (e.currentTarget.style.color = 'white')}
-                      onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.6)')}>
+                      onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.55)')}>
                       {label}
                     </a>
                   </li>
                 ))}
               </ul>
             </div>
-            {/* Rechtliches col */}
+
+            {/* Rechtliches */}
             <div>
-              <p style={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'rgba(255,255,255,0.5)' }}>Rechtliches</p>
-              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <p style={{ fontSize: '0.8125rem', fontWeight: 500, marginBottom: '1rem', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Rechtliches</p>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
                 {[{ href: '/impressum', label: 'Impressum' }, { href: '/datenschutz', label: 'Datenschutz' }, { href: 'mailto:kontakt@azubihub.app', label: 'Kontakt' }].map(({ href, label }) => (
                   <li key={label}>
-                    <Link href={href} style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.9375rem', transition: 'color 150ms ease', textDecoration: 'none' }}
+                    <Link href={href} style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.9rem', transition: 'color 150ms ease', textDecoration: 'none' }}
                       onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = 'white')}
-                      onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = 'rgba(255,255,255,0.6)')}>
+                      onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = 'rgba(255,255,255,0.55)')}>
                       {label}
                     </Link>
                   </li>
@@ -683,23 +697,10 @@ function LandingPage() {
               </ul>
             </div>
           </div>
-          <div style={{ paddingTop: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.1)', textAlign: 'center', color: 'rgba(255,255,255,0.4)', fontSize: '0.875rem' }}>
-            © {new Date().getFullYear()} AzubiHub. Alle Rechte vorbehalten.
-          </div>
-        </div>
 
-        {/* Large ring animation — antigravity.google footer signature */}
-        <div style={{ height: 'calc(18vw + 260px)', position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ position: 'absolute', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', bottom: 0 }}>
-            {[
-              { size: 'calc(18vw + 260px)', border: 'rgba(66,133,244,0.1)',  anim: 'orbit-cw 60s linear infinite' },
-              { size: 'calc(13vw + 200px)', border: 'rgba(234,67,53,0.08)',  anim: 'orbit-ccw 45s linear infinite 2s' },
-              { size: 'calc(9vw + 140px)',  border: 'rgba(52,168,83,0.1)',   anim: 'orbit-cw 30s linear infinite 1s' },
-              { size: 'calc(5vw + 90px)',   border: 'rgba(251,188,4,0.12)',  anim: 'orbit-ccw 18s linear infinite 0.5s' },
-            ].map((r, i) => (
-              <div key={i} style={{ position: 'absolute', width: r.size, height: r.size, borderRadius: '50%', border: `1px solid ${r.border}`, animation: r.anim }} />
-            ))}
-            <div style={{ position: 'absolute', width: 60, height: 60, borderRadius: '50%', background: 'radial-gradient(circle, rgba(66,133,244,0.4) 0%, transparent 70%)', animation: 'goog-glow-pulse 3.5s ease-in-out infinite', boxShadow: '0 0 60px rgba(66,133,244,0.3)' }} />
+          <div style={{ paddingTop: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.8125rem' }}>© {new Date().getFullYear()} AzubiHub</span>
+            <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.8125rem' }}>Gebaut für die Ausbildung in Deutschland.</span>
           </div>
         </div>
       </footer>
