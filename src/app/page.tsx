@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { format } from 'date-fns'
@@ -37,30 +37,82 @@ function getGreeting() {
 function SunIcon() { return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg> }
 function MoonIcon() { return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg> }
 
+function GripIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+      <circle cx="5" cy="4" r="1.2"/><circle cx="11" cy="4" r="1.2"/>
+      <circle cx="5" cy="8" r="1.2"/><circle cx="11" cy="8" r="1.2"/>
+      <circle cx="5" cy="12" r="1.2"/><circle cx="11" cy="12" r="1.2"/>
+    </svg>
+  )
+}
+
 function AppHome() {
   const router = useRouter()
   const { profile } = useProfile()
   const { logout } = useAuth()
   const { theme, toggleTheme } = useTheme()
   const [isMounted, setIsMounted] = useState(false)
+
+  const enabledIds = modules.filter(m => m.isEnabled).map(m => m.id)
+  const [order, setOrder] = useState<string[]>(enabledIds)
+  const draggedId = useRef<string | null>(null)
+  const [dragOverId, setDragOverId] = useState<string | null>(null)
+
   useEffect(() => { setIsMounted(true) }, [])
+  useEffect(() => {
+    const saved = localStorage.getItem('azubihub-module-order')
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved) as string[]
+        const valid = parsed.filter(id => enabledIds.includes(id))
+        const missing = enabledIds.filter(id => !parsed.includes(id))
+        setOrder([...valid, ...missing])
+      } catch { /* ignore */ }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const today    = isMounted ? format(new Date(), "EEEE, d. MMMM yyyy", { locale: de }) : ''
   const greeting = `${getGreeting()}${profile ? `, ${profile.firstName}` : ''}!`
   const isDark   = theme === 'dark'
 
-  /* CSS-variable-backed tokens — auto-update on theme change */
-  const fg       = 'hsl(var(--foreground))'
-  const fgMuted  = 'hsl(var(--muted-foreground))'
-  const bg       = 'hsl(var(--background))'
-  const cardBg   = 'hsl(var(--card))'
-  const borderC  = 'hsl(var(--border))'
-  const accent   = 'hsl(var(--accent))'
-  const primary  = isDark ? '#8ab4f8' : '#4285f4'
+  const fg      = 'hsl(var(--foreground))'
+  const fgMuted = 'hsl(var(--muted-foreground))'
+  const bg      = 'hsl(var(--background))'
+  const cardBg  = 'hsl(var(--card))'
+  const borderC = 'hsl(var(--border))'
+  const accent  = 'hsl(var(--accent))'
+  const primary = isDark ? '#8ab4f8' : '#4285f4'
 
   const initials = profile
     ? `${profile.firstName?.[0] ?? ''}${profile.lastName?.[0] ?? ''}`.toUpperCase()
     : 'AZ'
+
+  const enabledModules = order.map(id => modules.find(m => m.id === id)!).filter(Boolean)
+  const comingModules  = modules.filter(m => !m.isEnabled)
+
+  function handleDragStart(id: string) { draggedId.current = id }
+  function handleDragOver(e: React.DragEvent, id: string) {
+    e.preventDefault()
+    if (draggedId.current && draggedId.current !== id) setDragOverId(id)
+  }
+  function handleDrop(targetId: string) {
+    const fromId = draggedId.current
+    if (!fromId || fromId === targetId) { draggedId.current = null; setDragOverId(null); return }
+    setOrder(prev => {
+      const next = [...prev]
+      const fi = next.indexOf(fromId), ti = next.indexOf(targetId)
+      next.splice(fi, 1); next.splice(ti, 0, fromId)
+      localStorage.setItem('azubihub-module-order', JSON.stringify(next))
+      return next
+    })
+    draggedId.current = null
+    setDragOverId(null)
+  }
+  function handleDragEnd() { draggedId.current = null; setDragOverId(null) }
+
+  const sharedCardProps = { isDark, cardBg, borderC, fg, fgMuted, primary }
 
   return (
     <div style={{ minHeight: '100svh', background: bg, fontFamily: '"Google Sans","Roboto",-apple-system,"Segoe UI",sans-serif', WebkitFontSmoothing: 'antialiased', color: fg, transition: 'background 200ms, color 200ms' }}>
@@ -68,32 +120,23 @@ function AppHome() {
 
         {/* ── Header ── */}
         <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.125rem 0', borderBottom: `1px solid ${borderC}` }}>
-          {/* Logo */}
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/App Icon.png" alt="AzubiHub" width={30} height={30} style={{ borderRadius: 8, objectFit: 'cover' }} />
             <span style={{ fontSize: '0.9375rem', fontWeight: 600, letterSpacing: '-0.01em', color: fg }}>AzubiHub</span>
           </div>
-
-          {/* Right actions */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            {/* Theme toggle */}
             <button
-              onClick={toggleTheme}
-              title={isDark ? 'Light Mode' : 'Dark Mode'}
+              onClick={toggleTheme} title={isDark ? 'Light Mode' : 'Dark Mode'}
               style={{ width: 36, height: 36, borderRadius: 8, border: `1px solid ${borderC}`, background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: fgMuted, transition: 'background 120ms', fontFamily: 'inherit' }}
               onMouseEnter={e => (e.currentTarget.style.background = accent)}
               onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
             >
               {isDark ? <SunIcon /> : <MoonIcon />}
             </button>
-
-            {/* Avatar */}
             <div style={{ width: 32, height: 32, borderRadius: '50%', background: primary, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6875rem', fontWeight: 700, color: isDark ? '#202124' : '#fff', flexShrink: 0 }}>
               {initials}
             </div>
-
-            {/* Logout */}
             <button
               onClick={logout}
               style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0.4375rem 0.875rem', border: `1px solid ${borderC}`, borderRadius: 9999, background: 'transparent', color: fgMuted, fontSize: '0.8125rem', cursor: 'pointer', transition: 'background 120ms, border-color 120ms', fontFamily: 'inherit' }}
@@ -112,30 +155,55 @@ function AppHome() {
           <p style={{ fontSize: '0.9375rem', color: fgMuted }}>{today}</p>
         </div>
 
-        {/* ── Section label ── */}
-        <p style={{ fontSize: '0.6875rem', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: fgMuted, marginBottom: '1rem' }}>Deine Module</p>
-
-        {/* ── Module grid ── */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(260px,1fr))', gap: '1rem', marginBottom: '4rem' }}>
-          {modules.map(mod => {
-            const I = moduleIconMap[mod.icon]
-            return (
-              <ModuleCard
-                key={mod.id}
-                mod={mod}
-                icon={I}
-                isDark={isDark}
-                cardBg={cardBg}
-                borderC={borderC}
-                accent={accent}
-                fg={fg}
-                fgMuted={fgMuted}
-                primary={primary}
-                onOpen={() => router.push(mod.routePath)}
-              />
-            )
-          })}
+        {/* ── Active modules ── */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+          <p style={{ fontSize: '0.6875rem', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: fgMuted, margin: 0 }}>Deine Module</p>
+          <p style={{ fontSize: '0.6875rem', color: fgMuted, margin: 0 }}>Ziehen zum Anordnen</p>
         </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(260px,1fr))', gap: '1rem', marginBottom: '3rem' }}>
+          {enabledModules.map(mod => (
+            <ModuleCard
+              key={mod.id}
+              mod={mod}
+              icon={moduleIconMap[mod.icon]}
+              {...sharedCardProps}
+              draggable
+              isDragOver={dragOverId === mod.id}
+              onOpen={() => router.push(mod.routePath)}
+              onDragStart={() => handleDragStart(mod.id)}
+              onDragOver={e => handleDragOver(e, mod.id)}
+              onDrop={() => handleDrop(mod.id)}
+              onDragEnd={handleDragEnd}
+            />
+          ))}
+        </div>
+
+        {/* ── Coming soon ── */}
+        {comingModules.length > 0 && (
+          <>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: '1rem' }}>
+              <p style={{ fontSize: '0.6875rem', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: fgMuted, margin: 0, whiteSpace: 'nowrap' }}>Demnächst verfügbar</p>
+              <div style={{ flex: 1, height: 1, background: borderC }} />
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(260px,1fr))', gap: '1rem', marginBottom: '4rem' }}>
+              {comingModules.map(mod => (
+                <ModuleCard
+                  key={mod.id}
+                  mod={mod}
+                  icon={moduleIconMap[mod.icon]}
+                  {...sharedCardProps}
+                  draggable={false}
+                  isDragOver={false}
+                  onOpen={() => {}}
+                  onDragStart={() => {}}
+                  onDragOver={() => {}}
+                  onDrop={() => {}}
+                  onDragEnd={() => {}}
+                />
+              ))}
+            </div>
+          </>
+        )}
 
         {/* ── Footer ── */}
         <div style={{ borderTop: `1px solid ${borderC}`, paddingTop: '1.25rem', paddingBottom: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -147,80 +215,102 @@ function AppHome() {
   )
 }
 
-/* ── Module card extracted to avoid inline-style volatility ── */
-function ModuleCard({ mod, icon: I, isDark, cardBg, borderC, accent, fg, fgMuted, primary, onOpen }: {
+/* ── Module card ── */
+function ModuleCard({ mod, icon: I, isDark, cardBg, borderC, fg, fgMuted, primary, draggable, isDragOver, onOpen, onDragStart, onDragOver, onDrop, onDragEnd }: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   mod: AppModule; icon: any; isDark: boolean; cardBg: string; borderC: string
-  accent: string; fg: string; fgMuted: string; primary: string; onOpen: () => void
+  fg: string; fgMuted: string; primary: string
+  draggable: boolean; isDragOver: boolean
+  onOpen: () => void
+  onDragStart: () => void
+  onDragOver: (e: React.DragEvent) => void
+  onDrop: () => void
+  onDragEnd: () => void
 }) {
   const [hovered, setHovered] = useState(false)
+  const [dragging, setDragging] = useState(false)
   const enabled = mod.isEnabled
 
-  const cardShadow = hovered && enabled
-    ? isDark ? '0 4px 20px rgba(0,0,0,0.45)' : '0 4px 20px rgba(66,133,244,0.12)'
-    : isDark ? '0 1px 4px rgba(0,0,0,0.3)' : '0 1px 3px rgba(0,0,0,0.07)'
+  const cardShadow = isDragOver
+    ? `0 0 0 2px ${primary}`
+    : hovered && enabled
+      ? isDark ? '0 4px 20px rgba(0,0,0,0.45)' : '0 4px 20px rgba(66,133,244,0.12)'
+      : isDark ? '0 1px 4px rgba(0,0,0,0.3)' : '0 1px 3px rgba(0,0,0,0.07)'
 
   return (
     <div
-      onClick={() => enabled && onOpen()}
+      draggable={draggable}
+      onClick={() => enabled && !dragging && onOpen()}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      onDragStart={e => { e.dataTransfer.effectAllowed = 'move'; setDragging(true); onDragStart() }}
+      onDragOver={onDragOver}
+      onDrop={e => { e.preventDefault(); setDragging(false); onDrop() }}
+      onDragEnd={() => { setDragging(false); onDragEnd() }}
       style={{
-        border: `1px solid ${hovered && enabled ? primary : borderC}`,
+        border: `1px solid ${isDragOver ? primary : hovered && enabled ? primary : borderC}`,
         borderRadius: 16,
         padding: '1.5rem',
-        background: cardBg,
-        cursor: enabled ? 'pointer' : 'default',
-        opacity: enabled ? 1 : 0.55,
-        transition: 'border-color 180ms, box-shadow 180ms, transform 180ms',
+        background: isDragOver ? (isDark ? 'rgba(138,180,248,0.08)' : 'rgba(66,133,244,0.05)') : cardBg,
+        cursor: draggable ? 'grab' : enabled ? 'pointer' : 'default',
+        opacity: dragging ? 0.4 : enabled ? 1 : 0.52,
+        transition: 'border-color 160ms, box-shadow 160ms, transform 160ms, background 160ms, opacity 160ms',
         display: 'flex',
         flexDirection: 'column',
         gap: '1.125rem',
         boxShadow: cardShadow,
-        transform: hovered && enabled ? 'translateY(-2px)' : 'none',
+        transform: hovered && enabled && !dragging ? 'translateY(-2px)' : 'none',
         position: 'relative',
         overflow: 'hidden',
+        userSelect: 'none',
       }}
     >
-      {/* Subtle top accent stripe */}
+      {/* Accent stripe */}
       {enabled && (
         <div style={{
           position: 'absolute', top: 0, left: 0, right: 0, height: 3,
-          background: mod.accentColor,
-          borderRadius: '16px 16px 0 0',
-          opacity: hovered ? 1 : 0,
-          transition: 'opacity 180ms',
+          background: mod.accentColor, borderRadius: '16px 16px 0 0',
+          opacity: hovered || isDragOver ? 1 : 0, transition: 'opacity 160ms',
         }} />
       )}
 
-      {/* Icon chip */}
-      <div style={{
-        width: 48, height: 48, borderRadius: 14,
-        background: `${mod.accentColor}${isDark ? '22' : '15'}`,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        transition: 'background 180ms',
-      }}>
-        {I && <HugeiconsIcon icon={I} size={22} style={{ color: mod.accentColor }} />}
+      {/* Header row: icon + drag handle */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+        <div style={{
+          width: 48, height: 48, borderRadius: 14,
+          background: `${mod.accentColor}${isDark ? '22' : '15'}`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          {I && <HugeiconsIcon icon={I} size={22} style={{ color: mod.accentColor }} />}
+        </div>
+        {draggable && (
+          <div style={{
+            color: hovered ? fgMuted : 'transparent',
+            transition: 'color 160ms',
+            cursor: 'grab', padding: '2px 0',
+          }}>
+            <GripIcon />
+          </div>
+        )}
+        {!enabled && (
+          <span style={{
+            fontSize: '0.625rem', padding: '0.2rem 0.5625rem', borderRadius: 9999,
+            background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
+            color: fgMuted, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase',
+            border: `1px solid ${borderC}`,
+          }}>
+            Bald
+          </span>
+        )}
       </div>
 
       {/* Text */}
       <div style={{ flex: 1 }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: '0.4rem', flexWrap: 'wrap' }}>
-          <h3 style={{ fontSize: '0.9375rem', fontWeight: 500, color: fg, lineHeight: 1.3, margin: 0 }}>{mod.title}</h3>
-          {!enabled && (
-            <span style={{
-              fontSize: '0.625rem', padding: '0.2rem 0.5rem', borderRadius: 9999,
-              background: accent, color: fgMuted,
-              fontWeight: 600, whiteSpace: 'nowrap', letterSpacing: '0.04em', textTransform: 'uppercase',
-            }}>
-              Bald
-            </span>
-          )}
-        </div>
+        <h3 style={{ fontSize: '0.9375rem', fontWeight: 500, color: fg, lineHeight: 1.3, margin: '0 0 0.375rem' }}>{mod.title}</h3>
         <p style={{ fontSize: '0.8125rem', color: fgMuted, lineHeight: 1.6, margin: 0 }}>{mod.description}</p>
       </div>
 
-      {/* CTA row */}
+      {/* CTA */}
       {enabled && (
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
