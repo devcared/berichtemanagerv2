@@ -332,7 +332,7 @@ function Nav() {
           ))}
         </div>
 
-        {/* Right side */}
+        {/*Right side*/}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <Link href="/auth/login"
             style={{ color: C.textSec, fontWeight: 450, fontSize: '0.9375rem', padding: '0.5rem 0.75rem', borderRadius: 4, transition: 'color 150ms ease', textDecoration: 'none' }}
