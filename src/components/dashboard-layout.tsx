@@ -45,8 +45,9 @@ export default function DashboardLayout({ children, sections, subtitle }: Props)
   const hoverBg      = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)'
 
   function isActive(item: NavItem): boolean {
-    const isRoot = item.href === '/berichtsheft' || item.href === '/stundenplan'
-    return isRoot ? pathname === item.href : pathname.startsWith(item.href)
+    if (item.href === '/') return false
+    const isExact = item.href === '/berichtsheft' || item.href === '/stundenplan'
+    return isExact ? pathname === item.href : pathname.startsWith(item.href)
   }
 
   /* ── Sidebar JSX (reused for desktop + mobile overlay) ── */
