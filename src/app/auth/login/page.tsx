@@ -37,86 +37,84 @@ export default function LoginPage() {
     justifyContent: 'center',
     gap: '0.75rem',
     width: '100%',
-    padding: '0.75rem 1rem',
-    border: '1.5px solid hsl(var(--border))',
-    borderRadius: '12px',
+    padding: '0.625rem 1rem',
+    border: '1px solid hsl(var(--border))',
+    borderRadius: '8px',
     backgroundColor: 'transparent',
     color: 'hsl(var(--foreground))',
-    fontSize: '0.9375rem',
+    fontSize: '0.875rem',
     fontWeight: 500,
     cursor: 'pointer',
-    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+    transition: 'background-color 0.2s',
   }
 
   return (
-    <div className="min-h-[100svh] bg-background flex flex-col items-center justify-center p-6 font-sans antialiased text-foreground selection:bg-primary/20">
+    <div className="min-h-[100svh] bg-background flex flex-col items-center justify-center p-6 text-foreground selection:bg-primary/20">
       
-      {/* Theme Toggle Top Right */}
-      <div className="fixed top-8 right-8 z-50">
+      {/* Theme Toggle in Corner */}
+      <div className="fixed top-6 right-6 z-50">
         <ThemeToggle />
       </div>
 
-      <div className="w-full max-w-[420px] py-12">
+      <div className="w-full max-w-[400px]">
         
-        <div className="flex justify-center mb-12">
-          <AuthLogo size={56} />
+        <div className="flex justify-center mb-10">
+          <AuthLogo size={42} />
         </div>
 
-        <div className="bg-card border-none sm:border sm:border-border rounded-[2rem] p-8 sm:p-10 transition-all duration-500">
-          <div className="text-center mb-10">
-            <h1 className="text-[1.75rem] font-bold text-foreground mb-2 tracking-tight">
-              Anmelden
-            </h1>
-            <p className="text-[0.9375rem] text-muted-foreground">
-              Dein persönlicher Assistent erwartet dich.
-            </p>
-          </div>
+        <div className="bg-card border border-border sm:rounded-2xl p-8 transition-all">
+          <h1 className="text-[1.5rem] font-semibold text-foreground mb-1 text-center tracking-tight">
+            Anmelden
+          </h1>
+          <p className="text-[0.9375rem] text-muted-foreground text-center mb-8">
+            Verwalte deine Berichte mit AzubiHub
+          </p>
 
-          <div className="flex flex-col gap-4 mb-10">
+          <div className="flex flex-col gap-3 mb-8">
             <button 
               onClick={() => signInWithGoogle()}
               style={ssoButtonStyle}
-              className="hover:bg-muted hover:border-muted-foreground/20 active:scale-[0.985]"
+              className="hover:bg-muted"
             >
               <GoogleIcon />
-              Mit Google anmelden
+              Weiter mit Google
             </button>
             <button 
               onClick={() => signInWithApple()}
               style={ssoButtonStyle}
-              className="hover:bg-muted hover:border-muted-foreground/20 active:scale-[0.985]"
+              className="hover:bg-muted"
             >
               <AppleIcon />
-              Mit Apple anmelden
+              Weiter mit Apple
             </button>
           </div>
 
-          <div className="relative mb-10 text-center">
+          <div className="relative mb-8 text-center">
             <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-border/80"></span>
+              <span className="w-full border-t border-border"></span>
             </div>
-            <span className="relative px-6 bg-card text-[0.8125rem] text-muted-foreground/80 font-semibold uppercase tracking-widest pointer-events-none">
-              Oder via E-Mail
+            <span className="relative px-4 bg-card text-[0.8125rem] text-muted-foreground font-medium uppercase tracking-wider">
+              oder E-Mail
             </span>
           </div>
 
-          <form onSubmit={handleLogin} className="flex flex-col gap-5">
-            <div className="flex flex-col gap-2">
-              <label htmlFor="email" className="text-[0.8125rem] font-bold text-foreground/85 ml-1">
-                E-Mail
+          <form onSubmit={handleLogin} className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="email" className="text-[0.8125rem] font-semibold text-foreground/80 ml-0.5">
+                E-Mail-Adresse
               </label>
               <input
                 id="email" type="email" required
-                placeholder="max@mustermann.de"
+                placeholder="name@beispiel.de"
                 value={email} onChange={e => setEmail(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-border bg-input focus:bg-background focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none text-[0.9375rem] transition-all duration-200 placeholder:text-muted-foreground/40"
+                className="w-full px-4 py-2.5 rounded-lg border border-border bg-input focus:bg-background focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-[0.9375rem] transition-all"
               />
             </div>
 
-            <div className="flex flex-col gap-2">
-              <div className="flex justify-between items-center px-1">
-                <label htmlFor="password" className="text-[0.8125rem] font-bold text-foreground/85">Passwort</label>
-                <Link href="/auth/forgot-password" title="Passwort vergessen?" className="text-[0.8125rem] text-primary hover:text-primary/80 font-bold transition-colors">
+            <div className="flex flex-col gap-1.5">
+              <div className="flex justify-between items-center ml-0.5">
+                <label htmlFor="password" className="text-[0.8125rem] font-semibold text-foreground/80">Passwort</label>
+                <Link href="/auth/forgot-password" size="sm" className="text-[0.8125rem] text-primary hover:underline font-medium">
                   Vergessen?
                 </Link>
               </div>
@@ -124,49 +122,40 @@ export default function LoginPage() {
                 id="password" type="password" required
                 placeholder="••••••••"
                 value={password} onChange={e => setPassword(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-border bg-input focus:bg-background focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none text-[0.9375rem] transition-all duration-200 placeholder:text-muted-foreground/40"
+                className="w-full px-4 py-2.5 rounded-lg border border-border bg-input focus:bg-background focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-[0.9375rem] transition-all"
               />
             </div>
 
             {errorMsg && (
-              <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-xl text-destructive text-[0.875rem] text-center font-semibold animate-in fade-in zoom-in-95">
+              <div className="mt-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-[0.875rem] text-center font-medium">
                 {errorMsg}
               </div>
             )}
 
             <button
               type="submit" disabled={isLoading}
-              className="mt-4 w-full py-3.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl text-[1rem] font-bold transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-3 active:scale-[0.985] group"
+              className="mt-4 w-full py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg text-[0.9375rem] font-semibold transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isLoading ? (
                 <>
-                  <span className="size-5 rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground animate-spin" />
+                  <span className="size-4 rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground animate-spin" />
                   Wird angemeldet...
                 </>
-              ) : (
-                <>
-                  Anmelden
-                  <svg className="size-4 opacity-0 transition-all duration-300 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                  </svg>
-                </>
-              )}
+              ) : 'Anmelden'}
             </button>
           </form>
         </div>
 
-        <div className="flex flex-col items-center gap-6 mt-12 animate-in fade-in slide-in-from-bottom-4 duration-1000">
-          <p className="text-[0.9375rem] text-muted-foreground font-medium">
-            Du hast noch kein Konto?{' '}
-            <Link href="/auth/register" className="text-primary font-bold hover:underline underline-offset-4 decoration-2">
-              Kostenlos registrieren
-            </Link>
-          </p>
+        <p className="text-center mt-8 text-[0.9375rem] text-muted-foreground">
+          Noch kein Mitglied?{' '}
+          <Link href="/auth/register" className="text-primary font-semibold hover:underline">
+            Konto erstellen
+          </Link>
+        </p>
 
-          <p className="text-[0.8125rem] text-muted-foreground/40 font-bold uppercase tracking-widest select-none">
-            © {new Date().getFullYear()} AzubiHub — Digital Excellence
-          </p>
-        </div>
+        <p className="text-center mt-12 text-[0.8125rem] text-muted-foreground/60 font-medium">
+          © {new Date().getFullYear()} AzubiHub — Alle Rechte vorbehalten.
+        </p>
       </div>
     </div>
   )

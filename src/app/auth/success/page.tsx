@@ -31,44 +31,45 @@ export default function SuccessPage() {
   }
 
   return (
-    <div className="min-h-[100svh] bg-background flex flex-col items-center justify-center p-6 font-sans antialiased text-foreground selection:bg-primary/20">
+    <div className="min-h-[100svh] bg-background flex flex-col items-center justify-center p-6 text-foreground selection:bg-primary/20">
       
-      {/* Theme Toggle Top Right */}
-      <div className="fixed top-8 right-8 z-50">
+      {/* Theme Toggle in Corner */}
+      <div className="fixed top-6 right-6 z-50">
         <ThemeToggle />
       </div>
 
-      <div className="w-full max-w-[420px] py-12">
+      <div className="w-full max-w-[400px]">
         
-        <div className="flex justify-center mb-12">
-          <AuthLogo size={56} />
+        <div className="flex justify-center mb-10">
+          <AuthLogo size={42} />
         </div>
 
-        <div className="bg-card border-none sm:border sm:border-border rounded-[2rem] p-8 sm:p-10 transition-all duration-500 text-center">
+        <div className="bg-card border border-border sm:rounded-2xl p-8 transition-all relative overflow-hidden text-center">
           
-          <div className="mx-auto size-24 rounded-full bg-green-500/10 flex items-center justify-center mb-8 border border-green-500/20">
-            <svg width="48" height="48" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-green-500 drop-shadow-sm">
-              <path d="M10 24l8 8 20-20" />
+          <div className="mx-auto size-20 rounded-full bg-green-500/10 flex items-center justify-center mb-6 mt-4">
+            <svg width="40" height="40" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-green-500">
+              <path d="M7 13l3 3 7-7" />
+              <circle cx="12" cy="12" r="10" />
             </svg>
           </div>
 
-          <h1 className="text-[1.75rem] font-bold text-foreground mb-4 tracking-tight">
+          <h1 className="text-[1.5rem] font-semibold text-foreground mb-2 tracking-tight">
             {title}
           </h1>
-          <p className="text-[0.9375rem] text-muted-foreground mb-10 leading-relaxed px-4">
+          <p className="text-[0.9375rem] text-muted-foreground mb-8 px-2 leading-relaxed">
             {description}
           </p>
 
           <button
             onClick={() => router.push(targetPath)}
-            className="w-full py-3.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl text-[1rem] font-bold transition-all duration-300 active:scale-[0.985] group"
+            className="w-full py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg text-[0.9375rem] font-semibold transition-all active:scale-[0.98]"
           >
             {buttonText}
           </button>
         </div>
 
-        <p className="text-center mt-12 text-[0.8125rem] text-muted-foreground/40 font-bold uppercase tracking-widest select-none">
-          © {new Date().getFullYear()} AzubiHub — Digital Excellence
+        <p className="text-center mt-12 text-[0.8125rem] text-muted-foreground/60 font-medium">
+          © {new Date().getFullYear()} AzubiHub — Alle Rechte vorbehalten.
         </p>
       </div>
     </div>
