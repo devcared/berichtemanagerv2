@@ -32,9 +32,8 @@ function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" onClick={() => router.push('/stundenplan')} className="cursor-pointer">
-              <div className="flex size-8 items-center justify-center rounded-lg bg-purple-500/20 text-purple-400 font-bold text-sm shrink-0">
-                S
-              </div>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/App Icon.png" alt="AzubiHub" width={28} height={28} style={{ borderRadius: 6, objectFit: 'cover', flexShrink: 0 }} />
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold text-foreground">AzubiHub</span>
                 <span className="truncate text-xs text-muted-foreground">Stundenplan</span>

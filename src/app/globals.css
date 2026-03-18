@@ -2,61 +2,61 @@
 
 @layer base {
   :root {
-    /* Main background (black tone) */
-    --background: 0 0% 6%;
-    --foreground: 0 0% 95%;
+    /* ── Google Light Theme ── */
+    --background: 0 0% 100%;
+    --foreground: 225 6% 13%;
 
-    --card: 0 0% 10%;
-    --card-foreground: 0 0% 95%;
+    --card: 0 0% 100%;
+    --card-foreground: 225 6% 13%;
 
-    --popover: 0 0% 10%;
-    --popover-foreground: 0 0% 95%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 225 6% 13%;
 
-    /* RED PRIMARY */
-    --primary: 0 84% 55%;
+    /* Google Blue as primary */
+    --primary: 217 89% 61%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 16%;
-    --secondary-foreground: 0 0% 75%;
+    --secondary: 207 14% 95%;
+    --secondary-foreground: 225 6% 13%;
 
-    --muted: 0 0% 14%;
-    --muted-foreground: 0 0% 55%;
+    --muted: 210 17% 98%;
+    --muted-foreground: 213 5% 39%;
 
-    --accent: 0 0% 16%;
-    --accent-foreground: 0 0% 95%;
+    --accent: 207 14% 95%;
+    --accent-foreground: 225 6% 13%;
 
-    --destructive: 0 84% 60%;
+    --destructive: 4 80% 56%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 18%;
-    --input: 0 0% 14%;
-    --ring: 0 84% 55%;
+    --border: 225 13% 87%;
+    --input: 207 14% 95%;
+    --ring: 217 89% 61%;
 
-    --radius: 0rem;
+    --radius: 0.375rem;
 
     /* Status colors */
-    --status-success: 160 84% 39%;
-    --status-warning: 38 92% 50%;
-    --status-error: 0 84% 60%;
-    --status-info: 199 89% 48%;
+    --status-success: 137 53% 43%;
+    --status-warning: 45 100% 50%;
+    --status-error: 4 80% 56%;
+    --status-info: 217 89% 61%;
 
-    /* Sidebar (dark neutral instead of blue) */
-    --sidebar: 0 0% 8%;
-    --sidebar-foreground: 0 0% 85%;
+    /* Sidebar — white Google style */
+    --sidebar: 0 0% 100%;
+    --sidebar-foreground: 225 6% 13%;
 
-    --sidebar-primary: 0 84% 55%;
+    --sidebar-primary: 217 89% 61%;
     --sidebar-primary-foreground: 0 0% 100%;
 
-    --sidebar-accent: 0 0% 14%;
-    --sidebar-accent-foreground: 0 0% 90%;
+    --sidebar-accent: 207 14% 95%;
+    --sidebar-accent-foreground: 225 6% 13%;
 
-    --sidebar-border: 0 0% 16%;
-    --sidebar-ring: 0 84% 55%;
+    --sidebar-border: 225 13% 87%;
+    --sidebar-ring: 217 89% 61%;
 
     /* Active navigation tab */
-    --nav-active: 0 84% 55%;
+    --nav-active: 217 89% 61%;
     --nav-active-foreground: 0 0% 100%;
-    --nav-active-bg: 0 0% 12%;
+    --nav-active-bg: 217 100% 97%;
   }
 }
 

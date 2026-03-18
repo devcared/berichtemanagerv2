@@ -77,39 +77,56 @@ function AppHome() {
         </div>
 
         {/* Module label */}
-        <p style={{ fontSize: '0.75rem', fontWeight: 600, letterSpacing: '0.09em', textTransform: 'uppercase', color: textSec, marginBottom: '1rem' }}>Module</p>
+        <p style={{ fontSize: '0.75rem', fontWeight: 600, letterSpacing: '0.09em', textTransform: 'uppercase', color: textSec, marginBottom: '1.25rem' }}>Deine Module</p>
 
-        {/* Module cards */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: '1rem', marginBottom: '4rem' }}>
+        {/* Module cards — Google Product Card style */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(240px,1fr))', gap: '1.25rem', marginBottom: '4rem' }}>
           {modules.map(mod => {
             const I = moduleIconMap[mod.icon]
             return (
               <div
                 key={mod.id}
                 onClick={() => mod.isEnabled && router.push(mod.routePath)}
-                style={{ border: `1px solid ${border}`, borderTop: `3px solid ${mod.isEnabled ? mod.accentColor : border}`, borderRadius: 8, padding: '1.5rem', background: '#ffffff', cursor: mod.isEnabled ? 'pointer' : 'not-allowed', opacity: mod.isEnabled ? 1 : 0.55, transition: 'transform 200ms ease, border-color 200ms ease' }}
-                onMouseEnter={e => { if (mod.isEnabled) { e.currentTarget.style.transform = 'translateY(-2px)' } }}
-                onMouseLeave={e => { e.currentTarget.style.transform = '' }}
+                style={{
+                  border: `1px solid ${border}`,
+                  borderRadius: 12,
+                  padding: '1.75rem',
+                  background: '#ffffff',
+                  cursor: mod.isEnabled ? 'pointer' : 'default',
+                  opacity: mod.isEnabled ? 1 : 0.65,
+                  transition: 'border-color 180ms ease, background 180ms ease',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '1.25rem',
+                }}
+                onMouseEnter={e => { if (mod.isEnabled) { e.currentTarget.style.borderColor = '#bdc1c6'; e.currentTarget.style.background = '#fafafa' } }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = border; e.currentTarget.style.background = '#ffffff' }}
               >
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
-                  <div style={{ width: 44, height: 44, borderRadius: 8, background: `${mod.accentColor}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    {I && <HugeiconsIcon icon={I} size={20} style={{ color: mod.accentColor }} />}
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: '0.25rem' }}>
-                      <h3 style={{ fontSize: '0.9375rem', fontWeight: 500, color: textPrimary }}>{mod.title}</h3>
-                      {!mod.isEnabled && (
-                        <span style={{ fontSize: '0.6875rem', padding: '0.2rem 0.5rem', borderRadius: 9999, background: '#f1f3f4', color: textSec, fontWeight: 500, flexShrink: 0 }}>
-                          Bald verfügbar
-                        </span>
-                      )}
-                    </div>
-                    <p style={{ fontSize: '0.875rem', color: textSec, lineHeight: 1.6, margin: 0 }}>{mod.description}</p>
-                    {mod.isEnabled && mod.lastUsed && (
-                      <p style={{ fontSize: '0.75rem', color: textLight, marginTop: '0.5rem', marginBottom: 0 }}>Zuletzt genutzt heute</p>
+                {/* Icon */}
+                <div style={{ width: 52, height: 52, borderRadius: 14, background: `${mod.accentColor}14`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {I && <HugeiconsIcon icon={I} size={24} style={{ color: mod.accentColor }} />}
+                </div>
+
+                {/* Text */}
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: '0.5rem', flexWrap: 'wrap' }}>
+                    <h3 style={{ fontSize: '1rem', fontWeight: 500, color: textPrimary, lineHeight: 1.3 }}>{mod.title}</h3>
+                    {!mod.isEnabled && (
+                      <span style={{ fontSize: '0.6875rem', padding: '0.2rem 0.625rem', borderRadius: 9999, background: '#f1f3f4', color: textSec, fontWeight: 500, whiteSpace: 'nowrap' }}>
+                        Bald verfügbar
+                      </span>
                     )}
                   </div>
+                  <p style={{ fontSize: '0.875rem', color: textSec, lineHeight: 1.65, margin: 0 }}>{mod.description}</p>
                 </div>
+
+                {/* CTA */}
+                {mod.isEnabled && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#4285f4', fontSize: '0.875rem', fontWeight: 500 }}>
+                    Öffnen
+                    <HugeiconsIcon icon={ArrowRight01Icon} size={15} />
+                  </div>
+                )}
               </div>
             )
           })}
