@@ -337,7 +337,6 @@ function FaqItem({ q, a }: { q: string; a: string }) {
 function LandingPage() {
   useScrollReveal()
 
-  const featureIconBg = `linear-gradient(135deg, ${C.blue} 0%, ${C.green} 100%)`
 
   return (
     <div style={{ fontFamily: '"Google Sans","Roboto",-apple-system,"Segoe UI",sans-serif', color: C.textPrimary, WebkitFontSmoothing: 'antialiased' }}>
@@ -418,26 +417,25 @@ function LandingPage() {
       </section>
 
       {/* ══ 3. FEATURES ══ */}
-      <section id="features" style={{ padding: '6rem 0', background: C.bgSecondary, position: 'relative' }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 2rem' }}>
-          <div className="g-reveal" style={{ textAlign: 'center', marginBottom: '4rem' }}>
-            <h2 style={{ fontWeight: 450, fontSize: 'clamp(2rem,4vw,3rem)', color: C.textPrimary, marginBottom: '1rem', lineHeight: 1.2 }}>
-              Agent-First Ausbildung
+      <section id="features" style={{ padding: '6rem 0', background: '#ffffff', position: 'relative' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 2rem' }}>
+          <div className="g-reveal" style={{ textAlign: 'center', marginBottom: '4.5rem' }}>
+            <p style={{ fontSize: '0.8125rem', fontWeight: 600, letterSpacing: '0.09em', textTransform: 'uppercase', color: C.blue, marginBottom: '0.75rem', margin: '0 0 0.75rem' }}>Features</p>
+            <h2 style={{ fontWeight: 450, fontSize: 'clamp(1.875rem,3.5vw,2.75rem)', color: C.textPrimary, marginBottom: '0.875rem', lineHeight: 1.2 }}>
+              Alles, was moderne Ausbildung braucht.
             </h2>
-            <p style={{ fontSize: '1.125rem', color: C.textSec, maxWidth: 640, margin: '0 auto', lineHeight: 1.7 }}>
-              Revolutionäre Funktionen, die deine Ausbildungsdokumentation transformieren.
+            <p style={{ fontSize: '1.0625rem', color: C.textSec, maxWidth: 540, margin: '0 auto', lineHeight: 1.75 }}>
+              Von der KI-Formulierung bis zur Ausbilder-Freigabe — in einem System.
             </p>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: '1.5rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: '0' }}>
             {FEATURES.map((f, i) => (
               <div key={f.title} className="g-reveal"
-                style={{ padding: '2rem', background: '#ffffff', border: `1px solid ${C.border}`, borderRadius: 12, transition: 'all 250ms ease', transitionDelay: `${i * 0.07}s` }}
-                onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.transform = 'translateY(-4px)' }}
-                onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.transform = '' }}>
-                <div style={{ width: 56, height: 56, background: featureIconBg, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.25rem' }}>
-                  <HugeiconsIcon icon={f.icon} size={26} style={{ color: 'white' }} />
-                </div>
-                <h3 style={{ fontSize: '1.125rem', fontWeight: 500, color: C.textPrimary, marginBottom: '0.5rem', lineHeight: 1.3 }}>{f.title}</h3>
+                style={{ padding: '2.25rem 2rem', borderRadius: 8, transition: 'background 180ms ease', transitionDelay: `${i * 0.06}s`, cursor: 'default' }}
+                onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => { e.currentTarget.style.background = C.bgSecondary }}
+                onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => { e.currentTarget.style.background = 'transparent' }}>
+                <HugeiconsIcon icon={f.icon} size={26} style={{ color: C.blue, marginBottom: '1rem', display: 'block' }} />
+                <h3 style={{ fontSize: '1rem', fontWeight: 500, color: C.textPrimary, marginBottom: '0.4rem', lineHeight: 1.4 }}>{f.title}</h3>
                 <p style={{ color: C.textSec, lineHeight: 1.7, margin: 0, fontSize: '0.9375rem' }}>{f.desc}</p>
               </div>
             ))}
