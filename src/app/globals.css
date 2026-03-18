@@ -60,6 +60,50 @@
   }
 }
 
+/* ── Dark Mode ── */
+.dark {
+  --background: 225 6% 13%;
+  --foreground: 0 0% 90%;
+
+  --card: 225 5% 17%;
+  --card-foreground: 0 0% 90%;
+
+  --popover: 225 5% 19%;
+  --popover-foreground: 0 0% 90%;
+
+  --primary: 217 85% 72%;
+  --primary-foreground: 225 6% 13%;
+
+  --secondary: 225 5% 20%;
+  --secondary-foreground: 0 0% 80%;
+
+  --muted: 225 5% 18%;
+  --muted-foreground: 0 0% 52%;
+
+  --accent: 225 5% 22%;
+  --accent-foreground: 0 0% 90%;
+
+  --destructive: 4 70% 58%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 225 5% 22%;
+  --input: 225 5% 20%;
+  --ring: 217 85% 72%;
+
+  --sidebar: 225 7% 10%;
+  --sidebar-foreground: 0 0% 87%;
+  --sidebar-primary: 217 85% 72%;
+  --sidebar-primary-foreground: 225 6% 13%;
+  --sidebar-accent: 225 5% 17%;
+  --sidebar-accent-foreground: 0 0% 87%;
+  --sidebar-border: 225 5% 18%;
+  --sidebar-ring: 217 85% 72%;
+
+  --nav-active: 217 85% 72%;
+  --nav-active-foreground: 225 6% 13%;
+  --nav-active-bg: 217 50% 20%;
+}
+
 @theme inline {
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
