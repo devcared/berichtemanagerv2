@@ -133,7 +133,6 @@ export default function DashboardLayout({ children, sections, subtitle }: Props)
           justifyContent: isCollapsed ? 'center' : 'space-between',
           gap: 6, minHeight: 56,
         }}>
-          {/* App icon + title */}
           <button
             onClick={() => router.push('/')}
             title="Zur Übersicht"
@@ -142,7 +141,12 @@ export default function DashboardLayout({ children, sections, subtitle }: Props)
             onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/App Icon.png" alt="AzubiHub" width={28} height={28} style={{ borderRadius: 6, objectFit: 'cover', flexShrink: 0 }} />
+            <img
+              src="/App Icon.png" alt="AzubiHub"
+              width={isCollapsed ? 36 : 28}
+              height={isCollapsed ? 36 : 28}
+              style={{ borderRadius: isCollapsed ? 10 : 6, objectFit: 'cover', flexShrink: 0, transition: 'width 220ms, height 220ms, border-radius 220ms' }}
+            />
             {!isCollapsed && (
               <div style={{ textAlign: 'left', lineHeight: 1, overflow: 'hidden' }}>
                 <div style={{ fontSize: '0.875rem', fontWeight: 600, color: 'hsl(var(--sidebar-foreground))', whiteSpace: 'nowrap' }}>AzubiHub</div>
@@ -150,19 +154,6 @@ export default function DashboardLayout({ children, sections, subtitle }: Props)
               </div>
             )}
           </button>
-
-          {/* Collapse toggle — desktop only */}
-          {!forMobile && (
-            <button
-              onClick={() => setCollapsed(c => !c)}
-              title={collapsed ? 'Sidebar öffnen' : 'Sidebar minimieren'}
-              style={iconBtn({ width: 28, height: 28, borderRadius: 6 })}
-              onMouseEnter={e => (e.currentTarget.style.background = hoverBg)}
-              onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-            >
-              {collapsed ? <ChevronRight /> : <ChevronLeft />}
-            </button>
-          )}
         </div>
 
         {/* ── Navigation ── */}
@@ -257,37 +248,43 @@ export default function DashboardLayout({ children, sections, subtitle }: Props)
             {!isCollapsed && <span>Abmelden</span>}
           </button>
 
-          {/* User */}
-          {!isCollapsed ? (
+          {/* User + Collapse toggle */}
+          <div style={{ marginTop: 4, borderTop: '1px solid hsl(var(--sidebar-border))', paddingTop: '0.625rem', display: 'flex', alignItems: 'center', gap: 6 }}>
             <button
               onClick={() => router.push('/berichtsheft/profil')}
-              style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '0.625rem 0.75rem', borderRadius: 8, border: 'none', background: 'transparent', cursor: 'pointer', transition: 'background 100ms', fontFamily: 'inherit', width: '100%', marginTop: 4, borderTop: '1px solid hsl(var(--sidebar-border))' }}
+              title={isCollapsed ? (profile ? `${profile.firstName} ${profile.lastName}` : 'Profil') : undefined}
+              style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '0.5rem 0.625rem', borderRadius: 8, border: 'none', background: 'transparent', cursor: 'pointer', transition: 'background 100ms', fontFamily: 'inherit', flex: 1, minWidth: 0, overflow: 'hidden' }}
               onMouseEnter={e => (e.currentTarget.style.background = hoverBg)}
               onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
             >
               <div style={{ width: 30, height: 30, borderRadius: '50%', background: primaryColor, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6875rem', fontWeight: 700, color: 'white', flexShrink: 0 }}>
                 {initials}
               </div>
-              <div style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
-                <div style={{ fontSize: '0.8125rem', fontWeight: 500, color: 'hsl(var(--sidebar-foreground))', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {profile ? `${profile.firstName} ${profile.lastName}` : 'Kein Profil'}
+              {!isCollapsed && (
+                <div style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
+                  <div style={{ fontSize: '0.8125rem', fontWeight: 500, color: 'hsl(var(--sidebar-foreground))', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {profile ? `${profile.firstName} ${profile.lastName}` : 'Kein Profil'}
+                  </div>
+                  <div style={{ fontSize: '0.6875rem', color: 'hsl(var(--muted-foreground))', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {profile?.occupation ?? 'Profil einrichten'}
+                  </div>
                 </div>
-                <div style={{ fontSize: '0.6875rem', color: 'hsl(var(--muted-foreground))', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {profile?.occupation ?? 'Profil einrichten'}
-                </div>
-              </div>
+              )}
             </button>
-          ) : (
-            <button
-              onClick={() => router.push('/berichtsheft/profil')}
-              title={profile ? `${profile.firstName} ${profile.lastName}` : 'Profil'}
-              style={{ ...iconBtn({ width: 36, height: 36 }), marginTop: 4, borderRadius: '50%', background: primaryColor, color: 'white' }}
-              onMouseEnter={e => (e.currentTarget.style.opacity = '0.8')}
-              onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
-            >
-              <span style={{ fontSize: '0.6875rem', fontWeight: 700 }}>{initials}</span>
-            </button>
-          )}
+
+            {/* Collapse toggle — desktop only, next to profile */}
+            {!forMobile && (
+              <button
+                onClick={() => setCollapsed(c => !c)}
+                title={collapsed ? 'Sidebar öffnen' : 'Sidebar minimieren'}
+                style={iconBtn({ width: 28, height: 28, borderRadius: 6, flexShrink: 0 })}
+                onMouseEnter={e => (e.currentTarget.style.background = hoverBg)}
+                onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+              >
+                {collapsed ? <ChevronRight /> : <ChevronLeft />}
+              </button>
+            )}
+          </div>
         </div>
       </aside>
     )
