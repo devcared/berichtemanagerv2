@@ -108,15 +108,34 @@ function AppHome() {
 ═══════════════════════════════════════ */
 
 const FEATURES = [
-  { icon: BookOpenIcon,        title: 'Digitales Berichtsheft',   desc: 'Wochenberichte täglich, strukturiert und IHK-konform erfassen — kein Papier mehr.',           color: 'text-blue-400',   bg: 'bg-blue-500/10',   border: 'group-hover:border-blue-500/30' },
-  { icon: SparklesIcon,        title: 'KI-Formulierung',          desc: 'Aus deinen Stichpunkten wird in Sekunden professioneller Fließtext — powered by Claude AI.',   color: 'text-primary',    bg: 'bg-primary/10',    border: 'group-hover:border-primary/30' },
-  { icon: CheckmarkBadge01Icon,title: 'Ausbilder-Freigabe',       desc: 'Digitaler Workflow: einreichen, kommentieren, freigeben — vollständig papierlos.',             color: 'text-green-400',  bg: 'bg-green-500/10',  border: 'group-hover:border-green-500/30' },
-  { icon: BarChartIcon,        title: 'Statistiken',              desc: 'Fortschrittsübersicht, Freigabequoten und Fristen immer im Blick.',                            color: 'text-yellow-400', bg: 'bg-yellow-500/10', border: 'group-hover:border-yellow-500/30' },
-  { icon: PdfIcon,             title: 'PDF-Export',               desc: 'Jahresexport als druckfertiges PDF für die IHK — ein Klick genügt.',                          color: 'text-purple-400', bg: 'bg-purple-500/10', border: 'group-hover:border-purple-500/30' },
-  { icon: UserMultiple02Icon,  title: 'Nutzerverwaltung',         desc: 'Ausbilder laden Auszubildende per E-Mail ein und verwalten das gesamte Team.',                 color: 'text-orange-400', bg: 'bg-orange-500/10', border: 'group-hover:border-orange-500/30' },
-  { icon: CalendarIcon,        title: 'Kalender & Planung',       desc: 'Urlaubstage, Kranktage und Berufsschulwochen automatisch einplanen.',                         color: 'text-cyan-400',   bg: 'bg-cyan-500/10',   border: 'group-hover:border-cyan-500/30' },
-  { icon: Notification01Icon,  title: 'Erinnerungen',             desc: 'Smarte Benachrichtigungen erinnern pünktlich an offene oder überfällige Berichte.',           color: 'text-pink-400',   bg: 'bg-pink-500/10',   border: 'group-hover:border-pink-500/30' },
-  { icon: Shield01Icon,        title: 'DSGVO & Sicherheit',       desc: 'Alle Daten verschlüsselt, EU-Rechenzentren, DSGVO-konform. Kein Datenchaos.',                  color: 'text-teal-400',   bg: 'bg-teal-500/10',   border: 'group-hover:border-teal-500/30' },
+  {
+    icon: BookOpenIcon,
+    title: 'Kein Papierchaos mehr',
+    desc: 'Auszubildende erfassen Wochenberichte digital, strukturiert und IHK-konform. Kein Drucken, kein Suchen, kein Ablegen.',
+    color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'group-hover:border-blue-500/30',
+    stat: '0 Blatt Papier',
+  },
+  {
+    icon: SparklesIcon,
+    title: '80 % weniger Schreibaufwand',
+    desc: 'Stichpunkte eingeben, KI-Text generieren, fertig. Claude AI formuliert professionellen IHK-konformen Fließtext in Sekunden.',
+    color: 'text-primary', bg: 'bg-primary/10', border: 'group-hover:border-primary/30',
+    stat: 'Ø 12 Min. pro Bericht',
+  },
+  {
+    icon: CheckmarkBadge01Icon,
+    title: 'Ausbilder-Cockpit für den Überblick',
+    desc: 'Alle Berichte, Freigaben und Auszubildenden in einer Ansicht. Kommentieren, korrigieren und freigeben in Sekunden.',
+    color: 'text-green-400', bg: 'bg-green-500/10', border: 'group-hover:border-green-500/30',
+    stat: 'Bis zu 20 Azubis',
+  },
+  {
+    icon: Shield01Icon,
+    title: 'DSGVO-sicher & IHK-konform',
+    desc: 'Alle Daten verschlüsselt in EU-Rechenzentren gespeichert. PDF-Export für die IHK mit einem Klick — kein Compliance-Risiko.',
+    color: 'text-teal-400', bg: 'bg-teal-500/10', border: 'group-hover:border-teal-500/30',
+    stat: '100 % EU-Server',
+  },
 ]
 
 const STATS = [
@@ -127,20 +146,9 @@ const STATS = [
 ]
 
 const STEPS = [
-  { num: '01', title: 'Registrieren',      desc: 'Konto erstellen oder Einladung des Ausbilders annehmen. In unter 2 Minuten startklar.',                      color: 'from-primary to-orange-500' },
-  { num: '02', title: 'Profil einrichten', desc: 'Ausbildungsberuf, Betrieb und Startdatum angeben. Das war es — alles andere erledigt AzubiHub.',             color: 'from-blue-500 to-cyan-500' },
-  { num: '03', title: 'Einfach nutzen',    desc: 'Jede Woche Bericht schreiben, KI helfen lassen, dem Ausbilder einreichen und freigeben lassen.',             color: 'from-green-500 to-teal-500' },
-]
-
-const COMPARISON = [
-  { feature: 'Berichte digital erfassen',     without: false, with: true },
-  { feature: 'KI-gestützte Formulierung',     without: false, with: true },
-  { feature: 'Ausbilder-Freigabe per Klick',  without: false, with: true },
-  { feature: 'Überall verfügbar (Cloud)',      without: false, with: true },
-  { feature: 'PDF-Export für die IHK',         without: false, with: true },
-  { feature: 'Verlustgefahr durch Papier',     without: true,  with: false },
-  { feature: 'Stundenlanger Schreibaufwand',   without: true,  with: false },
-  { feature: 'E-Mail-Chaos mit dem Ausbilder', without: true,  with: false },
+  { num: '01', title: 'Betrieb registrieren',   desc: 'Konto erstellen, Ausbildungsbetrieb einrichten und Auszubildende per E-Mail einladen. In unter 5 Minuten startklar.',          color: 'from-primary to-orange-500' },
+  { num: '02', title: 'Profile einrichten',     desc: 'Auszubildende nehmen die Einladung an, geben Beruf und Betrieb an — und können sofort loslegen.',                              color: 'from-blue-500 to-cyan-500' },
+  { num: '03', title: 'Digital verwalten',      desc: 'Berichte schreiben, KI nutzen, Ausbilder freigeben lassen — der gesamte Workflow läuft digital und ohne Mehraufwand.',          color: 'from-green-500 to-teal-500' },
 ]
 
 const TESTIMONIALS = [
@@ -190,10 +198,10 @@ function LandingNav() {
         : 'bg-transparent')}>
       <div className="max-w-6xl mx-auto px-6 h-[68px] flex items-center justify-between gap-8">
 
-        {/* Logo */}
-        <Link href="/" className="shrink-0 transition-opacity hover:opacity-80"><Logo /></Link>
+        <Link href="/" className="shrink-0 transition-opacity hover:opacity-80">
+          <Logo />
+        </Link>
 
-        {/* Nav links */}
         <div className="hidden md:flex items-center gap-0.5 text-sm">
           {[['#features','Features'],['#how-it-works','So funktionierts'],['#pricing','Preise'],['#faq','FAQ']].map(([href,label]) => (
             <a key={href} href={href}
@@ -203,22 +211,17 @@ function LandingNav() {
           ))}
         </div>
 
-        {/* Buttons */}
         <div className="flex items-center gap-2 shrink-0">
-          {/* Login — subtle, minimal */}
           <Link href="/auth/login" className="hidden sm:block">
             <span className="group flex items-center gap-1 px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground rounded-xl hover:bg-white/[0.06] transition-all duration-150 cursor-pointer select-none">
               Anmelden
             </span>
           </Link>
-
-          {/* Register — premium CTA */}
           <Link href="/auth/register">
             <span className="group relative flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white overflow-hidden cursor-pointer select-none
               bg-primary shadow-lg shadow-primary/30
               hover:shadow-primary/50 hover:shadow-xl
               transition-all duration-200 hover:scale-[1.03] active:scale-[0.97]">
-              {/* shimmer sweep */}
               <span className="pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent
                 -translate-x-full group-hover:translate-x-full transition-transform duration-500 ease-in-out" />
               Kostenlos starten
@@ -260,15 +263,16 @@ function LandingPage() {
     <div className="min-h-screen bg-[hsl(var(--background))] text-foreground overflow-x-hidden">
       <LandingNav />
 
-      {/* ══ HERO ══ */}
+      {/* ══════════════════════════════════════
+          1. HERO
+      ══════════════════════════════════════ */}
       <section className="relative min-h-screen flex items-center pt-16 pb-8 px-6 overflow-hidden">
         {/* Background ambience */}
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[900px] h-[600px] bg-primary/6 rounded-full blur-[140px]" />
           <div className="absolute top-1/3 -left-40 w-[400px] h-[400px] bg-blue-600/4 rounded-full blur-[100px]" />
           <div className="absolute bottom-0 right-0 w-[500px] h-[300px] bg-primary/4 rounded-full blur-[120px]" />
-          {/* Subtle grid */}
-          <div className="absolute inset-0 opacity-[0.03]"
+          <div className="absolute inset-0 opacity-[0.025]"
             style={{ backgroundImage: 'linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)', backgroundSize: '60px 60px' }} />
         </div>
 
@@ -280,22 +284,20 @@ function LandingPage() {
               {/* Badge */}
               <div className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/8 px-4 py-1.5 text-xs font-medium text-primary mb-8 shadow-lg shadow-primary/10">
                 <span className="size-1.5 rounded-full bg-primary animate-pulse" />
-                Powered by Claude AI · 100 % kostenlos
+                Für Ausbildungsbetriebe · Auszubildende · Ausbilder
               </div>
 
               {/* Headline */}
               <h1 className="text-5xl sm:text-6xl font-black tracking-tight leading-[1.06] mb-6">
-                Das Berichtsheft,
-                <br />
+                Ausbildungsverwaltung,{' '}
                 <span className="bg-gradient-to-r from-primary via-orange-400 to-primary bg-clip-text text-transparent">
-                  das sich selbst
+                  die wirklich
                 </span>
-                <br />
-                schreibt.
+                {' '}funktioniert.
               </h1>
 
               <p className="text-lg text-muted-foreground leading-relaxed mb-8 max-w-lg">
-                AzubiHub digitalisiert deinen Ausbildungsnachweis. KI-gestützt, IHK-konform und in Sekunden erledigt.
+                AzubiHub digitalisiert Berichtshefte, Ausbilder-Freigaben und die gesamte Ausbildungsdokumentation — für Betriebe jeder Größe. Kostenlos, IHK-konform, KI-gestützt.
               </p>
 
               {/* CTAs */}
@@ -306,11 +308,11 @@ function LandingPage() {
                     <HugeiconsIcon icon={ArrowRight01Icon} size={16} />
                   </Button>
                 </Link>
-                <Link href="/auth/login">
+                <a href="#how-it-works">
                   <Button variant="outline" size="lg" className="h-12 px-8 text-base w-full sm:w-auto border-border/60 hover:border-primary/40 hover:bg-primary/5">
-                    Anmelden
+                    So funktioniert's
                   </Button>
-                </Link>
+                </a>
               </div>
 
               {/* Trust strip */}
@@ -324,7 +326,7 @@ function LandingPage() {
                   ))}
                 </div>
                 <div className="text-sm">
-                  <span className="font-semibold">500+ Auszubildende</span>
+                  <span className="font-semibold">500+ Auszubildende & Betriebe</span>
                   <span className="text-muted-foreground"> vertrauen AzubiHub</span>
                 </div>
               </div>
@@ -332,7 +334,6 @@ function LandingPage() {
 
             {/* Right — App mockup */}
             <div className="order-1 lg:order-2 relative">
-              {/* Glow behind mockup */}
               <div className="absolute inset-4 bg-primary/10 rounded-3xl blur-3xl" />
 
               {/* Floating badges */}
@@ -351,7 +352,6 @@ function LandingPage() {
 
               {/* Browser frame */}
               <div className="relative rounded-3xl overflow-hidden border border-border/60 bg-[hsl(var(--card))] shadow-2xl shadow-black/60 ring-1 ring-white/5">
-                {/* Browser bar */}
                 <div className="flex items-center gap-3 px-4 py-3 bg-[hsl(var(--background))]/80 border-b border-border/40">
                   <div className="flex gap-1.5">
                     <div className="size-2.5 rounded-full bg-red-500/70" />
@@ -366,7 +366,6 @@ function LandingPage() {
                   </div>
                 </div>
 
-                {/* App UI mockup */}
                 <div className="flex" style={{ height: '420px' }}>
                   {/* Sidebar */}
                   <div className="w-14 bg-[hsl(var(--sidebar))] border-r border-border/30 flex flex-col items-center py-4 gap-4 shrink-0">
@@ -383,7 +382,6 @@ function LandingPage() {
 
                   {/* Main content */}
                   <div className="flex-1 overflow-hidden p-4 space-y-3">
-                    {/* Header */}
                     <div className="flex items-center justify-between">
                       <div>
                         <div className="text-xs text-muted-foreground">Wochenberichte</div>
@@ -394,7 +392,6 @@ function LandingPage() {
                       </div>
                     </div>
 
-                    {/* Stat pills */}
                     <div className="grid grid-cols-3 gap-2">
                       {[{v:'18',l:'Freigegeben',c:'text-green-400',bg:'bg-green-500/10'},{v:'3',l:'Ausstehend',c:'text-yellow-400',bg:'bg-yellow-500/10'},{v:'24',l:'Gesamt',c:'text-blue-400',bg:'bg-blue-500/10'}].map(s => (
                         <div key={s.l} className={cn('rounded-xl p-2.5 border border-border/30', s.bg)}>
@@ -404,7 +401,6 @@ function LandingPage() {
                       ))}
                     </div>
 
-                    {/* Report rows */}
                     <div className="space-y-1.5">
                       {[
                         { kw:'KW 11',s:'Freigegeben',sc:'bg-green-500/15 text-green-400 border-green-500/25' },
@@ -423,7 +419,6 @@ function LandingPage() {
                       ))}
                     </div>
 
-                    {/* AI Helper */}
                     <div className="rounded-xl border border-primary/25 bg-gradient-to-br from-primary/8 to-primary/4 p-3">
                       <div className="flex items-center gap-2 mb-2">
                         <div className="size-5 rounded-md bg-primary/20 flex items-center justify-center">
@@ -452,7 +447,9 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* ══ STATS BAR ══ */}
+      {/* ══════════════════════════════════════
+          2. STATS BAR (Vertrauen auf einen Blick)
+      ══════════════════════════════════════ */}
       <section className="relative py-12 px-6 border-y border-border/40">
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/3 to-transparent" />
         <div className="relative max-w-4xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-6">
@@ -468,44 +465,129 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* ══ FEATURES ══ */}
-      <section id="features" className="py-28 px-6">
-        <div className="max-w-6xl mx-auto">
+      {/* ══════════════════════════════════════
+          3. PROBLEM / LÖSUNG
+      ══════════════════════════════════════ */}
+      <section className="py-28 px-6 relative overflow-hidden">
+        <div className="pointer-events-none absolute inset-0">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-primary/3 rounded-full blur-[120px]" />
+        </div>
+        <div className="relative max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <span className="text-xs font-bold text-primary uppercase tracking-[0.2em] mb-4 block">Funktionen</span>
-            <h2 className="text-4xl sm:text-5xl font-black tracking-tight">
-              Alles, was du brauchst.
+            <span className="text-xs font-bold text-primary uppercase tracking-[0.2em] mb-4 block">Die Ausgangslage</span>
+            <h2 className="text-4xl sm:text-5xl font-black tracking-tight leading-[1.1]">
+              Ausbildungsdokumentation kostet Zeit.
               <br />
-              <span className="text-muted-foreground font-light">Nichts, was du nicht brauchst.</span>
+              <span className="text-muted-foreground font-light">Das muss nicht so sein.</span>
             </h2>
-            <p className="text-muted-foreground mt-5 max-w-xl mx-auto text-lg">
-              AzubiHub ist kein generisches Tool — es ist speziell für die Ausbildung gebaut.
+            <p className="text-muted-foreground mt-5 max-w-xl mx-auto text-base leading-relaxed">
+              Jedes Unternehmen mit Auszubildenden kennt die Herausforderung. AzubiHub löst sie — ohne Mehraufwand für Betriebe oder Azubis.
             </p>
           </div>
 
-          {/* Top 3 features — larger */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-            {FEATURES.slice(0, 3).map(f => (
-              <div key={f.title} className={cn('group relative rounded-2xl border border-border/60 bg-gradient-to-b from-card/80 to-card/40 p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5', f.border)}>
-                <div className={cn('size-12 rounded-2xl flex items-center justify-center mb-5', f.bg)}>
-                  <HugeiconsIcon icon={f.icon} size={22} className={f.color} />
-                </div>
-                <h3 className="font-bold text-base mb-2">{f.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
-              </div>
-            ))}
-          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
 
-          {/* Bottom 6 features — compact */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {FEATURES.slice(3).map(f => (
-              <div key={f.title} className={cn('group flex items-start gap-4 rounded-2xl border border-border/40 bg-card/30 p-4 transition-all duration-200 hover:bg-card/60', f.border)}>
-                <div className={cn('size-9 rounded-xl flex items-center justify-center shrink-0 mt-0.5', f.bg)}>
-                  <HugeiconsIcon icon={f.icon} size={16} className={f.color} />
+            {/* Problem column */}
+            <div className="rounded-3xl border border-border/50 bg-card/40 p-8">
+              <div className="flex items-center gap-3 mb-7">
+                <div className="size-9 rounded-xl bg-muted flex items-center justify-center">
+                  <HugeiconsIcon icon={Cancel01Icon} size={15} className="text-muted-foreground/60" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-sm mb-1">{f.title}</h3>
-                  <p className="text-xs text-muted-foreground leading-relaxed">{f.desc}</p>
+                  <p className="font-bold text-sm">Ohne AzubiHub</p>
+                  <p className="text-[11px] text-muted-foreground">Der typische Ausbildungsalltag</p>
+                </div>
+              </div>
+              <ul className="space-y-5">
+                {[
+                  { t: '3+ Stunden Schreibaufwand pro Woche', d: 'Pro Auszubildendem — für Berichte, die nur der Ausbilder liest.' },
+                  { t: 'Papierdokumente gehen verloren', d: 'Kein zentrales Ablagesystem, kein Backup — alles im Aktenordner.' },
+                  { t: 'Freigabe per E-Mail und Telefon', d: 'Berichte hin- und herschicken, Korrekturen einbauen, erneut senden.' },
+                  { t: 'IHK-Fristen werden übersehen', d: 'Kein Überblick über offene Berichte, keine automatischen Erinnerungen.' },
+                ].map(item => (
+                  <li key={item.t} className="flex items-start gap-3.5">
+                    <div className="size-5 rounded-full bg-border/60 flex items-center justify-center shrink-0 mt-0.5">
+                      <HugeiconsIcon icon={Cancel01Icon} size={9} className="text-muted-foreground/50" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-foreground/70 leading-snug">{item.t}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{item.d}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Solution column */}
+            <div className="rounded-3xl border border-primary/25 bg-gradient-to-b from-primary/6 to-primary/[0.02] p-8 relative overflow-hidden">
+              <div className="pointer-events-none absolute top-0 right-0 w-48 h-48 bg-primary/8 rounded-full blur-3xl" />
+              <div className="flex items-center gap-3 mb-7 relative">
+                <div className="size-9 rounded-xl bg-primary/15 border border-primary/20 flex items-center justify-center">
+                  <HugeiconsIcon icon={CheckmarkBadge01Icon} size={15} className="text-primary" />
+                </div>
+                <div>
+                  <p className="font-bold text-sm">Mit AzubiHub</p>
+                  <p className="text-[11px] text-muted-foreground">Digitaler Workflow, der funktioniert</p>
+                </div>
+              </div>
+              <ul className="space-y-5 relative">
+                {[
+                  { t: '15 Minuten statt 3 Stunden', d: 'KI formuliert professionellen IHK-Text aus Stichpunkten — in Sekunden.' },
+                  { t: 'Alles zentral in der Cloud', d: 'Sicheres Ablagesystem, automatisches Backup, auf allen Geräten verfügbar.' },
+                  { t: 'Digitaler Freigabe-Workflow', d: 'Einreichen, kommentieren und freigeben — mit einem Klick im Browser.' },
+                  { t: 'Keine Frist mehr verpassen', d: 'Automatische Erinnerungen und Live-Statusübersicht für Ausbilder.' },
+                ].map(item => (
+                  <li key={item.t} className="flex items-start gap-3.5">
+                    <div className="size-5 rounded-full bg-green-500/15 flex items-center justify-center shrink-0 mt-0.5">
+                      <HugeiconsIcon icon={CheckmarkCircle01Icon} size={9} className="text-green-400" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold leading-snug">{item.t}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{item.d}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════
+          4. FEATURES (Business-Nutzen im Fokus)
+      ══════════════════════════════════════ */}
+      <section id="features" className="py-28 px-6 relative">
+        <div className="absolute inset-0 bg-gradient-to-b from-card/15 via-card/25 to-card/15 border-y border-border/30" />
+        <div className="relative max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <span className="text-xs font-bold text-primary uppercase tracking-[0.2em] mb-4 block">Was AzubiHub leistet</span>
+            <h2 className="text-4xl sm:text-5xl font-black tracking-tight">
+              Vier Gründe, die überzeugen.
+            </h2>
+            <p className="text-muted-foreground mt-5 max-w-xl mx-auto text-base leading-relaxed">
+              Kein generisches Tool — AzubiHub ist speziell für die duale Ausbildung gebaut.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            {FEATURES.map(f => (
+              <div key={f.title} className={cn(
+                'group relative rounded-2xl border border-border/60 bg-gradient-to-b from-card/80 to-card/40 p-7 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 overflow-hidden',
+                f.border
+              )}>
+                <div className="pointer-events-none absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                  style={{ background: f.bg.replace('bg-', '').replace('/10', '') }} />
+                <div className="relative">
+                  <div className="flex items-start justify-between mb-5">
+                    <div className={cn('size-12 rounded-2xl flex items-center justify-center', f.bg)}>
+                      <HugeiconsIcon icon={f.icon} size={22} className={f.color} />
+                    </div>
+                    <span className={cn('text-xs font-bold px-2.5 py-1 rounded-full', f.bg, f.color)}>
+                      {f.stat}
+                    </span>
+                  </div>
+                  <h3 className="font-bold text-base mb-2 leading-snug">{f.title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
                 </div>
               </div>
             ))}
@@ -513,26 +595,65 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* ══ HOW IT WORKS ══ */}
+      {/* ══════════════════════════════════════
+          5. SOCIAL PROOF (Stimmen & Zahlen)
+      ══════════════════════════════════════ */}
+      <section className="py-28 px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <span className="text-xs font-bold text-primary uppercase tracking-[0.2em] mb-4 block">Echte Meinungen</span>
+            <h2 className="text-4xl sm:text-5xl font-black tracking-tight">Was andere sagen.</h2>
+            <p className="text-muted-foreground mt-4 text-base max-w-md mx-auto">Von Auszubildenden und Ausbildern, die täglich mit AzubiHub arbeiten.</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {TESTIMONIALS.map((t, i) => (
+              <div key={t.name} className={cn(
+                'rounded-3xl border border-border/50 bg-gradient-to-b p-6 flex flex-col group hover:border-border transition-all duration-200 hover:-translate-y-0.5',
+                i % 3 === 0 ? 'from-card/80 to-card/50' : i % 3 === 1 ? 'from-card/60 to-card/40' : 'from-card/70 to-card/50'
+              )}>
+                <div className="flex gap-0.5 mb-4">
+                  {[...Array(5)].map((_, j) => <HugeiconsIcon key={j} icon={StarIcon} size={12} className="text-yellow-400" />)}
+                </div>
+                <HugeiconsIcon icon={QuoteUpIcon} size={18} className="text-primary/40 mb-3" />
+                <p className="text-sm text-foreground/80 leading-relaxed flex-1 italic mb-6">{t.text}</p>
+                <div className="flex items-center gap-3 border-t border-border/30 pt-4 mt-auto">
+                  <div className="size-9 rounded-xl bg-gradient-to-br from-primary to-orange-500 flex items-center justify-center font-bold text-xs text-white shrink-0 shadow-md shadow-primary/25">
+                    {t.name.split(' ').map(n => n[0]).join('')}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-bold text-sm truncate">{t.name}</p>
+                    <p className="text-[10px] text-muted-foreground truncate">{t.role}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════
+          6. WIE ES FUNKTIONIERT
+      ══════════════════════════════════════ */}
       <section id="how-it-works" className="py-28 px-6 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-card/20 via-card/30 to-card/20" />
-        <div className="absolute inset-0 border-y border-border/30" />
+        <div className="absolute inset-0 bg-gradient-to-b from-card/20 via-card/30 to-card/20 border-y border-border/30" />
         <div className="relative max-w-5xl mx-auto">
           <div className="text-center mb-16">
-            <span className="text-xs font-bold text-primary uppercase tracking-[0.2em] mb-4 block">So einfach geht's</span>
+            <span className="text-xs font-bold text-primary uppercase tracking-[0.2em] mb-4 block">Der Einstieg</span>
             <h2 className="text-4xl sm:text-5xl font-black tracking-tight">In 3 Schritten startklar.</h2>
+            <p className="text-muted-foreground mt-4 max-w-lg mx-auto text-base">Kein aufwändiges Onboarding. Kein IT-Projekt. Einfach registrieren und loslegen.</p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 relative">
-            {/* Connector */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 relative">
+            {/* Connector line */}
             <div className="absolute top-10 left-[calc(16.7%+1.5rem)] right-[calc(16.7%+1.5rem)] h-px hidden sm:block"
               style={{ background: 'linear-gradient(90deg, hsl(var(--primary)/40%), hsl(var(--border)/60%), hsl(var(--primary)/40%))' }} />
 
-            {STEPS.map((s, i) => (
+            {STEPS.map(s => (
               <div key={s.num} className="relative flex flex-col items-center text-center">
-                {/* Step indicator */}
-                <div className={cn('size-20 rounded-2xl flex items-center justify-center mb-6 text-2xl font-black text-white shadow-xl relative z-10',
-                  `bg-gradient-to-br ${s.color}`)}>
+                <div className={cn(
+                  'size-20 rounded-2xl flex items-center justify-center mb-6 text-2xl font-black text-white shadow-xl relative z-10',
+                  `bg-gradient-to-br ${s.color}`
+                )}>
                   {s.num}
                   <div className={cn('absolute -inset-1 rounded-2xl blur-md opacity-30 bg-gradient-to-br', s.color)} />
                 </div>
@@ -545,137 +666,23 @@ function LandingPage() {
           <div className="text-center mt-14">
             <Link href="/auth/register">
               <Button size="lg" className="h-12 px-8 gap-2 shadow-xl shadow-primary/25 bg-primary hover:bg-primary/90">
-                Jetzt kostenlos starten <HugeiconsIcon icon={ArrowRight01Icon} size={16} />
+                Jetzt kostenlos starten
+                <HugeiconsIcon icon={ArrowRight01Icon} size={16} />
               </Button>
             </Link>
           </div>
         </div>
       </section>
 
-      {/* ══ BENEFITS + AI DEMO ══ */}
-      <section className="py-28 px-6">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-          <div>
-            <span className="text-xs font-bold text-primary uppercase tracking-[0.2em] mb-4 block">Dein Vorteil</span>
-            <h2 className="text-4xl font-black tracking-tight mb-6 leading-tight">
-              Weniger Aufwand.<br />
-              <span className="text-muted-foreground font-light">Mehr Ausbildung.</span>
-            </h2>
-            <p className="text-muted-foreground leading-relaxed mb-10 text-base">
-              Das Berichtsheft ist Pflicht — aber es muss keine Qual sein. AzubiHub nimmt dir die stupide Arbeit ab.
-            </p>
-            <div className="space-y-5">
-              {[
-                { icon: Time01Icon, color: 'text-primary', bg: 'bg-primary/10', t: '80 % weniger Zeitaufwand', d: 'Nutzer sparen im Schnitt über 3 Stunden pro Monat beim Schreiben von Berichten.' },
-                { icon: Shield01Icon, color: 'text-blue-400', bg: 'bg-blue-500/10', t: 'Nie wieder Berichte verlieren', d: 'Alle Berichte sicher in der Cloud. Kein Papier, kein vergesstes Heft.' },
-                { icon: CheckmarkBadge01Icon, color: 'text-green-400', bg: 'bg-green-500/10', t: '100 % IHK-konform', d: 'Struktur und Format entsprechen den Anforderungen der IHK und Berufsschulen.' },
-                { icon: Notification01Icon, color: 'text-yellow-400', bg: 'bg-yellow-500/10', t: 'Stressfrei durch die Ausbildung', d: 'Erinnerungen und Status-Updates halten dich immer auf dem richtigen Stand.' },
-              ].map(b => (
-                <div key={b.t} className="flex items-start gap-4">
-                  <div className={cn('size-10 rounded-xl flex items-center justify-center shrink-0', b.bg)}>
-                    <HugeiconsIcon icon={b.icon} size={18} className={b.color} />
-                  </div>
-                  <div>
-                    <p className="font-bold text-sm">{b.t}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{b.d}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* AI Demo card */}
-          <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/8 to-blue-500/5 rounded-3xl blur-3xl" />
-            <div className="relative rounded-3xl border border-border/60 bg-gradient-to-b from-card/90 to-card/60 p-7 space-y-5 shadow-2xl shadow-black/30">
-              <div className="flex items-center gap-3">
-                <div className="size-10 rounded-xl bg-primary/15 border border-primary/20 flex items-center justify-center">
-                  <HugeiconsIcon icon={SparklesIcon} size={18} className="text-primary" />
-                </div>
-                <div>
-                  <p className="font-bold text-sm">KI-Formulierung</p>
-                  <p className="text-[11px] text-muted-foreground">Aus Stichpunkten wird professioneller Text</p>
-                </div>
-              </div>
-
-              <div className="rounded-2xl bg-muted/40 border border-border/40 p-4">
-                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Deine Stichpunkte:</p>
-                <ul className="space-y-1">
-                  {['Nginx-Server eingerichtet und konfiguriert','API-Route debuggt, Fehler gefunden & behoben','Code Review im Entwicklungsteam'].map(t => (
-                    <li key={t} className="flex items-start gap-2 text-xs text-foreground/70">
-                      <span className="text-primary mt-0.5 shrink-0">•</span>{t}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="flex items-center justify-center gap-3 py-1">
-                <div className="h-px flex-1 bg-gradient-to-r from-transparent to-primary/30" />
-                <div className="size-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
-                  <HugeiconsIcon icon={SparklesIcon} size={14} className="text-primary" />
-                </div>
-                <div className="h-px flex-1 bg-gradient-to-l from-transparent to-primary/30" />
-              </div>
-
-              <div className="rounded-2xl bg-gradient-to-br from-primary/8 to-primary/4 border border-primary/20 p-4">
-                <p className="text-[10px] font-semibold text-primary uppercase tracking-wider mb-2">Generierter Text:</p>
-                <p className="text-xs text-foreground/85 leading-relaxed">Am heutigen Arbeitstag konfigurierte ich einen Nginx-Webserver und richtete die erforderlichen Servereinstellungen ein. Im Anschluss analysierte ich einen Fehler in einer API-Route und konnte diesen erfolgreich identifizieren und beheben. Den Abschluss bildete ein Code Review im Entwicklungsteam.</p>
-              </div>
-
-              <div className="flex gap-2">
-                {['Kurz','Normal','Ausführlich'].map((opt, i) => (
-                  <button key={opt} className={cn('flex-1 rounded-xl py-2 text-[11px] font-semibold transition-all border', i === 1 ? 'bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/25' : 'bg-muted/30 text-muted-foreground border-border/40 hover:border-primary/30')}>
-                    {opt}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ══ COMPARISON ══ */}
-      <section className="py-28 px-6 relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-card/20 via-card/30 to-card/20 border-y border-border/30" />
-        <div className="relative max-w-3xl mx-auto">
-          <div className="text-center mb-16">
-            <span className="text-xs font-bold text-primary uppercase tracking-[0.2em] mb-4 block">Vergleich</span>
-            <h2 className="text-4xl sm:text-5xl font-black tracking-tight">Papier vs. AzubiHub.</h2>
-            <p className="text-muted-foreground mt-4 text-base">Die Wahl ist eindeutig.</p>
-          </div>
-
-          <div className="rounded-3xl border border-border/60 overflow-hidden shadow-2xl shadow-black/20 backdrop-blur-sm">
-            <div className="grid grid-cols-3 bg-muted/30 border-b border-border/40">
-              <div className="px-6 py-4 text-xs font-bold text-muted-foreground uppercase tracking-wider">Funktion</div>
-              <div className="px-4 py-4 text-center text-xs font-bold text-muted-foreground uppercase tracking-wider border-x border-border/30">Papier / Word</div>
-              <div className="px-4 py-4 text-center text-xs font-bold text-primary uppercase tracking-wider">AzubiHub</div>
-            </div>
-            {COMPARISON.map((c, i) => (
-              <div key={c.feature} className={cn('grid grid-cols-3 items-center', i % 2 === 0 ? 'bg-card/20' : 'bg-card/40')}>
-                <div className="px-6 py-4 text-sm">{c.feature}</div>
-                <div className="px-4 py-4 flex justify-center border-x border-border/20">
-                  {c.without
-                    ? <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><HugeiconsIcon icon={CheckmarkCircle01Icon} size={16} className="text-muted-foreground/40" /> Ja</div>
-                    : <HugeiconsIcon icon={Cancel01Icon} size={18} className="text-destructive/50" />}
-                </div>
-                <div className="px-4 py-4 flex justify-center">
-                  {c.with
-                    ? <div className="flex items-center gap-1.5 text-xs text-green-400 font-semibold"><HugeiconsIcon icon={CheckmarkCircle01Icon} size={16} className="text-green-400" /> Ja</div>
-                    : <HugeiconsIcon icon={Cancel01Icon} size={18} className="text-destructive/50" />}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ══ PRICING ══ */}
+      {/* ══════════════════════════════════════
+          PRICING
+      ══════════════════════════════════════ */}
       <section id="pricing" className="py-28 px-6">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-16">
             <span className="text-xs font-bold text-primary uppercase tracking-[0.2em] mb-4 block">Preise</span>
             <h2 className="text-4xl sm:text-5xl font-black tracking-tight">Einfach. Kostenlos.</h2>
-            <p className="text-muted-foreground mt-5 max-w-lg mx-auto text-base">Kein Abo. Keine Kreditkarte. Keine versteckten Kosten.</p>
+            <p className="text-muted-foreground mt-5 max-w-lg mx-auto text-base">Kein Abo. Keine Kreditkarte. Keine versteckten Kosten. Für Ausbildungsbetriebe jeder Größe.</p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 max-w-2xl mx-auto">
@@ -686,9 +693,9 @@ function LandingPage() {
                 <span className="text-6xl font-black">0€</span>
                 <span className="text-muted-foreground mb-2 text-sm">/ für immer</span>
               </div>
-              <p className="text-sm text-muted-foreground mb-7">Alles, was du als Auszubildender brauchst.</p>
+              <p className="text-sm text-muted-foreground mb-7">Alles, was du für eine vollständige Ausbildungsdokumentation brauchst.</p>
               <ul className="space-y-3 mb-8">
-                {['Unbegrenzte Wochenberichte','KI-Formulierung','Ausbilder-Freigabe Workflow','PDF-Export','Kalender & Statistiken','Cloud-Sync auf allen Geräten'].map(f => (
+                {['Unbegrenzte Wochenberichte','KI-Formulierung','Ausbilder-Freigabe Workflow','PDF-Export für die IHK','Kalender & Statistiken','Cloud-Sync auf allen Geräten'].map(f => (
                   <li key={f} className="flex items-center gap-3 text-sm">
                     <HugeiconsIcon icon={CheckmarkCircle01Icon} size={16} className="text-green-400 shrink-0" />{f}
                   </li>
@@ -710,7 +717,7 @@ function LandingPage() {
                   <span className="text-6xl font-black">4,99€</span>
                   <span className="text-muted-foreground mb-2 text-sm">/ Monat</span>
                 </div>
-                <p className="text-sm text-muted-foreground mb-7">Für Betriebe mit mehreren Auszubildenden.</p>
+                <p className="text-sm text-muted-foreground mb-7">Für Betriebe mit mehreren Auszubildenden und erweiterten Anforderungen.</p>
                 <ul className="space-y-3 mb-8">
                   {['Alles aus Kostenlos','Unbegrenzte KI-Nutzung','Team-Verwaltung (bis 20 Azubis)','Vorlagen-Bibliothek','Prioritäts-Support','Native App (iOS & Android)'].map(f => (
                     <li key={f} className="flex items-center gap-3 text-sm">
@@ -725,43 +732,12 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* ══ TESTIMONIALS ══ */}
-      <section className="py-28 px-6 relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-card/20 via-card/30 to-card/20 border-y border-border/30" />
-        <div className="relative max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <span className="text-xs font-bold text-primary uppercase tracking-[0.2em] mb-4 block">Stimmen</span>
-            <h2 className="text-4xl sm:text-5xl font-black tracking-tight">Was andere sagen.</h2>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {TESTIMONIALS.map((t, i) => (
-              <div key={t.name} className={cn('rounded-3xl border border-border/50 bg-gradient-to-b p-6 flex flex-col group hover:border-border transition-all duration-200 hover:-translate-y-0.5',
-                i % 3 === 0 ? 'from-card/80 to-card/50' : i % 3 === 1 ? 'from-card/60 to-card/40' : 'from-card/70 to-card/50')}>
-                {/* Stars */}
-                <div className="flex gap-0.5 mb-4">
-                  {[...Array(5)].map((_, j) => <HugeiconsIcon key={j} icon={StarIcon} size={12} className="text-yellow-400" />)}
-                </div>
-                {/* Quote icon */}
-                <HugeiconsIcon icon={QuoteUpIcon} size={18} className="text-primary/40 mb-3" />
-                <p className="text-sm text-foreground/80 leading-relaxed flex-1 italic mb-6">{t.text}</p>
-                <div className="flex items-center gap-3 border-t border-border/30 pt-4 mt-auto">
-                  <div className="size-9 rounded-xl bg-gradient-to-br from-primary to-orange-500 flex items-center justify-center font-bold text-xs text-white shrink-0 shadow-md shadow-primary/25">
-                    {t.name.split(' ').map(n => n[0]).join('')}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="font-bold text-sm truncate">{t.name}</p>
-                    <p className="text-[10px] text-muted-foreground truncate">{t.role}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ══ FAQ ══ */}
-      <section id="faq" className="py-28 px-6">
-        <div className="max-w-3xl mx-auto">
+      {/* ══════════════════════════════════════
+          FAQ
+      ══════════════════════════════════════ */}
+      <section id="faq" className="py-28 px-6 relative">
+        <div className="absolute inset-0 bg-gradient-to-b from-card/15 via-card/25 to-card/15 border-y border-border/30" />
+        <div className="relative max-w-3xl mx-auto">
           <div className="text-center mb-16">
             <span className="text-xs font-bold text-primary uppercase tracking-[0.2em] mb-4 block">FAQ</span>
             <h2 className="text-4xl sm:text-5xl font-black tracking-tight">Häufige Fragen.</h2>
@@ -771,12 +747,16 @@ function LandingPage() {
           </div>
           <p className="text-center text-sm text-muted-foreground mt-10">
             Noch Fragen?{' '}
-            <a href="mailto:kontakt@azubihub.app" className="text-primary hover:text-primary/80 font-medium transition-colors">Schreib uns direkt.</a>
+            <a href="mailto:kontakt@azubihub.app" className="text-primary hover:text-primary/80 font-medium transition-colors">
+              Schreib uns direkt.
+            </a>
           </p>
         </div>
       </section>
 
-      {/* ══ FINAL CTA ══ */}
+      {/* ══════════════════════════════════════
+          7. CTA-SEKTION
+      ══════════════════════════════════════ */}
       <section className="relative py-36 px-6 overflow-hidden">
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent" />
@@ -789,12 +769,13 @@ function LandingPage() {
             Kostenlos · Keine Kreditkarte · Sofort startklar
           </div>
           <h2 className="text-5xl sm:text-6xl font-black tracking-tight leading-[1.05] mb-6">
-            Bereit,
-            <span className="bg-gradient-to-r from-primary via-orange-400 to-primary bg-clip-text text-transparent"> das Berichtsheft</span>
-            <br />endlich zu mögen?
+            Bereit, die Ausbildung
+            <span className="bg-gradient-to-r from-primary via-orange-400 to-primary bg-clip-text text-transparent"> endlich digital</span>
+            {' '}zu machen?
           </h2>
-          <p className="text-muted-foreground text-xl mb-12 leading-relaxed">
-            Hunderte Auszubildende haben schon gewechselt.<br />Dein erster Bericht ist in 5 Minuten fertig.
+          <p className="text-muted-foreground text-lg mb-12 leading-relaxed max-w-lg mx-auto">
+            Hunderte Betriebe und Auszubildende haben schon gewechselt.
+            Der erste Bericht ist in unter 15 Minuten fertig.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link href="/auth/register">
@@ -803,60 +784,92 @@ function LandingPage() {
                 <HugeiconsIcon icon={ArrowRight01Icon} size={18} />
               </Button>
             </Link>
-            <Link href="/auth/login">
-              <Button variant="outline" size="lg" className="h-14 px-12 text-lg w-full sm:w-auto border-border/60 hover:border-primary/40 hover:bg-primary/5">
-                Anmelden
+            <a href="mailto:kontakt@azubihub.app">
+              <Button variant="outline" size="lg" className="h-14 px-10 text-lg w-full sm:w-auto border-border/60 hover:border-primary/40 hover:bg-primary/5 gap-2">
+                <HugeiconsIcon icon={Mail01Icon} size={16} />
+                Kontakt aufnehmen
               </Button>
-            </Link>
+            </a>
           </div>
         </div>
       </section>
 
-      {/* ══ FOOTER ══ */}
+      {/* ══════════════════════════════════════
+          FOOTER
+      ══════════════════════════════════════ */}
       <footer className="border-t border-border/40 pt-14 pb-8 px-6 bg-[hsl(var(--card))]/30">
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 sm:grid-cols-12 gap-10 mb-12">
+
             {/* Brand */}
             <div className="sm:col-span-5">
               <Logo />
               <p className="text-sm text-muted-foreground mt-4 leading-relaxed max-w-xs">
-                Das digitale Berichtsheft für moderne Ausbildungsbetriebe. KI-gestützt, IHK-konform, kostenlos.
+                Die digitale Ausbildungsplattform für moderne Betriebe. KI-gestützt, IHK-konform, kostenlos.
               </p>
+              {/* Trust badges */}
+              <div className="flex items-center gap-2 mt-5 flex-wrap">
+                {[
+                  { label: 'DSGVO', icon: Shield01Icon, color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20' },
+                  { label: 'IHK-konform', icon: CheckmarkBadge01Icon, color: 'text-green-400', bg: 'bg-green-500/10 border-green-500/20' },
+                  { label: 'KI-gestützt', icon: SparklesIcon, color: 'text-primary', bg: 'bg-primary/10 border-primary/20' },
+                ].map(b => (
+                  <span key={b.label}
+                    className={cn('inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full border', b.bg, b.color)}>
+                    <HugeiconsIcon icon={b.icon} size={11} />
+                    {b.label}
+                  </span>
+                ))}
+              </div>
+              {/* Social links */}
               <div className="flex items-center gap-2 mt-5">
                 <a href="mailto:kontakt@azubihub.app"
-                  className="size-9 rounded-xl border border-border/60 hover:border-primary/40 hover:bg-primary/5 flex items-center justify-center text-muted-foreground hover:text-primary transition-all">
+                  className="size-9 rounded-xl border border-border/60 hover:border-primary/40 hover:bg-primary/5 flex items-center justify-center text-muted-foreground hover:text-primary transition-all"
+                  aria-label="E-Mail an AzubiHub">
                   <HugeiconsIcon icon={Mail01Icon} size={16} />
                 </a>
                 <a href="https://github.com" target="_blank" rel="noopener noreferrer"
-                  className="size-9 rounded-xl border border-border/60 hover:border-primary/40 hover:bg-primary/5 flex items-center justify-center text-muted-foreground hover:text-primary transition-all">
+                  className="size-9 rounded-xl border border-border/60 hover:border-primary/40 hover:bg-primary/5 flex items-center justify-center text-muted-foreground hover:text-primary transition-all"
+                  aria-label="AzubiHub auf GitHub">
                   <HugeiconsIcon icon={Github01Icon} size={16} />
                 </a>
               </div>
             </div>
 
-            {/* Links */}
+            {/* Produkt */}
             <div className="sm:col-span-3">
               <p className="text-xs font-bold text-muted-foreground uppercase tracking-[0.15em] mb-5">Produkt</p>
-              <div className="space-y-3">
-                {[['#features','Features'],['#pricing','Preise'],['#faq','FAQ'],['/auth/register','Registrieren'],['/auth/login','Anmelden']].map(([href,label]) => (
-                  <a key={label} href={href} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{label}</a>
+              <nav className="space-y-3">
+                {[
+                  { href: '#features',    label: 'Features' },
+                  { href: '#pricing',     label: 'Preise' },
+                  { href: '#faq',         label: 'FAQ' },
+                  { href: '/auth/register', label: 'Registrieren' },
+                  { href: '/auth/login',  label: 'Anmelden' },
+                ].map(({ href, label }) => (
+                  <a key={label} href={href}
+                    className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
+                    {label}
+                  </a>
                 ))}
-              </div>
+              </nav>
             </div>
+
+            {/* Rechtliches */}
             <div className="sm:col-span-4">
-              <p className="text-xs font-bold text-muted-foreground uppercase tracking-[0.15em] mb-5">Rechtliches</p>
-              <div className="space-y-3">
-                <Link href="/impressum" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Impressum</Link>
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-[0.15em] mb-5">Rechtliches & Kontakt</p>
+              <nav className="space-y-3">
+                <Link href="/impressum"   className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Impressum</Link>
                 <Link href="/datenschutz" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Datenschutzerklärung</Link>
-                <span className="block text-sm text-muted-foreground">AGB</span>
-                <a href="mailto:kontakt@azubihub.app" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Kontakt</a>
-              </div>
+                <span className="block text-sm text-muted-foreground/50 cursor-default">AGB (in Vorbereitung)</span>
+                <a href="mailto:kontakt@azubihub.app" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">kontakt@azubihub.app</a>
+              </nav>
             </div>
           </div>
 
           <div className="border-t border-border/30 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
             <span className="text-xs text-muted-foreground/50">© {new Date().getFullYear()} AzubiHub. Alle Rechte vorbehalten.</span>
-            <span className="text-xs text-muted-foreground/50">Made with ♥ für Auszubildende in Deutschland</span>
+            <span className="text-xs text-muted-foreground/50">Gebaut für Auszubildende und Ausbilder in Deutschland</span>
           </div>
         </div>
       </footer>
