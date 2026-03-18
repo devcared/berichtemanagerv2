@@ -14,15 +14,15 @@ import { useAuth } from '@/contexts/AuthContext'
 import type { AppModule } from '@/types'
 import {
   BookOpenIcon, CheckListIcon, CalendarIcon, GridViewIcon, Logout01Icon,
-  SparklesIcon, CheckmarkBadge01Icon, ArrowRight01Icon, BarChartIcon,
-  UserMultiple02Icon, Shield01Icon, Time01Icon,
+  SparklesIcon, CheckmarkBadge01Icon, ArrowRight01Icon,
+  Shield01Icon,
   StarIcon, QuoteUpIcon, CheckmarkCircle01Icon, Cancel01Icon, Add01Icon,
   MinusSignIcon, Mail01Icon, Github01Icon, LockPasswordIcon,
 } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 
 /* ═══════════════════════════════════════
-   APP HOME  (nach Login)
+   APP HOME  (nach Login — unverändert)
 ═══════════════════════════════════════ */
 
 const modules: AppModule[] = [
@@ -37,7 +37,6 @@ function getGreeting() {
   const h = new Date().getHours()
   return h < 12 ? 'Guten Morgen' : h < 18 ? 'Guten Tag' : 'Guten Abend'
 }
-
 function AppHome() {
   const router = useRouter()
   const { profile } = useProfile()
@@ -104,70 +103,94 @@ function AppHome() {
 }
 
 /* ═══════════════════════════════════════
-   LANDING DATA
+   DESIGN TOKENS  (Google Antigravity)
 ═══════════════════════════════════════ */
 
 const G = {
-  blue:   '#4285F4',
-  red:    '#EA4335',
-  yellow: '#FBBC04',
-  green:  '#34A853',
-  dark:   '#202124',
-  mid:    '#5f6368',
-  light:  '#f8f9fa',
-  border: '#e8eaed',
+  bg:       '#060912',
+  surface:  '#0d1117',
+  surface2: '#13192b',
+  border:   'rgba(255,255,255,0.08)',
+  blue:     '#4285F4',
+  red:      '#EA4335',
+  yellow:   '#FBBC04',
+  green:    '#34A853',
+  purple:   '#9c27b0',
+  text:     '#e8eaed',
+  mid:      '#9aa0a6',
+  muted:    '#5f6368',
 }
 
+/* Glassmorphism card base */
+const glass = {
+  background:     'rgba(255,255,255,0.04)',
+  border:         '1px solid rgba(255,255,255,0.08)',
+  backdropFilter: 'blur(16px)',
+  WebkitBackdropFilter: 'blur(16px)',
+} as React.CSSProperties
+
+/* Gradient text */
+const gradText = {
+  background:             'linear-gradient(180deg, #fff 0%, rgba(232,234,237,0.75) 100%)',
+  WebkitBackgroundClip:   'text',
+  WebkitTextFillColor:    'transparent',
+  backgroundClip:         'text',
+} as React.CSSProperties
+
+/* ═══════════════════════════════════════
+   DATA
+═══════════════════════════════════════ */
+
 const FEATURES = [
-  { icon: BookOpenIcon,        title: 'Kein Papierchaos mehr',              desc: 'Wochenberichte digital erfassen — IHK-konform, strukturiert, ohne Drucken oder Ablegen.',                                              color: G.blue,   bg: '#e8f0fe', stat: '0 Blatt Papier' },
-  { icon: SparklesIcon,        title: '80 % weniger Schreibaufwand',         desc: 'Stichpunkte eingeben — KI formuliert professionellen IHK-Text in Sekunden.',                                                            color: '#9c27b0', bg: '#f3e5f5', stat: 'Ø 12 Min.' },
-  { icon: CheckmarkBadge01Icon, title: 'Ausbilder-Cockpit',                  desc: 'Alle Berichte, Freigaben und Auszubildenden zentral in einer Ansicht.',                                                                  color: G.green,  bg: '#e6f4ea', stat: 'Bis 20 Azubis' },
-  { icon: Shield01Icon,        title: 'DSGVO-sicher & IHK-konform',          desc: 'Verschlüsselt auf EU-Servern. PDF-Export für die IHK mit einem Klick.',                                                                  color: G.red,    bg: '#fce8e6', stat: '100 % EU' },
+  { icon: BookOpenIcon,         title: 'Kein Papierchaos',         desc: 'Wochenberichte digital, strukturiert und IHK-konform. Kein Drucken, Suchen oder Ablegen.', color: G.blue,   glow: 'rgba(66,133,244,0.15)',   bg: 'rgba(66,133,244,0.1)',  stat: '0 Papier' },
+  { icon: SparklesIcon,         title: '80 % weniger Aufwand',     desc: 'Stichpunkte eingeben — Claude AI formuliert in Sekunden professionellen IHK-Text.',      color: G.purple, glow: 'rgba(156,39,176,0.15)',   bg: 'rgba(156,39,176,0.1)', stat: 'Ø 12 Min.' },
+  { icon: CheckmarkBadge01Icon, title: 'Ausbilder-Cockpit',        desc: 'Alle Berichte, Freigaben und Auszubildenden zentral. Kommentieren und freigeben — sofort.', color: G.green,  glow: 'rgba(52,168,83,0.15)',    bg: 'rgba(52,168,83,0.1)',  stat: 'Bis 20 Azubis' },
+  { icon: Shield01Icon,         title: 'DSGVO & IHK-konform',      desc: 'Verschlüsselt auf EU-Servern. PDF-Export für die IHK mit einem Klick.',                   color: G.red,    glow: 'rgba(234,67,53,0.15)',    bg: 'rgba(234,67,53,0.1)',  stat: '100 % EU' },
 ]
 
 const STATS = [
-  { value: '500+',    label: 'Aktive Nutzer',    color: G.blue   },
-  { value: '12.000+', label: 'Berichte erstellt', color: G.red    },
-  { value: '80%',     label: 'Zeitersparnis',     color: G.yellow },
-  { value: '4.9 ★',   label: 'Bewertung',         color: G.green  },
+  { value: 500,    suffix: '+',  label: 'Aktive Nutzer',    color: G.blue   },
+  { value: 12000,  suffix: '+',  label: 'Berichte erstellt', color: G.red    },
+  { value: 80,     suffix: '%',  label: 'Zeitersparnis',     color: G.yellow },
+  { value: 49,     suffix: ' ★', label: 'Nutzerbewertung',   color: G.green  },
 ]
 
 const STEPS = [
-  { num: 1, title: 'Betrieb registrieren',  desc: 'Konto anlegen, Betrieb einrichten, Auszubildende per E-Mail einladen — in unter 5 Minuten.',   color: G.blue   },
-  { num: 2, title: 'Profile einrichten',    desc: 'Auszubildende nehmen die Einladung an und können sofort loslegen.',                              color: G.red    },
-  { num: 3, title: 'Digital verwalten',     desc: 'Berichte schreiben, KI nutzen, Ausbilder freigeben — vollständig digital ohne Mehraufwand.',     color: G.green  },
+  { num: '01', title: 'Betrieb registrieren',  desc: 'Konto anlegen, Betrieb einrichten, Auszubildende einladen — in unter 5 Minuten.',      color: G.blue   },
+  { num: '02', title: 'Profile einrichten',    desc: 'Auszubildende nehmen die Einladung an und können sofort ihren ersten Bericht schreiben.',  color: G.red    },
+  { num: '03', title: 'Digital verwalten',     desc: 'Berichte schreiben, KI nutzen, freigeben lassen — vollständig digital, ohne Mehraufwand.', color: G.green  },
 ]
 
 const TESTIMONIALS = [
-  { name: 'Lena M.',    role: 'Auszubildende · Fachinformatikerin',         text: 'Früher hat das Berichtsheft ewig gedauert. Ich tippe meine Stichpunkte ein und die KI macht den Rest. Absoluter Game Changer!', color: G.blue   },
-  { name: 'Thomas K.',  role: 'Ausbilder · IT-Systemkaufmann',              text: 'Endlich kann ich alle Berichte zentral prüfen. Kein E-Mail-Chaos mehr, alles an einem Ort.',                                   color: G.red    },
-  { name: 'Sara B.',    role: 'Auszubildende · Kauffrau Büromanagement',    text: 'Das Design ist so aufgeräumt. Man merkt, dass es von jemandem gebaut wurde, der Ausbildung wirklich kennt.',                    color: G.green  },
-  { name: 'Marcus D.',  role: 'Ausbilder · Mechatronik',                    text: 'Das Einladungssystem ist super. Ich schicke eine E-Mail und meine Azubis sind in Minuten registriert.',                        color: G.yellow },
-  { name: 'Jana F.',    role: 'Auszubildende · Industriekauffrau',          text: 'Direkte Kommentare am Bericht sind Gold wert. Keine langen E-Mail-Threads mehr.',                                              color: G.blue   },
-  { name: 'Florian R.', role: 'Ausbildungsleiter · Großbetrieb',            text: 'Wir verwalten 12 Auszubildende über AzubiHub. Die Zeitersparnis gegenüber Papier ist enorm.',                                  color: G.red    },
+  { name: 'Lena M.',    role: 'Auszubildende · Fachinformatikerin',         text: 'Ich tippe Stichpunkte ein und die KI macht den Rest. Absoluter Game Changer!',                color: G.blue   },
+  { name: 'Thomas K.',  role: 'Ausbilder · IT-Systemkaufmann',              text: 'Endlich alle Berichte zentral. Kein E-Mail-Chaos — alles übersichtlich an einem Ort.',       color: G.red    },
+  { name: 'Sara B.',    role: 'Auszubildende · Kauffrau Büromanagement',    text: 'So aufgeräumt und modern. Man merkt, dass es jemand gebaut hat, der Ausbildung kennt.',      color: G.green  },
+  { name: 'Marcus D.',  role: 'Ausbilder · Mechatronik',                    text: 'E-Mail schicken, Azubis sind in Minuten drin. Das Einladungssystem ist wirklich genial.',    color: G.yellow },
+  { name: 'Jana F.',    role: 'Auszubildende · Industriekauffrau',          text: 'Direkte Kommentare am Bericht — keine E-Mail-Threads mehr. Einfach direkt im System.',       color: G.blue   },
+  { name: 'Florian R.', role: 'Ausbildungsleiter · Großbetrieb',            text: '12 Azubis über AzubiHub. Die Zeitersparnis verglichen mit Papier ist wirklich enorm.',        color: G.purple },
 ]
 
 const FAQS = [
   { q: 'Ist AzubiHub kostenlos?',                          a: 'Ja, vollständig kostenlos — für Auszubildende und Ausbilder. Der Kern bleibt dauerhaft gratis.' },
   { q: 'Welche Ausbildungsberufe werden unterstützt?',     a: 'Alle Berufe mit wöchentlichem Ausbildungsnachweis — nahezu alle IHK- und HWK-Berufe.' },
-  { q: 'Wie funktioniert die KI-Formulierung?',            a: 'Stichpunkte eingeben → Länge und Stil wählen → Claude AI formuliert IHK-konformen Text in Sekunden.' },
-  { q: 'Kann mein Ausbilder die Berichte kommentieren?',   a: 'Ja. Direkt am Bericht kommentieren, Revisionen anfordern oder freigeben — alles in AzubiHub.' },
+  { q: 'Wie funktioniert die KI-Formulierung?',            a: 'Stichpunkte eingeben, Länge und Stil wählen — Claude AI formuliert IHK-konformen Text in Sekunden.' },
+  { q: 'Kann mein Ausbilder die Berichte kommentieren?',   a: 'Ja. Direkt am Bericht kommentieren, Revisionen anfordern oder freigeben — alles innerhalb AzubiHub.' },
   { q: 'Sind meine Daten sicher und DSGVO-konform?',       a: 'Ja. Verschlüsselt auf EU-Servern. Wir verarbeiten keine Daten außerhalb der EU.' },
   { q: 'Kann ich meine Berichte exportieren?',             a: 'Ja, als professionelles PDF — alle Jahresberichte in einem Dokument, druckfertig für die IHK.' },
-  { q: 'Wie funktioniert die Ausbilder-Einladung?',        a: 'E-Mail-Adresse eingeben → Auszubildende erhalten automatisch eine Einladung und sind in Minuten aktiv.' },
-  { q: 'Funktioniert AzubiHub auf dem Smartphone?',        a: 'Ja, vollständig responsive auf Smartphone, Tablet und Desktop. Native App ist in Planung.' },
+  { q: 'Wie funktioniert die Ausbilder-Einladung?',        a: 'E-Mail eingeben → automatische Einladung → Auszubildende sind in Minuten aktiv.' },
+  { q: 'Funktioniert AzubiHub auf dem Smartphone?',        a: 'Ja, vollständig responsive. Native App ist in Planung.' },
 ]
 
-/* ─── Scroll reveal hook ─── */
+/* ═══════════════════════════════════════
+   HOOKS & SHARED COMPONENTS
+═══════════════════════════════════════ */
+
 function useScrollReveal() {
   useEffect(() => {
-    const selectors = '.g-reveal, .g-reveal-left, .g-reveal-right, .g-reveal-scale'
-    const els = document.querySelectorAll<Element>(selectors)
+    const els = document.querySelectorAll<Element>('.g-reveal,.g-reveal-left,.g-reveal-right,.g-reveal-scale')
     if (!els.length) return
     const io = new IntersectionObserver(
-      entries => entries.forEach(e => {
-        if (e.isIntersecting) { e.target.classList.add('g-visible'); io.unobserve(e.target) }
-      }),
+      entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('g-visible'); io.unobserve(e.target) } }),
       { threshold: 0.08, rootMargin: '0px 0px -60px 0px' }
     )
     els.forEach(el => io.observe(el))
@@ -175,7 +198,6 @@ function useScrollReveal() {
   }, [])
 }
 
-/* ─── Animated counter ─── */
 function AnimatedNumber({ target, suffix = '' }: { target: number; suffix?: string }) {
   const [count, setCount] = useState(0)
   const ref = useRef<HTMLSpanElement>(null)
@@ -186,29 +208,97 @@ function AnimatedNumber({ target, suffix = '' }: { target: number; suffix?: stri
     const io = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting && !started.current) {
         started.current = true
-        let start = 0
-        const step = Math.ceil(target / 50)
+        const display = target === 49 ? 4.9 : target
+        const steps = 50
+        const stepVal = display / steps
+        let cur = 0
         const timer = setInterval(() => {
-          start = Math.min(start + step, target)
-          setCount(start)
-          if (start >= target) clearInterval(timer)
-        }, 30)
+          cur = Math.min(cur + stepVal, display as number)
+          setCount(Math.round(cur * 10) / 10)
+          if (cur >= display) clearInterval(timer)
+        }, 28)
       }
     }, { threshold: 0.5 })
     io.observe(el)
     return () => io.disconnect()
   }, [target])
-  return <span ref={ref}>{count.toLocaleString('de-DE')}{suffix}</span>
+
+  const display = target === 49 ? count.toFixed(1) : target > 999
+    ? (count >= 1000 ? (count / 1000).toFixed(0) + '.000' : Math.round(count).toString())
+    : Math.round(count).toString()
+
+  return <span ref={ref}>{display}{suffix}</span>
 }
 
-/* ─── Logo ─── */
-function Logo({ light = true }: { light?: boolean }) {
+function Logo({ dark = false }: { dark?: boolean }) {
   return (
     <div className="flex items-center gap-2.5">
       <div className="size-8 rounded-xl flex items-center justify-center" style={{ background: G.blue }}>
         <span className="text-white font-black text-sm leading-none">A</span>
       </div>
-      <span className="font-bold text-base tracking-tight" style={{ color: light ? G.dark : '#fff' }}>AzubiHub</span>
+      <span className="font-bold text-base tracking-tight" style={{ color: dark ? G.bg : '#fff' }}>AzubiHub</span>
+    </div>
+  )
+}
+
+/* ─── Pill button ─── */
+function GButton({ href, children, primary = false, className = '' }: { href: string; children: React.ReactNode; primary?: boolean; className?: string }) {
+  const base: React.CSSProperties = primary
+    ? { background: G.blue, color: '#fff', boxShadow: `0 0 20px rgba(66,133,244,0.4)` }
+    : { background: 'rgba(255,255,255,0.06)', color: G.text, border: '1px solid rgba(255,255,255,0.14)' }
+  return (
+    <Link href={href}>
+      <span className={`inline-flex items-center gap-2 px-7 py-3.5 rounded-full text-sm font-semibold cursor-pointer select-none transition-all duration-200 ${className}`}
+        style={base}
+        onMouseEnter={(e: React.MouseEvent<HTMLSpanElement>) => {
+          const el = e.currentTarget as HTMLSpanElement
+          if (primary) { el.style.transform = 'translateY(-2px)'; el.style.boxShadow = `0 6px 28px rgba(66,133,244,.6)` }
+          else { el.style.background = 'rgba(255,255,255,0.1)'; el.style.borderColor = 'rgba(255,255,255,0.22)' }
+        }}
+        onMouseLeave={(e: React.MouseEvent<HTMLSpanElement>) => {
+          const el = e.currentTarget as HTMLSpanElement
+          if (primary) { el.style.transform = ''; el.style.boxShadow = `0 0 20px rgba(66,133,244,.4)` }
+          else { el.style.background = 'rgba(255,255,255,0.06)'; el.style.borderColor = 'rgba(255,255,255,0.14)' }
+        }}>
+        {children}
+      </span>
+    </Link>
+  )
+}
+
+/* ─── Orbital ring system ─── */
+function OrbitalRings() {
+  return (
+    <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none" style={{ zIndex: 0 }}>
+      {/* Ambient glow blobs */}
+      <div className="absolute rounded-full" style={{ width: 800, height: 800, background: 'radial-gradient(circle, rgba(66,133,244,0.07) 0%, transparent 70%)', top: '50%', left: '50%', transform: 'translate(-50%,-50%)' }} />
+      <div className="absolute rounded-full" style={{ width: 500, height: 500, background: 'radial-gradient(circle, rgba(52,168,83,0.05) 0%, transparent 70%)', top: '20%', right: '15%' }} />
+      <div className="absolute rounded-full" style={{ width: 400, height: 400, background: 'radial-gradient(circle, rgba(234,67,53,0.04) 0%, transparent 70%)', bottom: '15%', left: '10%' }} />
+
+      {/* Ring 1 — outer, CW 28s */}
+      <div className="absolute rounded-full" style={{ width: 660, height: 660, border: '1px solid rgba(66,133,244,0.18)', animation: 'orbit-cw 28s linear infinite' }}>
+        <span className="absolute rounded-full" style={{ width: 12, height: 12, background: G.blue, top: -6, left: '50%', marginLeft: -6, boxShadow: `0 0 18px ${G.blue}, 0 0 36px rgba(66,133,244,0.4)` }} />
+        <span className="absolute rounded-full" style={{ width: 6, height: 6, background: 'rgba(66,133,244,0.5)', bottom: -3, right: '25%', boxShadow: `0 0 10px ${G.blue}` }} />
+      </div>
+
+      {/* Ring 2 — mid, CCW 20s */}
+      <div className="absolute rounded-full" style={{ width: 460, height: 460, border: '1px solid rgba(234,67,53,0.16)', animation: 'orbit-ccw 20s linear infinite 2s' }}>
+        <span className="absolute rounded-full" style={{ width: 10, height: 10, background: G.red, bottom: -5, left: '50%', marginLeft: -5, boxShadow: `0 0 14px ${G.red}, 0 0 28px rgba(234,67,53,0.35)` }} />
+        <span className="absolute rounded-full" style={{ width: 5, height: 5, background: 'rgba(234,67,53,0.5)', top: '20%', right: -2, boxShadow: `0 0 8px ${G.red}` }} />
+      </div>
+
+      {/* Ring 3 — inner, CW 13s */}
+      <div className="absolute rounded-full" style={{ width: 290, height: 290, border: '1px dashed rgba(52,168,83,0.2)', animation: 'orbit-cw 13s linear infinite 1s' }}>
+        <span className="absolute rounded-full" style={{ width: 8, height: 8, background: G.green, top: -4, right: '20%', boxShadow: `0 0 12px ${G.green}, 0 0 24px rgba(52,168,83,0.3)` }} />
+      </div>
+
+      {/* Ring 4 — tiny, CCW 8s */}
+      <div className="absolute rounded-full" style={{ width: 150, height: 150, border: '1px solid rgba(251,188,4,0.22)', animation: 'orbit-ccw 8s linear infinite 0.5s' }}>
+        <span className="absolute rounded-full" style={{ width: 6, height: 6, background: G.yellow, top: -3, left: '50%', marginLeft: -3, boxShadow: `0 0 10px ${G.yellow}` }} />
+      </div>
+
+      {/* Center orb */}
+      <div className="absolute rounded-full" style={{ width: 64, height: 64, background: `radial-gradient(circle, rgba(66,133,244,0.9) 0%, rgba(66,133,244,0) 70%)`, animation: 'goog-glow-pulse 3.5s ease-in-out infinite', boxShadow: `0 0 40px rgba(66,133,244,0.5), 0 0 80px rgba(66,133,244,0.2)` }} />
     </div>
   )
 }
@@ -217,141 +307,116 @@ function Logo({ light = true }: { light?: boolean }) {
 function LandingNav() {
   const [scrolled, setScrolled] = useState(false)
   useEffect(() => {
-    const fn = () => setScrolled(window.scrollY > 20)
+    const fn = () => setScrolled(window.scrollY > 30)
     window.addEventListener('scroll', fn, { passive: true })
     return () => window.removeEventListener('scroll', fn)
   }, [])
   return (
-    <nav style={{ background: scrolled ? 'rgba(255,255,255,0.95)' : 'transparent', backdropFilter: scrolled ? 'blur(12px)' : 'none', borderBottom: scrolled ? `1px solid ${G.border}` : '1px solid transparent', boxShadow: scrolled ? '0 1px 8px rgba(0,0,0,0.06)' : 'none' }}
-      className="fixed top-0 inset-x-0 z-50 transition-all duration-300">
+    <nav className="fixed top-0 inset-x-0 z-50 transition-all duration-400"
+      style={{
+        background:     scrolled ? 'rgba(6,9,18,0.85)' : 'transparent',
+        backdropFilter: scrolled ? 'blur(20px)' : 'none',
+        WebkitBackdropFilter: scrolled ? 'blur(20px)' : 'none',
+        borderBottom:   scrolled ? `1px solid ${G.border}` : '1px solid transparent',
+        boxShadow:      scrolled ? '0 2px 20px rgba(0,0,0,0.4)' : 'none',
+      }}>
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-8">
         <Link href="/"><Logo /></Link>
+
         <div className="hidden md:flex items-center gap-1 text-sm">
-          {[['#features','Features'],['#how-it-works','Wie es funktioniert'],['#pricing','Preise'],['#faq','FAQ']].map(([href,label]) => (
-            <a key={href} href={href} className="px-3.5 py-2 rounded-full font-medium transition-colors duration-150"
-              style={{ color: G.mid }} onMouseEnter={e => (e.currentTarget.style.color = G.dark)} onMouseLeave={e => (e.currentTarget.style.color = G.mid)}>
+          {[['#features','Features'],['#how-it-works','So funktioniert\'s'],['#pricing','Preise'],['#faq','FAQ']].map(([href, label]) => (
+            <a key={href} href={href}
+              className="px-4 py-2 rounded-full font-medium transition-all duration-150"
+              style={{ color: G.mid }}
+              onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = '#fff')}
+              onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = G.mid)}>
               {label}
             </a>
           ))}
         </div>
+
         <div className="flex items-center gap-3">
-          <Link href="/auth/login" className="hidden sm:block px-4 py-2 text-sm font-medium rounded-full transition-colors duration-150"
-            style={{ color: G.mid }} onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = G.dark)} onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = G.mid)}>
+          <Link href="/auth/login"
+            className="hidden sm:block px-4 py-2 text-sm font-medium rounded-full transition-all duration-150"
+            style={{ color: G.mid }}
+            onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = '#fff')}
+            onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = G.mid)}>
             Anmelden
           </Link>
-          <Link href="/auth/register">
-            <span className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full text-sm font-semibold text-white transition-all duration-200 cursor-pointer select-none"
-              style={{ background: G.blue, boxShadow: '0 2px 8px rgba(66,133,244,0.35)' }}
-              onMouseEnter={(e: React.MouseEvent<HTMLSpanElement>) => { (e.currentTarget as HTMLSpanElement).style.boxShadow = '0 4px 16px rgba(66,133,244,0.5)'; (e.currentTarget as HTMLSpanElement).style.transform = 'translateY(-1px)' }}
-              onMouseLeave={(e: React.MouseEvent<HTMLSpanElement>) => { (e.currentTarget as HTMLSpanElement).style.boxShadow = '0 2px 8px rgba(66,133,244,0.35)'; (e.currentTarget as HTMLSpanElement).style.transform = '' }}>
-              Kostenlos starten
-              <HugeiconsIcon icon={ArrowRight01Icon} size={14} />
-            </span>
-          </Link>
+          <GButton href="/auth/register" primary>
+            Kostenlos starten
+            <HugeiconsIcon icon={ArrowRight01Icon} size={14} />
+          </GButton>
         </div>
       </div>
     </nav>
   )
 }
 
-/* ─── FAQ accordion ─── */
-function FaqItem({ q, a, index }: { q: string; a: string; index: number }) {
+/* ─── FAQ item ─── */
+function FaqItem({ q, a, idx }: { q: string; a: string; idx: number }) {
   const [open, setOpen] = useState(false)
   const colors = [G.blue, G.red, G.green, G.yellow, G.blue, G.red, G.green, G.yellow]
-  const c = colors[index % colors.length]
+  const c = colors[idx % colors.length]
   return (
     <button onClick={() => setOpen(o => !o)}
       className="w-full text-left rounded-2xl px-6 py-5 transition-all duration-200"
-      style={{ background: '#fff', border: `1px solid ${open ? c : G.border}`, boxShadow: open ? `0 4px 20px ${c}18` : 'none' }}>
+      style={{ ...glass, boxShadow: open ? `0 0 20px ${c}18` : 'none', borderColor: open ? `${c}30` : G.border }}>
       <div className="flex items-center justify-between gap-4">
-        <span className="font-semibold text-sm leading-snug" style={{ color: G.dark }}>{q}</span>
+        <span className="font-semibold text-sm leading-snug" style={{ color: G.text }}>{q}</span>
         <span className="size-7 rounded-full flex items-center justify-center shrink-0 transition-all duration-200"
-          style={{ background: open ? c : G.border, color: open ? '#fff' : G.mid }}>
+          style={{ background: open ? c : 'rgba(255,255,255,0.08)', color: open ? '#fff' : G.mid }}>
           <HugeiconsIcon icon={open ? MinusSignIcon : Add01Icon} size={13} />
         </span>
       </div>
-      <div style={{ maxHeight: open ? '120px' : '0', overflow: 'hidden', transition: 'max-height 0.35s cubic-bezier(0.16,1,0.3,1)', marginTop: open ? '12px' : '0' }}>
+      <div style={{ maxHeight: open ? '160px' : '0', overflow: 'hidden', transition: 'max-height 0.35s cubic-bezier(0.16,1,0.3,1)', marginTop: open ? '12px' : '0' }}>
         <p className="text-sm leading-relaxed" style={{ color: G.mid }}>{a}</p>
       </div>
     </button>
   )
 }
 
-/* ═══════════════════════════════════════
-   LANDING PAGE
-═══════════════════════════════════════ */
-
-/* 3-D sphere helper */
-function Sphere({ size, grad, style, anim }: { size: number; grad: string; style?: React.CSSProperties; anim: string }) {
+/* ─── Section label ─── */
+function SectionLabel({ text, color }: { text: string; color: string }) {
   return (
-    <div className="absolute pointer-events-none" style={{
-      width: size, height: size, borderRadius: '50%',
-      background: grad,
-      animation: anim,
-      ...style,
-    }} />
+    <p className="g-reveal text-xs font-bold uppercase tracking-[0.2em] mb-4" style={{ color }}>
+      {text}
+    </p>
   )
 }
 
+/* ═══════════════════════════════════════
+   LANDING PAGE
+═══════════════════════════════════════ */
 function LandingPage() {
   useScrollReveal()
 
   return (
-    <div className="min-h-screen overflow-x-hidden" style={{ background: '#fff', color: G.dark, fontFamily: 'var(--font-geist-sans), system-ui, sans-serif' }}>
+    <div style={{ background: G.bg, color: G.text, fontFamily: '"Google Sans", "Segoe UI", system-ui, sans-serif' }} className="min-h-screen overflow-x-hidden">
       <LandingNav />
 
       {/* ══════════════════════════════════════
           1. HERO
       ══════════════════════════════════════ */}
-      <section className="relative min-h-screen flex flex-col items-center justify-center pt-16 pb-16 px-6 overflow-hidden">
+      <section className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-16 pb-24 overflow-hidden" style={{ background: G.bg }}>
+        <OrbitalRings />
 
-        {/* Floating 3-D objects */}
-        <Sphere size={180} anim="goog-float 8s ease-in-out infinite"
-          grad="radial-gradient(circle at 35% 30%, #8ab4f8 0%, #4285F4 55%, #1a56db 100%)"
-          style={{ top: '8%', right: '5%', filter: 'drop-shadow(0 28px 56px rgba(66,133,244,.4))' }} />
-        <Sphere size={120} anim="goog-float2 10s ease-in-out infinite 0.5s"
-          grad="radial-gradient(circle at 35% 30%, #f28b82 0%, #EA4335 55%, #b31412 100%)"
-          style={{ bottom: '18%', left: '3%', borderRadius: '32px', transform: 'rotate(-12deg)', filter: 'drop-shadow(0 20px 40px rgba(234,67,53,.38))' }} />
-        <Sphere size={100} anim="goog-float3 6s ease-in-out infinite 1s"
-          grad="radial-gradient(circle at 35% 30%, #81c995 0%, #34A853 55%, #137333 100%)"
-          style={{ top: '22%', left: '6%', borderRadius: '24px', filter: 'drop-shadow(0 16px 32px rgba(52,168,83,.38))' }} />
-        {/* Yellow ring */}
-        <div className="absolute pointer-events-none" style={{
-          width: 96, height: 96,
-          border: '20px solid #FBBC04',
-          borderRadius: '50%',
-          top: '14%', left: '14%',
-          animation: 'goog-float4 7s ease-in-out infinite 2s',
-          filter: 'drop-shadow(0 12px 24px rgba(251,188,4,.45))',
-        }} />
-        {/* Small accent dots */}
-        <Sphere size={52} anim="goog-float2 5s ease-in-out infinite 0.8s"
-          grad="radial-gradient(circle at 35% 30%, #8ab4f8 0%, #4285F4 100%)"
-          style={{ top: '52%', right: '18%', opacity: 0.7, filter: 'drop-shadow(0 8px 16px rgba(66,133,244,.3))' }} />
-        <Sphere size={38} anim="goog-float 6s ease-in-out infinite 1.5s"
-          grad="radial-gradient(circle at 35% 30%, #f28b82 0%, #EA4335 100%)"
-          style={{ bottom: '38%', right: '28%', opacity: 0.65 }} />
-        <Sphere size={64} anim="goog-float3 9s ease-in-out infinite 0.3s"
-          grad="radial-gradient(circle at 35% 30%, #fde293 0%, #FBBC04 100%)"
-          style={{ bottom: '28%', right: '7%', borderRadius: '20px', opacity: 0.8, filter: 'drop-shadow(0 10px 20px rgba(251,188,4,.35))' }} />
-
-        {/* Content */}
-        <div className="relative z-10 max-w-4xl mx-auto text-center">
-
-          {/* Google dots badge */}
-          <div className="g-reveal inline-flex items-center gap-3 rounded-full px-5 py-2.5 mb-10"
-            style={{ background: G.light, border: `1px solid ${G.border}`, color: G.mid, fontSize: 13, fontWeight: 500 }}>
+        {/* Content — above rings */}
+        <div className="relative z-10 max-w-3xl mx-auto text-center">
+          {/* Badge */}
+          <div className="g-reveal inline-flex items-center gap-3 rounded-full px-5 py-2.5 mb-10 text-sm font-medium"
+            style={{ ...glass, color: G.mid }}>
             <span className="flex gap-1.5">
               {[G.blue, G.red, G.yellow, G.green].map(c => (
-                <span key={c} className="size-2.5 rounded-full inline-block" style={{ background: c }} />
+                <span key={c} className="size-2 rounded-full" style={{ background: c, boxShadow: `0 0 6px ${c}` }} />
               ))}
             </span>
-            Für Ausbildungsbetriebe · Ausbilder · Auszubildende
+            Für Betriebe · Ausbilder · Auszubildende
           </div>
 
           {/* Headline */}
           <h1 className="g-reveal font-black tracking-tight leading-none mb-8"
-            style={{ fontSize: 'clamp(52px, 9vw, 96px)', letterSpacing: '-3px', transitionDelay: '0.1s' }}>
+            style={{ ...gradText, fontSize: 'clamp(52px, 9vw, 96px)', letterSpacing: '-3px', transitionDelay: '0.1s' }}>
             Ausbildung, neu gedacht.
           </h1>
 
@@ -360,22 +425,17 @@ function LandingPage() {
             KI-gestützt, IHK-konform und dauerhaft kostenlos.
           </p>
 
-          {/* CTA buttons — Google pill style */}
+          {/* CTAs */}
           <div className="g-reveal flex flex-col sm:flex-row gap-4 justify-center mb-14" style={{ transitionDelay: '0.3s' }}>
-            <Link href="/auth/register">
-              <span className="inline-flex items-center gap-2 px-8 py-4 rounded-full text-base font-semibold text-white cursor-pointer select-none transition-all duration-200"
-                style={{ background: G.blue, boxShadow: '0 4px 18px rgba(66,133,244,.4)' }}
-                onMouseEnter={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.transform = 'translateY(-2px)'; el.style.boxShadow = '0 8px 28px rgba(66,133,244,.5)' }}
-                onMouseLeave={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.transform = ''; el.style.boxShadow = '0 4px 18px rgba(66,133,244,.4)' }}>
-                Kostenlos starten
-                <HugeiconsIcon icon={ArrowRight01Icon} size={18} />
-              </span>
-            </Link>
+            <GButton href="/auth/register" primary className="text-base px-9 py-4">
+              Kostenlos starten
+              <HugeiconsIcon icon={ArrowRight01Icon} size={18} />
+            </GButton>
             <a href="#features">
-              <span className="inline-flex items-center gap-2 px-8 py-4 rounded-full text-base font-semibold cursor-pointer select-none transition-all duration-200"
-                style={{ color: G.dark, border: `2px solid ${G.border}`, background: '#fff' }}
-                onMouseEnter={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.background = G.light; el.style.borderColor = '#bdc1c6' }}
-                onMouseLeave={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.background = '#fff'; el.style.borderColor = G.border }}>
+              <span className="inline-flex items-center gap-2 px-9 py-4 rounded-full text-base font-semibold cursor-pointer transition-all duration-200"
+                style={{ background: 'rgba(255,255,255,0.05)', color: G.text, border: '1px solid rgba(255,255,255,0.12)' }}
+                onMouseEnter={(e: React.MouseEvent<HTMLSpanElement>) => (e.currentTarget as HTMLSpanElement).style.background = 'rgba(255,255,255,0.09)'}
+                onMouseLeave={(e: React.MouseEvent<HTMLSpanElement>) => (e.currentTarget as HTMLSpanElement).style.background = 'rgba(255,255,255,0.05)'}>
                 Features entdecken
               </span>
             </a>
@@ -384,140 +444,40 @@ function LandingPage() {
           {/* Trust chips */}
           <div className="g-reveal flex flex-wrap items-center justify-center gap-3" style={{ transitionDelay: '0.4s' }}>
             {[
-              { icon: Shield01Icon,          label: 'DSGVO-konform',   color: G.blue  },
-              { icon: CheckmarkBadge01Icon,  label: 'IHK-konform',     color: G.green },
-              { icon: SparklesIcon,          label: 'KI-gestützt',     color: '#9c27b0' },
-              { icon: LockPasswordIcon,      label: 'EU-Datenschutz',  color: G.red   },
+              { icon: Shield01Icon,         label: 'DSGVO-konform',  color: G.blue   },
+              { icon: CheckmarkBadge01Icon, label: 'IHK-konform',    color: G.green  },
+              { icon: SparklesIcon,         label: 'KI-gestützt',    color: G.purple },
+              { icon: LockPasswordIcon,     label: 'EU-Datenschutz', color: G.red    },
             ].map(t => (
               <span key={t.label} className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium"
-                style={{ background: G.light, border: `1px solid ${G.border}`, color: G.mid }}>
-                <HugeiconsIcon icon={t.icon} size={14} style={{ color: t.color }} />
+                style={{ ...glass, color: G.mid }}>
+                <HugeiconsIcon icon={t.icon} size={13} style={{ color: t.color }} />
                 {t.label}
               </span>
             ))}
           </div>
         </div>
 
-        {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2" style={{ color: '#bdc1c6', animation: 'goog-float4 2.5s ease-in-out infinite' }}>
-          <div className="size-6 rounded-full border-2 border-current flex items-center justify-center">
+        {/* Scroll cue */}
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-30"
+          style={{ animation: 'goog-float4 2.8s ease-in-out infinite' }}>
+          <div className="size-6 rounded-full border border-current flex items-center justify-center" style={{ color: G.muted }}>
             <div className="size-1.5 rounded-full bg-current" />
           </div>
         </div>
       </section>
 
       {/* ══════════════════════════════════════
-          2. APP MOCKUP SHOWCASE
+          2. STATS
       ══════════════════════════════════════ */}
-      <section className="py-20 px-6" style={{ background: G.light }}>
-        <div className="max-w-5xl mx-auto">
-          <div className="g-reveal-scale rounded-3xl overflow-hidden border shadow-2xl" style={{ borderColor: G.border, boxShadow: '0 32px 80px rgba(0,0,0,0.12), 0 8px 24px rgba(0,0,0,0.06)' }}>
-            {/* Browser chrome */}
-            <div className="flex items-center gap-3 px-4 py-3.5" style={{ background: '#f1f3f4', borderBottom: `1px solid ${G.border}` }}>
-              <div className="flex gap-1.5">
-                {[G.red, G.yellow, G.green].map(c => (
-                  <div key={c} className="size-3 rounded-full" style={{ background: c, opacity: 0.8 }} />
-                ))}
-              </div>
-              <div className="flex-1 mx-3">
-                <div className="max-w-xs mx-auto h-6 rounded-full flex items-center gap-2 px-3" style={{ background: '#fff', border: `1px solid ${G.border}` }}>
-                  <HugeiconsIcon icon={LockPasswordIcon} size={10} style={{ color: '#5f6368' }} />
-                  <span className="text-[11px]" style={{ color: '#5f6368' }}>azubihub.app/berichtsheft</span>
-                </div>
-              </div>
-            </div>
-
-            {/* App content */}
-            <div className="flex" style={{ height: 420 }}>
-              {/* Sidebar */}
-              <div className="w-16 flex flex-col items-center py-5 gap-4 shrink-0" style={{ background: '#fff', borderRight: `1px solid ${G.border}` }}>
-                <div className="size-8 rounded-xl flex items-center justify-center" style={{ background: G.blue }}>
-                  <span className="text-white font-black text-xs">A</span>
-                </div>
-                <div className="h-px w-10 my-1" style={{ background: G.border }} />
-                {[BookOpenIcon, BarChartIcon, CalendarIcon, UserMultiple02Icon].map((Ic, i) => (
-                  <div key={i} className="size-10 rounded-xl flex items-center justify-center transition-colors"
-                    style={{ background: i === 0 ? '#e8f0fe' : 'transparent', color: i === 0 ? G.blue : '#9aa0a6' }}>
-                    <HugeiconsIcon icon={Ic} size={18} />
-                  </div>
-                ))}
-              </div>
-
-              {/* Main */}
-              <div className="flex-1 p-5 space-y-4 overflow-hidden" style={{ background: '#fff' }}>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-medium" style={{ color: G.mid }}>Wochenberichte</p>
-                    <p className="text-sm font-bold" style={{ color: G.dark }}>KW 13 · 2025</p>
-                  </div>
-                  <div className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium cursor-pointer"
-                    style={{ background: '#e8f0fe', color: G.blue }}>
-                    <HugeiconsIcon icon={Add01Icon} size={13} />
-                    Neuer Bericht
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-3 gap-3">
-                  {[
-                    { v: '18', l: 'Freigegeben', bg: '#e6f4ea', c: G.green  },
-                    { v: '3',  l: 'Ausstehend',  bg: '#fef9e7', c: '#f9ab00' },
-                    { v: '24', l: 'Gesamt',       bg: '#e8f0fe', c: G.blue   },
-                  ].map(s => (
-                    <div key={s.l} className="rounded-2xl p-3" style={{ background: s.bg }}>
-                      <div className="text-2xl font-black" style={{ color: s.c }}>{s.v}</div>
-                      <div className="text-[10px] font-medium mt-0.5" style={{ color: G.mid }}>{s.l}</div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="space-y-2">
-                  {[
-                    { kw: 'KW 11', s: 'Freigegeben', bg: '#e6f4ea', c: G.green   },
-                    { kw: 'KW 12', s: 'In Prüfung',  bg: '#fef9e7', c: '#f9ab00' },
-                    { kw: 'KW 13', s: 'Entwurf',     bg: G.light,   c: G.mid     },
-                  ].map(r => (
-                    <div key={r.kw} className="flex items-center gap-3 rounded-xl px-3 py-2.5" style={{ border: `1px solid ${G.border}` }}>
-                      <span className="text-xs font-semibold w-12 shrink-0" style={{ color: G.dark }}>{r.kw}</span>
-                      <div className="flex gap-1 flex-1">
-                        {['Mo','Di','Mi','Do','Fr'].map(d => (
-                          <span key={d} className="text-[9px] px-1.5 py-0.5 rounded font-semibold" style={{ background: '#e8f0fe', color: G.blue }}>{d}</span>
-                        ))}
-                      </div>
-                      <span className="text-[10px] font-bold px-2.5 py-1 rounded-full shrink-0" style={{ background: r.bg, color: r.c }}>{r.s}</span>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="rounded-2xl p-3.5" style={{ background: '#f3e5f5', border: '1px solid #e1bee7' }}>
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="size-6 rounded-lg flex items-center justify-center" style={{ background: '#ce93d8' }}>
-                      <HugeiconsIcon icon={SparklesIcon} size={12} className="text-white" />
-                    </div>
-                    <span className="text-xs font-bold" style={{ color: '#6a1b9a' }}>KI-Formulierung</span>
-                    <span className="ml-auto text-[9px] px-1.5 py-0.5 rounded" style={{ background: '#fff', color: G.mid }}>Ctrl+Enter</span>
-                  </div>
-                  <p className="text-[10px] italic mb-2" style={{ color: '#7b1fa2' }}>„API-Fehler behoben, Datenbank-Migration, Teammeeting..."</p>
-                  <div className="h-1.5 rounded-full overflow-hidden" style={{ background: '#e1bee7' }}>
-                    <div className="h-full rounded-full" style={{ width: '70%', background: '#ab47bc', animation: 'goog-float4 2s ease-in-out infinite' }} />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════
-          3. STATS
-      ══════════════════════════════════════ */}
-      <section className="py-20 px-6" style={{ background: '#fff' }}>
+      <section className="py-20 px-6" style={{ background: G.surface, borderTop: `1px solid ${G.border}`, borderBottom: `1px solid ${G.border}` }}>
         <div className="max-w-5xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-8">
           {STATS.map((s, i) => (
             <div key={s.label} className="g-reveal text-center" style={{ transitionDelay: `${i * 0.1}s` }}>
-              <div className="text-5xl sm:text-6xl font-black mb-2 tabular-nums" style={{ color: s.color }}>
-                {s.value.includes('+') ? <><AnimatedNumber target={parseInt(s.value)} />+</> :
-                 s.value.includes('%') ? <><AnimatedNumber target={parseInt(s.value)} />%</> :
-                 s.value}
+              {/* Glow dot */}
+              <div className="size-2 rounded-full mx-auto mb-4" style={{ background: s.color, boxShadow: `0 0 12px ${s.color}` }} />
+              <div className="text-5xl sm:text-6xl font-black mb-2 tabular-nums" style={{ color: s.color, filter: `drop-shadow(0 0 16px ${s.color}60)` }}>
+                <AnimatedNumber target={s.value} suffix={s.suffix} />
               </div>
               <p className="text-sm font-medium" style={{ color: G.mid }}>{s.label}</p>
             </div>
@@ -526,33 +486,36 @@ function LandingPage() {
       </section>
 
       {/* ══════════════════════════════════════
-          4. FEATURES
+          3. FEATURES
       ══════════════════════════════════════ */}
-      <section id="features" className="py-28 px-6" style={{ background: G.light }}>
-        <div className="max-w-6xl mx-auto">
+      <section id="features" className="py-28 px-6 relative overflow-hidden" style={{ background: G.bg }}>
+        {/* Section glow */}
+        <div className="absolute pointer-events-none" style={{ width: 600, height: 600, background: 'radial-gradient(circle, rgba(66,133,244,0.06) 0%, transparent 70%)', top: '0%', left: '-10%', borderRadius: '50%' }} />
+        <div className="max-w-6xl mx-auto relative z-10">
           <div className="text-center mb-16">
-            <p className="g-reveal text-sm font-semibold uppercase tracking-widest mb-4" style={{ color: G.blue }}>Was AzubiHub leistet</p>
-            <h2 className="g-reveal text-5xl sm:text-6xl font-black tracking-tight" style={{ letterSpacing: '-2px', transitionDelay: '0.1s' }}>
-              Vier Gründe,<br />
-              <span style={{ color: G.blue }}>die überzeugen.</span>
+            <SectionLabel text="Was AzubiHub leistet" color={G.blue} />
+            <h2 className="g-reveal text-5xl sm:text-6xl font-black tracking-tight" style={{ ...gradText, letterSpacing: '-2px', transitionDelay: '0.1s' }}>
+              Vier Gründe,<br />die überzeugen.
             </h2>
           </div>
-
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             {FEATURES.map((f, i) => (
               <div key={f.title}
-                className="g-reveal rounded-3xl p-8 transition-all duration-300 cursor-default"
-                style={{ background: '#fff', border: `1px solid ${G.border}`, transitionDelay: `${i * 0.08}s` }}
-                onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.transform = 'translateY(-4px)'; el.style.boxShadow = `0 12px 40px ${f.color}20`; el.style.borderColor = `${f.color}60` }}
-                onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.transform = ''; el.style.boxShadow = ''; el.style.borderColor = G.border }}>
-                <div className="flex items-start justify-between mb-6">
+                className="g-reveal rounded-3xl p-8 relative overflow-hidden transition-all duration-300 cursor-default group"
+                style={{ ...glass, borderRadius: 24, transitionDelay: `${i * 0.08}s` }}
+                onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.background = 'rgba(255,255,255,0.07)'; el.style.borderColor = `${f.color}30`; el.style.transform = 'translateY(-4px)'; el.style.boxShadow = `0 20px 60px ${f.glow}` }}
+                onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.background = 'rgba(255,255,255,0.04)'; el.style.borderColor = G.border; el.style.transform = ''; el.style.boxShadow = '' }}>
+                {/* Card glow top-right */}
+                <div className="absolute top-0 right-0 w-40 h-40 rounded-full pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                  style={{ background: `radial-gradient(circle, ${f.color}20 0%, transparent 70%)` }} />
+                <div className="flex items-start justify-between mb-6 relative z-10">
                   <div className="size-14 rounded-2xl flex items-center justify-center" style={{ background: f.bg }}>
                     <HugeiconsIcon icon={f.icon} size={26} style={{ color: f.color }} />
                   </div>
                   <span className="text-xs font-bold px-3 py-1.5 rounded-full" style={{ background: f.bg, color: f.color }}>{f.stat}</span>
                 </div>
-                <h3 className="text-lg font-bold mb-2" style={{ color: G.dark }}>{f.title}</h3>
-                <p className="text-sm leading-relaxed" style={{ color: G.mid }}>{f.desc}</p>
+                <h3 className="text-lg font-bold mb-2 relative z-10" style={{ color: G.text }}>{f.title}</h3>
+                <p className="text-sm leading-relaxed relative z-10" style={{ color: G.mid }}>{f.desc}</p>
               </div>
             ))}
           </div>
@@ -560,43 +523,43 @@ function LandingPage() {
       </section>
 
       {/* ══════════════════════════════════════
-          5. PROBLEM / LÖSUNG
+          4. PROBLEM / LÖSUNG
       ══════════════════════════════════════ */}
-      <section className="py-28 px-6" style={{ background: '#fff' }}>
-        <div className="max-w-6xl mx-auto">
+      <section className="py-28 px-6 relative overflow-hidden" style={{ background: G.surface }}>
+        <div className="absolute pointer-events-none" style={{ width: 500, height: 500, background: 'radial-gradient(circle, rgba(234,67,53,0.05) 0%, transparent 70%)', bottom: '-5%', right: '-5%', borderRadius: '50%' }} />
+        <div className="max-w-6xl mx-auto relative z-10">
           <div className="text-center mb-16">
-            <p className="g-reveal text-sm font-semibold uppercase tracking-widest mb-4" style={{ color: G.red }}>Die Ausgangslage</p>
-            <h2 className="g-reveal text-5xl sm:text-6xl font-black tracking-tight" style={{ letterSpacing: '-2px', transitionDelay: '0.1s' }}>
+            <SectionLabel text="Die Ausgangslage" color={G.red} />
+            <h2 className="g-reveal text-5xl sm:text-6xl font-black tracking-tight" style={{ ...gradText, letterSpacing: '-2px', transitionDelay: '0.1s' }}>
               So war es bisher.<br />
               <span style={{ color: G.green }}>So geht es besser.</span>
             </h2>
           </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
             {/* Problem */}
-            <div className="g-reveal-left rounded-3xl p-8" style={{ background: '#fce8e6', border: `1px solid #f5c6c2` }}>
+            <div className="g-reveal-left rounded-3xl p-8" style={{ ...glass, borderColor: `rgba(234,67,53,0.15)` }}>
               <div className="flex items-center gap-3 mb-7">
-                <div className="size-10 rounded-xl flex items-center justify-center" style={{ background: '#f5c6c2' }}>
+                <div className="size-10 rounded-xl flex items-center justify-center" style={{ background: 'rgba(234,67,53,0.15)' }}>
                   <HugeiconsIcon icon={Cancel01Icon} size={18} style={{ color: G.red }} />
                 </div>
                 <div>
-                  <p className="font-bold text-sm" style={{ color: G.dark }}>Ohne AzubiHub</p>
+                  <p className="font-bold text-sm" style={{ color: G.text }}>Ohne AzubiHub</p>
                   <p className="text-xs" style={{ color: G.mid }}>Der Ausbildungsalltag heute</p>
                 </div>
               </div>
               <ul className="space-y-5">
                 {[
-                  { t: '3+ Stunden Schreibaufwand pro Woche', d: 'Für Berichte, die nur der Ausbilder liest.' },
-                  { t: 'Papierdokumente gehen verloren',       d: 'Kein Ablagesystem, kein Backup, alles im Ordner.' },
-                  { t: 'Freigabe per E-Mail und Telefon',      d: 'Hin- und herschicken, Korrekturen, erneut senden.' },
-                  { t: 'IHK-Fristen werden übersehen',         d: 'Kein Überblick, keine automatischen Erinnerungen.' },
+                  { t: '3+ Stunden Schreibaufwand/Woche', d: 'Für Berichte, die nur der Ausbilder liest.' },
+                  { t: 'Papierdokumente gehen verloren',   d: 'Kein Ablagesystem, kein Backup, alles im Ordner.' },
+                  { t: 'Freigabe per E-Mail & Telefon',    d: 'Hin- und herschicken, Korrekturen, erneut senden.' },
+                  { t: 'IHK-Fristen werden übersehen',     d: 'Kein Überblick, keine automatischen Erinnerungen.' },
                 ].map(item => (
                   <li key={item.t} className="flex items-start gap-3.5">
-                    <div className="size-5 rounded-full flex items-center justify-center shrink-0 mt-0.5" style={{ background: '#f5c6c2' }}>
+                    <div className="size-5 rounded-full flex items-center justify-center shrink-0 mt-0.5" style={{ background: 'rgba(234,67,53,0.15)' }}>
                       <HugeiconsIcon icon={Cancel01Icon} size={9} style={{ color: G.red }} />
                     </div>
                     <div>
-                      <p className="text-sm font-semibold" style={{ color: '#c5221f' }}>{item.t}</p>
+                      <p className="text-sm font-semibold" style={{ color: '#f28b82' }}>{item.t}</p>
                       <p className="text-xs mt-0.5 leading-relaxed" style={{ color: G.mid }}>{item.d}</p>
                     </div>
                   </li>
@@ -605,29 +568,30 @@ function LandingPage() {
             </div>
 
             {/* Solution */}
-            <div className="g-reveal-right rounded-3xl p-8" style={{ background: '#e6f4ea', border: `1px solid #a8d5b5` }}>
-              <div className="flex items-center gap-3 mb-7">
-                <div className="size-10 rounded-xl flex items-center justify-center" style={{ background: '#a8d5b5' }}>
+            <div className="g-reveal-right rounded-3xl p-8 relative overflow-hidden" style={{ ...glass, borderColor: `rgba(52,168,83,0.2)` }}>
+              <div className="absolute top-0 right-0 w-48 h-48 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(52,168,83,0.08) 0%, transparent 70%)' }} />
+              <div className="flex items-center gap-3 mb-7 relative z-10">
+                <div className="size-10 rounded-xl flex items-center justify-center" style={{ background: 'rgba(52,168,83,0.15)' }}>
                   <HugeiconsIcon icon={CheckmarkBadge01Icon} size={18} style={{ color: G.green }} />
                 </div>
                 <div>
-                  <p className="font-bold text-sm" style={{ color: G.dark }}>Mit AzubiHub</p>
-                  <p className="text-xs" style={{ color: G.mid }}>Digitaler Workflow der wirklich funktioniert</p>
+                  <p className="font-bold text-sm" style={{ color: G.text }}>Mit AzubiHub</p>
+                  <p className="text-xs" style={{ color: G.mid }}>Digitaler Workflow der funktioniert</p>
                 </div>
               </div>
-              <ul className="space-y-5">
+              <ul className="space-y-5 relative z-10">
                 {[
                   { t: '15 Minuten statt 3 Stunden', d: 'KI formuliert IHK-Text aus Stichpunkten — in Sekunden.' },
-                  { t: 'Alles zentral in der Cloud', d: 'Sicheres Ablagesystem, Backup, auf allen Geräten.' },
+                  { t: 'Alles zentral in der Cloud',  d: 'Sicheres Ablagesystem, Backup, auf allen Geräten.' },
                   { t: 'Digitaler Freigabe-Workflow', d: 'Einreichen, kommentieren, freigeben — ein Klick.' },
-                  { t: 'Keine Frist mehr verpassen', d: 'Erinnerungen und Live-Statusübersicht für Ausbilder.' },
+                  { t: 'Keine Frist mehr verpassen',  d: 'Erinnerungen und Live-Statusübersicht für Ausbilder.' },
                 ].map(item => (
                   <li key={item.t} className="flex items-start gap-3.5">
-                    <div className="size-5 rounded-full flex items-center justify-center shrink-0 mt-0.5" style={{ background: '#a8d5b5' }}>
+                    <div className="size-5 rounded-full flex items-center justify-center shrink-0 mt-0.5" style={{ background: 'rgba(52,168,83,0.15)' }}>
                       <HugeiconsIcon icon={CheckmarkCircle01Icon} size={9} style={{ color: G.green }} />
                     </div>
                     <div>
-                      <p className="text-sm font-semibold" style={{ color: '#137333' }}>{item.t}</p>
+                      <p className="text-sm font-semibold" style={{ color: '#81c995' }}>{item.t}</p>
                       <p className="text-xs mt-0.5 leading-relaxed" style={{ color: G.mid }}>{item.d}</p>
                     </div>
                   </li>
@@ -639,36 +603,36 @@ function LandingPage() {
       </section>
 
       {/* ══════════════════════════════════════
-          6. TESTIMONIALS
+          5. TESTIMONIALS
       ══════════════════════════════════════ */}
-      <section className="py-28 px-6" style={{ background: G.light }}>
-        <div className="max-w-6xl mx-auto">
+      <section className="py-28 px-6 relative overflow-hidden" style={{ background: G.bg }}>
+        <div className="absolute pointer-events-none" style={{ width: 700, height: 700, background: 'radial-gradient(circle, rgba(251,188,4,0.04) 0%, transparent 70%)', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', borderRadius: '50%' }} />
+        <div className="max-w-6xl mx-auto relative z-10">
           <div className="text-center mb-16">
-            <p className="g-reveal text-sm font-semibold uppercase tracking-widest mb-4" style={{ color: G.yellow }}>Echte Meinungen</p>
-            <h2 className="g-reveal text-5xl sm:text-6xl font-black tracking-tight" style={{ letterSpacing: '-2px', transitionDelay: '0.1s' }}>
+            <SectionLabel text="Echte Meinungen" color={G.yellow} />
+            <h2 className="g-reveal text-5xl sm:text-6xl font-black tracking-tight" style={{ ...gradText, letterSpacing: '-2px', transitionDelay: '0.1s' }}>
               Was andere sagen.
             </h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {TESTIMONIALS.map((t, i) => (
               <div key={t.name}
-                className="g-reveal rounded-3xl p-6 flex flex-col transition-all duration-300"
-                style={{ background: '#fff', border: `1px solid ${G.border}`, transitionDelay: `${i * 0.07}s` }}
-                onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.transform = 'translateY(-4px)'; el.style.boxShadow = `0 12px 40px ${t.color}18`; el.style.borderColor = `${t.color}50` }}
-                onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.transform = ''; el.style.boxShadow = ''; el.style.borderColor = G.border }}>
+                className="g-reveal rounded-3xl p-6 flex flex-col relative overflow-hidden transition-all duration-300"
+                style={{ ...glass, transitionDelay: `${i * 0.07}s` }}
+                onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.background = 'rgba(255,255,255,0.07)'; el.style.borderColor = `${t.color}25`; el.style.transform = 'translateY(-4px)'; el.style.boxShadow = `0 20px 50px rgba(0,0,0,0.3)` }}
+                onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.background = 'rgba(255,255,255,0.04)'; el.style.borderColor = G.border; el.style.transform = ''; el.style.boxShadow = '' }}>
                 <div className="flex gap-0.5 mb-4">
                   {[...Array(5)].map((_, j) => <HugeiconsIcon key={j} icon={StarIcon} size={13} style={{ color: G.yellow }} />)}
                 </div>
-                <HugeiconsIcon icon={QuoteUpIcon} size={20} style={{ color: `${t.color}40`, marginBottom: 10 }} />
+                <HugeiconsIcon icon={QuoteUpIcon} size={20} style={{ color: `${t.color}35`, marginBottom: 10 }} />
                 <p className="text-sm leading-relaxed flex-1 mb-6" style={{ color: G.mid }}>{t.text}</p>
                 <div className="flex items-center gap-3 pt-4" style={{ borderTop: `1px solid ${G.border}` }}>
-                  <div className="size-9 rounded-xl flex items-center justify-center font-bold text-xs text-white shrink-0"
-                    style={{ background: t.color }}>
+                  <div className="size-9 rounded-xl flex items-center justify-center font-bold text-xs text-white shrink-0" style={{ background: t.color }}>
                     {t.name.split(' ').map(n => n[0]).join('')}
                   </div>
                   <div>
-                    <p className="font-bold text-sm" style={{ color: G.dark }}>{t.name}</p>
-                    <p className="text-[10px]" style={{ color: G.mid }}>{t.role}</p>
+                    <p className="font-bold text-sm" style={{ color: G.text }}>{t.name}</p>
+                    <p className="text-[10px]" style={{ color: G.muted }}>{t.role}</p>
                   </div>
                 </div>
               </div>
@@ -678,105 +642,107 @@ function LandingPage() {
       </section>
 
       {/* ══════════════════════════════════════
-          7. HOW IT WORKS
+          6. HOW IT WORKS
       ══════════════════════════════════════ */}
-      <section id="how-it-works" className="py-28 px-6" style={{ background: '#fff' }}>
-        <div className="max-w-5xl mx-auto">
+      <section id="how-it-works" className="py-28 px-6 relative overflow-hidden" style={{ background: G.surface }}>
+        <div className="max-w-5xl mx-auto relative z-10">
           <div className="text-center mb-16">
-            <p className="g-reveal text-sm font-semibold uppercase tracking-widest mb-4" style={{ color: G.green }}>Der Einstieg</p>
-            <h2 className="g-reveal text-5xl sm:text-6xl font-black tracking-tight" style={{ letterSpacing: '-2px', transitionDelay: '0.1s' }}>
+            <SectionLabel text="Der Einstieg" color={G.green} />
+            <h2 className="g-reveal text-5xl sm:text-6xl font-black tracking-tight" style={{ ...gradText, letterSpacing: '-2px', transitionDelay: '0.1s' }}>
               In 3 Schritten startklar.
             </h2>
-            <p className="g-reveal text-lg mt-4 max-w-lg mx-auto" style={{ color: G.mid, transitionDelay: '0.2s' }}>
-              Kein Onboarding-Aufwand. Kein IT-Projekt. Einfach registrieren und loslegen.
+            <p className="g-reveal text-lg mt-5 max-w-lg mx-auto" style={{ color: G.mid, transitionDelay: '0.2s' }}>
+              Kein Onboarding-Aufwand. Kein IT-Projekt. Einfach loslegen.
             </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 relative">
-            <div className="absolute top-9 hidden sm:block" style={{ left: 'calc(16.7% + 2.5rem)', right: 'calc(16.7% + 2.5rem)', height: 2, background: `linear-gradient(90deg, ${G.blue}60, ${G.red}60, ${G.green}60)`, borderRadius: 2 }} />
+            {/* Connecting gradient line */}
+            <div className="absolute top-10 hidden sm:block" style={{ left: 'calc(16.7% + 2.5rem)', right: 'calc(16.7% + 2.5rem)', height: 1, background: `linear-gradient(90deg, ${G.blue}50, ${G.red}50, ${G.green}50)` }} />
+
             {STEPS.map((s, i) => (
               <div key={s.num} className="g-reveal flex flex-col items-center text-center" style={{ transitionDelay: `${i * 0.12}s` }}>
                 <div className="size-20 rounded-3xl flex items-center justify-center mb-6 text-3xl font-black text-white relative z-10"
-                  style={{ background: s.color, boxShadow: `0 8px 24px ${s.color}40` }}>
-                  {String(s.num).padStart(2, '0')}
+                  style={{ background: s.color, boxShadow: `0 0 30px ${s.color}40, 0 8px 24px rgba(0,0,0,0.3)` }}>
+                  {s.num}
+                  {/* Pulse ring */}
+                  <div className="absolute inset-0 rounded-3xl" style={{ border: `1px solid ${s.color}`, animation: 'goog-pulse-ring 3s ease-out infinite', animationDelay: `${i * 0.8}s` }} />
                 </div>
-                <h3 className="font-bold text-lg mb-3" style={{ color: G.dark }}>{s.title}</h3>
+                <h3 className="font-bold text-lg mb-3" style={{ color: G.text }}>{s.title}</h3>
                 <p className="text-sm leading-relaxed" style={{ color: G.mid }}>{s.desc}</p>
               </div>
             ))}
           </div>
 
           <div className="text-center mt-14">
-            <Link href="/auth/register">
-              <span className="inline-flex items-center gap-2 px-8 py-4 rounded-full text-base font-semibold text-white cursor-pointer select-none transition-all duration-200"
-                style={{ background: G.blue, boxShadow: '0 4px 18px rgba(66,133,244,.4)' }}
-                onMouseEnter={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.transform = 'translateY(-2px)'; el.style.boxShadow = '0 8px 28px rgba(66,133,244,.5)' }}
-                onMouseLeave={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.transform = ''; el.style.boxShadow = '0 4px 18px rgba(66,133,244,.4)' }}>
-                Jetzt kostenlos starten
-                <HugeiconsIcon icon={ArrowRight01Icon} size={18} />
-              </span>
-            </Link>
+            <GButton href="/auth/register" primary className="text-base px-9 py-4">
+              Jetzt kostenlos starten
+              <HugeiconsIcon icon={ArrowRight01Icon} size={18} />
+            </GButton>
           </div>
         </div>
       </section>
 
       {/* ══════════════════════════════════════
-          8. PRICING
+          7. PRICING
       ══════════════════════════════════════ */}
-      <section id="pricing" className="py-28 px-6" style={{ background: G.light }}>
-        <div className="max-w-4xl mx-auto">
+      <section id="pricing" className="py-28 px-6 relative overflow-hidden" style={{ background: G.bg }}>
+        <div className="absolute pointer-events-none" style={{ width: 600, height: 600, background: 'radial-gradient(circle, rgba(66,133,244,0.06) 0%, transparent 70%)', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', borderRadius: '50%' }} />
+        <div className="max-w-4xl mx-auto relative z-10">
           <div className="text-center mb-16">
-            <p className="g-reveal text-sm font-semibold uppercase tracking-widest mb-4" style={{ color: G.blue }}>Preise</p>
-            <h2 className="g-reveal text-5xl sm:text-6xl font-black tracking-tight" style={{ letterSpacing: '-2px', transitionDelay: '0.1s' }}>Einfach. Kostenlos.</h2>
-            <p className="g-reveal text-lg mt-4 max-w-lg mx-auto" style={{ color: G.mid, transitionDelay: '0.2s' }}>Kein Abo. Keine Kreditkarte. Keine versteckten Kosten.</p>
+            <SectionLabel text="Preise" color={G.blue} />
+            <h2 className="g-reveal text-5xl sm:text-6xl font-black tracking-tight" style={{ ...gradText, letterSpacing: '-2px', transitionDelay: '0.1s' }}>Einfach. Kostenlos.</h2>
+            <p className="g-reveal text-lg mt-5 max-w-lg mx-auto" style={{ color: G.mid, transitionDelay: '0.2s' }}>Kein Abo. Keine Kreditkarte. Keine versteckten Kosten.</p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 max-w-2xl mx-auto">
             {/* Free */}
-            <div className="g-reveal rounded-3xl p-8" style={{ background: '#fff', border: `1px solid ${G.border}` }}>
-              <p className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: G.mid }}>Kostenlos</p>
+            <div className="g-reveal rounded-3xl p-8 transition-all duration-300" style={{ ...glass }}
+              onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.background = 'rgba(255,255,255,0.07)'; el.style.transform = 'translateY(-4px)' }}
+              onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => { const el = e.currentTarget; el.style.background = 'rgba(255,255,255,0.04)'; el.style.transform = '' }}>
+              <p className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: G.muted }}>Kostenlos</p>
               <div className="flex items-end gap-1.5 mb-2">
-                <span className="text-6xl font-black" style={{ color: G.dark }}>0€</span>
+                <span className="text-6xl font-black" style={{ color: G.text }}>0€</span>
                 <span className="mb-2 text-sm" style={{ color: G.mid }}>/ für immer</span>
               </div>
               <p className="text-sm mb-7 leading-relaxed" style={{ color: G.mid }}>Alles für eine vollständige Ausbildungsdokumentation.</p>
               <ul className="space-y-3 mb-8">
                 {['Unbegrenzte Wochenberichte','KI-Formulierung','Ausbilder-Freigabe','PDF-Export','Kalender & Statistiken','Cloud-Sync'].map(f => (
-                  <li key={f} className="flex items-center gap-3 text-sm" style={{ color: G.dark }}>
+                  <li key={f} className="flex items-center gap-3 text-sm" style={{ color: G.text }}>
                     <HugeiconsIcon icon={CheckmarkCircle01Icon} size={16} style={{ color: G.green, flexShrink: 0 }} />{f}
                   </li>
                 ))}
               </ul>
               <Link href="/auth/register" className="block">
-                <span className="flex items-center justify-center gap-2 w-full py-3 rounded-full text-sm font-semibold cursor-pointer transition-all duration-200"
-                  style={{ border: `2px solid ${G.border}`, color: G.dark }}
-                  onMouseEnter={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.background = G.light; el.style.borderColor = '#bdc1c6' }}
-                  onMouseLeave={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.background = ''; el.style.borderColor = G.border }}>
+                <span className="flex items-center justify-center w-full py-3.5 rounded-full text-sm font-semibold cursor-pointer transition-all duration-200"
+                  style={{ border: '1px solid rgba(255,255,255,0.15)', color: G.text }}
+                  onMouseEnter={(e: React.MouseEvent<HTMLSpanElement>) => (e.currentTarget as HTMLSpanElement).style.background = 'rgba(255,255,255,0.06)'}
+                  onMouseLeave={(e: React.MouseEvent<HTMLSpanElement>) => (e.currentTarget as HTMLSpanElement).style.background = ''}>
                   Jetzt registrieren
                 </span>
               </Link>
             </div>
 
-            {/* Pro */}
-            <div className="g-reveal rounded-3xl p-[2px] relative" style={{ background: `linear-gradient(135deg, ${G.blue}, ${G.green})`, transitionDelay: '0.1s' }}>
-              <div className="rounded-[22px] p-8 h-full" style={{ background: '#fff' }}>
+            {/* Pro — gradient border */}
+            <div className="g-reveal rounded-3xl p-[1px] relative" style={{ background: `linear-gradient(135deg, ${G.blue}, ${G.green})`, transitionDelay: '0.1s' }}>
+              <div className="rounded-[23px] p-8 h-full" style={{ background: G.surface2 }}>
                 <div className="flex items-start justify-between mb-4">
                   <p className="text-xs font-bold uppercase tracking-widest" style={{ color: G.blue }}>Pro</p>
-                  <span className="text-[10px] font-bold px-3 py-1 rounded-full text-white" style={{ background: G.blue }}>Demnächst</span>
+                  <span className="text-[10px] font-bold px-3 py-1 rounded-full" style={{ background: G.blue, color: '#fff' }}>Demnächst</span>
                 </div>
                 <div className="flex items-end gap-1.5 mb-2">
-                  <span className="text-6xl font-black" style={{ color: G.dark }}>4,99€</span>
+                  <span className="text-6xl font-black" style={{ color: G.text }}>4,99€</span>
                   <span className="mb-2 text-sm" style={{ color: G.mid }}>/ Monat</span>
                 </div>
                 <p className="text-sm mb-7 leading-relaxed" style={{ color: G.mid }}>Für Betriebe mit mehreren Auszubildenden.</p>
                 <ul className="space-y-3 mb-8">
-                  {['Alles aus Kostenlos','Unbegrenzte KI','Team-Verwaltung (20 Azubis)','Vorlagen-Bibliothek','Prioritäts-Support','Native App'].map(f => (
-                    <li key={f} className="flex items-center gap-3 text-sm" style={{ color: G.dark }}>
+                  {['Alles aus Kostenlos','Unbegrenzte KI-Nutzung','Team-Verwaltung (20 Azubis)','Vorlagen-Bibliothek','Prioritäts-Support','Native App'].map(f => (
+                    <li key={f} className="flex items-center gap-3 text-sm" style={{ color: G.text }}>
                       <HugeiconsIcon icon={CheckmarkCircle01Icon} size={16} style={{ color: G.blue, flexShrink: 0 }} />{f}
                     </li>
                   ))}
                 </ul>
-                <button disabled className="w-full py-3 rounded-full text-sm font-semibold opacity-50 cursor-not-allowed text-white" style={{ background: G.blue }}>
+                <button disabled className="w-full py-3.5 rounded-full text-sm font-semibold opacity-40 cursor-not-allowed" style={{ background: G.blue, color: '#fff' }}>
                   Benachrichtigen wenn verfügbar
                 </button>
               </div>
@@ -786,20 +752,22 @@ function LandingPage() {
       </section>
 
       {/* ══════════════════════════════════════
-          9. FAQ
+          8. FAQ
       ══════════════════════════════════════ */}
-      <section id="faq" className="py-28 px-6" style={{ background: '#fff' }}>
-        <div className="max-w-3xl mx-auto">
+      <section id="faq" className="py-28 px-6 relative overflow-hidden" style={{ background: G.surface }}>
+        <div className="max-w-3xl mx-auto relative z-10">
           <div className="text-center mb-16">
-            <p className="g-reveal text-sm font-semibold uppercase tracking-widest mb-4" style={{ color: G.red }}>FAQ</p>
-            <h2 className="g-reveal text-5xl sm:text-6xl font-black tracking-tight" style={{ letterSpacing: '-2px', transitionDelay: '0.1s' }}>Häufige Fragen.</h2>
+            <SectionLabel text="FAQ" color={G.red} />
+            <h2 className="g-reveal text-5xl sm:text-6xl font-black tracking-tight" style={{ ...gradText, letterSpacing: '-2px', transitionDelay: '0.1s' }}>Häufige Fragen.</h2>
           </div>
           <div className="space-y-2">
-            {FAQS.map((f, i) => <FaqItem key={f.q} q={f.q} a={f.a} index={i} />)}
+            {FAQS.map((f, i) => <FaqItem key={f.q} q={f.q} a={f.a} idx={i} />)}
           </div>
-          <p className="text-center text-sm mt-10" style={{ color: G.mid }}>
+          <p className="text-center text-sm mt-10" style={{ color: G.muted }}>
             Noch Fragen?{' '}
-            <a href="mailto:kontakt@azubihub.app" className="font-semibold transition-colors duration-150" style={{ color: G.blue }}>
+            <a href="mailto:kontakt@azubihub.app" className="font-semibold transition-colors duration-150" style={{ color: G.blue }}
+              onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = '#8ab4f8')}
+              onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = G.blue)}>
               Schreib uns direkt.
             </a>
           </p>
@@ -807,45 +775,44 @@ function LandingPage() {
       </section>
 
       {/* ══════════════════════════════════════
-          10. CTA
+          9. CTA
       ══════════════════════════════════════ */}
-      <section className="relative py-36 px-6 overflow-hidden" style={{ background: G.blue }}>
-        {/* Floating shapes on blue bg */}
-        <Sphere size={200} anim="goog-float 9s ease-in-out infinite"
-          grad="radial-gradient(circle at 35% 30%, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.06) 100%)"
-          style={{ top: '-10%', right: '-4%' }} />
-        <Sphere size={140} anim="goog-float2 7s ease-in-out infinite 1s"
-          grad="radial-gradient(circle at 35% 30%, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.04) 100%)"
-          style={{ bottom: '-5%', left: '5%' }} />
+      <section className="relative py-40 px-6 overflow-hidden" style={{ background: G.bg }}>
+        {/* Orbital rings (smaller, centered) */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div className="absolute rounded-full" style={{ width: 700, height: 700, background: 'radial-gradient(circle, rgba(66,133,244,0.08) 0%, transparent 65%)' }} />
+          <div className="absolute rounded-full" style={{ width: 480, height: 480, border: '1px solid rgba(66,133,244,0.12)', animation: 'orbit-cw 22s linear infinite' }}>
+            <span className="absolute rounded-full" style={{ width: 10, height: 10, background: G.blue, top: -5, left: '50%', marginLeft: -5, boxShadow: `0 0 16px ${G.blue}` }} />
+          </div>
+          <div className="absolute rounded-full" style={{ width: 320, height: 320, border: '1px solid rgba(52,168,83,0.14)', animation: 'orbit-ccw 16s linear infinite 1s' }}>
+            <span className="absolute rounded-full" style={{ width: 8, height: 8, background: G.green, bottom: -4, right: '30%', boxShadow: `0 0 12px ${G.green}` }} />
+          </div>
+        </div>
 
         <div className="relative z-10 max-w-2xl mx-auto text-center">
-          <div className="g-reveal inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-semibold text-white/80 mb-10"
-            style={{ border: '1px solid rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.1)' }}>
-            <HugeiconsIcon icon={CheckmarkBadge01Icon} size={14} />
+          <div className="g-reveal inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold mb-10"
+            style={{ ...glass, color: G.mid }}>
+            <HugeiconsIcon icon={CheckmarkBadge01Icon} size={14} style={{ color: G.green }} />
             Kostenlos · Keine Kreditkarte · Sofort startklar
           </div>
-          <h2 className="g-reveal text-5xl sm:text-7xl font-black tracking-tight text-white leading-[1.02] mb-6" style={{ letterSpacing: '-2px', transitionDelay: '0.1s' }}>
+          <h2 className="g-reveal font-black tracking-tight text-white leading-none mb-6"
+            style={{ ...gradText, fontSize: 'clamp(48px, 8vw, 88px)', letterSpacing: '-2px', transitionDelay: '0.1s' }}>
             Bereit?
           </h2>
-          <p className="g-reveal text-xl text-white/70 mb-12 leading-relaxed" style={{ transitionDelay: '0.2s' }}>
-            Hunderte Betriebe haben schon gewechselt.<br />
+          <p className="g-reveal text-xl mb-12 leading-relaxed" style={{ color: G.mid, transitionDelay: '0.2s' }}>
+            Hunderte Betriebe haben bereits gewechselt.<br />
             Der erste Bericht ist in unter 15 Minuten fertig.
           </p>
           <div className="g-reveal flex flex-col sm:flex-row gap-4 justify-center" style={{ transitionDelay: '0.3s' }}>
-            <Link href="/auth/register">
-              <span className="inline-flex items-center gap-2 px-10 py-4 rounded-full text-base font-semibold cursor-pointer select-none transition-all duration-200"
-                style={{ background: '#fff', color: G.blue, boxShadow: '0 4px 20px rgba(0,0,0,0.25)' }}
-                onMouseEnter={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.transform = 'translateY(-2px)'; el.style.boxShadow = '0 8px 32px rgba(0,0,0,0.3)' }}
-                onMouseLeave={(e: React.MouseEvent<HTMLSpanElement>) => { const el = e.currentTarget as HTMLSpanElement; el.style.transform = ''; el.style.boxShadow = '0 4px 20px rgba(0,0,0,0.25)' }}>
-                Kostenlos starten
-                <HugeiconsIcon icon={ArrowRight01Icon} size={18} />
-              </span>
-            </Link>
+            <GButton href="/auth/register" primary className="text-base px-10 py-4">
+              Kostenlos starten
+              <HugeiconsIcon icon={ArrowRight01Icon} size={18} />
+            </GButton>
             <a href="mailto:kontakt@azubihub.app">
-              <span className="inline-flex items-center gap-2 px-10 py-4 rounded-full text-base font-semibold text-white cursor-pointer select-none transition-all duration-200"
-                style={{ border: '2px solid rgba(255,255,255,0.4)' }}
-                onMouseEnter={(e: React.MouseEvent<HTMLSpanElement>) => { (e.currentTarget as HTMLSpanElement).style.background = 'rgba(255,255,255,0.1)' }}
-                onMouseLeave={(e: React.MouseEvent<HTMLSpanElement>) => { (e.currentTarget as HTMLSpanElement).style.background = '' }}>
+              <span className="inline-flex items-center gap-2 px-10 py-4 rounded-full text-base font-semibold cursor-pointer transition-all duration-200"
+                style={{ background: 'rgba(255,255,255,0.05)', color: G.text, border: '1px solid rgba(255,255,255,0.12)' }}
+                onMouseEnter={(e: React.MouseEvent<HTMLSpanElement>) => (e.currentTarget as HTMLSpanElement).style.background = 'rgba(255,255,255,0.09)'}
+                onMouseLeave={(e: React.MouseEvent<HTMLSpanElement>) => (e.currentTarget as HTMLSpanElement).style.background = 'rgba(255,255,255,0.05)'}>
                 <HugeiconsIcon icon={Mail01Icon} size={16} />
                 Kontakt aufnehmen
               </span>
@@ -857,22 +824,22 @@ function LandingPage() {
       {/* ══════════════════════════════════════
           FOOTER
       ══════════════════════════════════════ */}
-      <footer className="py-14 px-6" style={{ background: G.dark }}>
+      <footer className="py-14 px-6" style={{ background: G.surface, borderTop: `1px solid ${G.border}` }}>
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 sm:grid-cols-12 gap-10 mb-12">
             <div className="sm:col-span-5">
-              <Logo light={false} />
-              <p className="text-sm leading-relaxed mt-4 max-w-xs" style={{ color: '#9aa0a6' }}>
+              <Logo />
+              <p className="text-sm leading-relaxed mt-4 max-w-xs" style={{ color: G.mid }}>
                 Die digitale Ausbildungsplattform für moderne Betriebe. KI-gestützt, IHK-konform, kostenlos.
               </p>
               <div className="flex gap-2 mt-5 flex-wrap">
                 {[
-                  { label: 'DSGVO',      c: G.blue  },
-                  { label: 'IHK-konform', c: G.green },
-                  { label: 'KI-gestützt', c: '#ab47bc' },
+                  { label: 'DSGVO',       c: G.blue   },
+                  { label: 'IHK-konform', c: G.green  },
+                  { label: 'KI-gestützt', c: G.purple },
                 ].map(b => (
                   <span key={b.label} className="text-xs font-semibold px-3 py-1 rounded-full"
-                    style={{ border: `1px solid ${b.c}40`, color: b.c, background: `${b.c}15` }}>
+                    style={{ border: `1px solid ${b.c}30`, color: b.c, background: `${b.c}12` }}>
                     {b.label}
                   </span>
                 ))}
@@ -885,9 +852,9 @@ function LandingPage() {
                   <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer"
                     aria-label={`AzubiHub auf ${s.label}`}
                     className="size-10 rounded-xl flex items-center justify-center transition-all duration-150"
-                    style={{ border: '1px solid #3c4043', color: '#9aa0a6' }}
-                    onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => { const el = e.currentTarget; el.style.background = '#3c4043'; el.style.color = '#fff' }}
-                    onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => { const el = e.currentTarget; el.style.background = ''; el.style.color = '#9aa0a6' }}>
+                    style={{ ...glass, color: G.muted }}
+                    onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => { const el = e.currentTarget; el.style.background = 'rgba(255,255,255,0.1)'; el.style.color = '#fff' }}
+                    onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => { const el = e.currentTarget; el.style.background = 'rgba(255,255,255,0.04)'; el.style.color = G.muted }}>
                     <HugeiconsIcon icon={s.icon} size={16} />
                   </a>
                 ))}
@@ -895,12 +862,12 @@ function LandingPage() {
             </div>
 
             <div className="sm:col-span-3">
-              <p className="text-xs font-bold uppercase tracking-widest mb-5" style={{ color: '#5f6368' }}>Produkt</p>
+              <p className="text-xs font-bold uppercase tracking-widest mb-5" style={{ color: G.muted }}>Produkt</p>
               <nav className="space-y-3">
-                {[['#features','Features'],['#pricing','Preise'],['#faq','FAQ'],['/auth/register','Registrieren'],['/auth/login','Anmelden']].map(([href,label]) => (
-                  <a key={label} href={href} className="block text-sm transition-colors duration-150" style={{ color: '#9aa0a6' }}
+                {[['#features','Features'],['#pricing','Preise'],['#faq','FAQ'],['/auth/register','Registrieren'],['/auth/login','Anmelden']].map(([href, label]) => (
+                  <a key={label} href={href} className="block text-sm transition-colors duration-150" style={{ color: G.mid }}
                     onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = '#fff')}
-                    onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = '#9aa0a6')}>
+                    onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = G.mid)}>
                     {label}
                   </a>
                 ))}
@@ -908,25 +875,27 @@ function LandingPage() {
             </div>
 
             <div className="sm:col-span-4">
-              <p className="text-xs font-bold uppercase tracking-widest mb-5" style={{ color: '#5f6368' }}>Rechtliches</p>
+              <p className="text-xs font-bold uppercase tracking-widest mb-5" style={{ color: G.muted }}>Rechtliches</p>
               <nav className="space-y-3">
-                <Link href="/impressum" className="block text-sm transition-colors duration-150" style={{ color: '#9aa0a6' }}
-                  onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = '#fff')}
-                  onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = '#9aa0a6')}>Impressum</Link>
-                <Link href="/datenschutz" className="block text-sm transition-colors duration-150" style={{ color: '#9aa0a6' }}
-                  onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = '#fff')}
-                  onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = '#9aa0a6')}>Datenschutzerklärung</Link>
-                <span className="block text-sm" style={{ color: '#5f6368' }}>AGB (in Vorbereitung)</span>
-                <a href="mailto:kontakt@azubihub.app" className="block text-sm transition-colors duration-150" style={{ color: '#9aa0a6' }}
-                  onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = '#fff')}
-                  onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = '#9aa0a6')}>kontakt@azubihub.app</a>
+                {[
+                  { href: '/impressum',               label: 'Impressum' },
+                  { href: '/datenschutz',              label: 'Datenschutzerklärung' },
+                  { href: 'mailto:kontakt@azubihub.app', label: 'kontakt@azubihub.app' },
+                ].map(({ href, label }) => (
+                  <Link key={label} href={href} className="block text-sm transition-colors duration-150" style={{ color: G.mid }}
+                    onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = '#fff')}
+                    onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = G.mid)}>
+                    {label}
+                  </Link>
+                ))}
+                <span className="block text-sm" style={{ color: G.muted }}>AGB (in Vorbereitung)</span>
               </nav>
             </div>
           </div>
 
-          <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3" style={{ borderTop: '1px solid #3c4043' }}>
-            <span className="text-xs" style={{ color: '#5f6368' }}>© {new Date().getFullYear()} AzubiHub. Alle Rechte vorbehalten.</span>
-            <span className="text-xs" style={{ color: '#5f6368' }}>Gebaut für Auszubildende und Ausbilder in Deutschland</span>
+          <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3" style={{ borderTop: `1px solid ${G.border}` }}>
+            <span className="text-xs" style={{ color: G.muted }}>© {new Date().getFullYear()} AzubiHub. Alle Rechte vorbehalten.</span>
+            <span className="text-xs" style={{ color: G.muted }}>Gebaut für Auszubildende und Ausbilder in Deutschland</span>
           </div>
         </div>
       </footer>
