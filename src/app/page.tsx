@@ -576,62 +576,190 @@ function Nav() {
 
   return (
     <>
-      <nav className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 ease-in-out ${scrolled ? 'top-4 inset-x-4 max-w-5xl mx-auto h-14 bg-white/70 backdrop-blur-2xl border border-gray-200/20 rounded-full shadow-xl shadow-gray-200/10' : 'h-20 bg-transparent'}`}>
-        <div className={`h-full flex items-center justify-between relative ${scrolled ? 'px-4' : 'max-w-7xl mx-auto px-6'}`}>
+      {/* ── Desktop / main nav ── */}
+      <nav style={{
+        position: 'fixed',
+        top: scrolled ? 14 : 0,
+        left: scrolled ? '50%' : 0,
+        right: scrolled ? 'auto' : 0,
+        transform: scrolled ? 'translateX(-50%)' : 'none',
+        width: scrolled ? 'min(880px, calc(100% - 2rem))' : '100%',
+        zIndex: 100,
+        height: scrolled ? 54 : 72,
+        display: 'flex',
+        alignItems: 'center',
+        background: scrolled ? 'rgba(255,255,255,0.94)' : 'transparent',
+        backdropFilter: scrolled ? 'blur(20px)' : 'none',
+        WebkitBackdropFilter: scrolled ? 'blur(20px)' : 'none',
+        border: scrolled ? '1px solid rgba(0,0,0,0.09)' : 'none',
+        borderRadius: scrolled ? 9999 : 0,
+        boxShadow: scrolled ? '0 2px 8px rgba(0,0,0,0.06), 0 12px 32px rgba(0,0,0,0.05)' : 'none',
+        transition: 'top 450ms cubic-bezier(0.4,0,0.2,1), width 450ms cubic-bezier(0.4,0,0.2,1), height 350ms cubic-bezier(0.4,0,0.2,1), background 350ms ease, border-radius 450ms ease, box-shadow 350ms ease, border 350ms ease',
+        padding: scrolled ? '0 6px 0 20px' : '0',
+      }}>
+        <div style={{
+          width: '100%', height: '100%', display: 'flex', alignItems: 'center',
+          justifyContent: 'space-between', position: 'relative',
+          maxWidth: scrolled ? 'none' : 1280,
+          margin: scrolled ? '0' : '0 auto',
+          padding: scrolled ? '0' : '0 24px',
+        }}>
 
-          <div className="flex-1 flex justify-start">
-            <Link href="/" className="no-underline active:scale-95 transition-transform" onClick={() => setMenuOpen(false)}>
+          {/* Logo */}
+          <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-start' }}>
+            <Link href="/" style={{ textDecoration: 'none', display: 'inline-flex' }} onClick={() => setMenuOpen(false)}>
               <Logo size={scrolled ? 24 : 28} />
             </Link>
           </div>
 
-          <div className={`hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-1 transition-all duration-500 ${scrolled ? 'bg-white/40 p-0.5' : 'bg-transparent p-0'} rounded-full`}>
+          {/* Center links — desktop only */}
+          <div className="hidden md:flex" style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', alignItems: 'center', gap: 2 }}>
             {links.map(([href, label]) => (
-              <a key={href} href={href} className={`text-[0.8125rem] font-medium text-gray-600 px-5 py-2 rounded-full hover:text-blue-600 hover:bg-white transition-all duration-300 no-underline ${scrolled ? 'text-gray-800' : 'text-gray-600'}`}>
+              <a key={href} href={href} style={{
+                textDecoration: 'none', fontSize: '0.875rem', fontWeight: 500,
+                color: scrolled ? '#3c4043' : '#5f6368',
+                padding: '8px 16px', borderRadius: 9999,
+                transition: 'background 150ms ease, color 150ms ease',
+              }}
+                onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                  e.currentTarget.style.background = scrolled ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.72)'
+                  e.currentTarget.style.color = '#1a73e8'
+                }}
+                onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                  e.currentTarget.style.background = 'transparent'
+                  e.currentTarget.style.color = scrolled ? '#3c4043' : '#5f6368'
+                }}>
                 {label}
               </a>
             ))}
           </div>
 
-          <div className="flex-1 flex justify-end items-center gap-2">
-            {!scrolled && (
-              <Link href="/auth/login" className="hidden sm:inline-flex text-[0.875rem] font-medium text-gray-500 px-4 py-2 hover:text-gray-900 transition-colors no-underline">
-                Anmelden
-              </Link>
-            )}
-            <Link href="/auth/register" className="no-underline">
-              <span className={`bg-[#4285f4] hover:bg-[#1a73e8] text-white px-6 py-2 rounded-full text-[0.8125rem] font-semibold transition-all duration-300 active:scale-95 shadow-sm hover:shadow-md ${scrolled ? 'h-10 flex items-center' : 'h-11 flex items-center'}`}>
+          {/* Right cluster */}
+          <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 4 }}>
+
+            {/* Anmelden */}
+            <Link href="/auth/login" className="hidden sm:inline-flex" style={{
+              textDecoration: 'none', fontSize: '0.875rem', fontWeight: 500,
+              color: scrolled ? '#3c4043' : '#5f6368',
+              padding: '8px 16px', borderRadius: 9999,
+              transition: 'background 150ms ease, color 150ms ease',
+            }}
+              onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                e.currentTarget.style.background = scrolled ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.72)'
+                e.currentTarget.style.color = '#1a73e8'
+              }}
+              onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                e.currentTarget.style.background = 'transparent'
+                e.currentTarget.style.color = scrolled ? '#3c4043' : '#5f6368'
+              }}>
+              Anmelden
+            </Link>
+
+            {/* CTA */}
+            <Link href="/auth/register" style={{ textDecoration: 'none' }}>
+              <span style={{
+                display: 'inline-flex', alignItems: 'center',
+                height: scrolled ? 38 : 42,
+                padding: '0 22px',
+                background: '#4285f4', color: '#fff',
+                borderRadius: 9999,
+                fontSize: '0.875rem', fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'background 200ms ease, box-shadow 200ms ease, height 350ms ease',
+                letterSpacing: '0.01em', whiteSpace: 'nowrap',
+              }}
+                onMouseEnter={(e: React.MouseEvent<HTMLSpanElement>) => {
+                  e.currentTarget.style.background = '#1a73e8'
+                  e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.2), 0 6px 16px rgba(26,115,232,0.28)'
+                }}
+                onMouseLeave={(e: React.MouseEvent<HTMLSpanElement>) => {
+                  e.currentTarget.style.background = '#4285f4'
+                  e.currentTarget.style.boxShadow = 'none'
+                }}>
                 {scrolled ? 'Starten' : 'Loslegen'}
               </span>
             </Link>
 
+            {/* Mobile hamburger */}
             <button
               onClick={() => setMenuOpen(o => !o)}
-              className="md:hidden flex flex-col items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition-colors"
+              className="md:hidden"
+              style={{
+                width: 40, height: 40, borderRadius: '50%', border: 'none',
+                background: 'transparent', cursor: 'pointer',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 5,
+                transition: 'background 150ms ease',
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(0,0,0,0.06)' }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
             >
-              <div className={`w-5 h-0.5 bg-gray-900 rounded-full transition-all duration-300 ${menuOpen ? 'rotate-45 translate-y-1' : ''}`} />
-              <div className={`w-5 h-0.5 bg-gray-900 rounded-full mt-1.5 transition-all duration-200 ${menuOpen ? 'opacity-0' : ''}`} />
-              <div className={`w-5 h-0.5 bg-gray-900 rounded-full mt-1.5 transition-all duration-300 ${menuOpen ? '-rotate-45 -translate-y-1' : ''}`} />
+              <div style={{ width: 18, height: 1.5, background: '#202124', borderRadius: 4, transition: 'all 300ms ease', transform: menuOpen ? 'rotate(45deg) translate(4px, 4px)' : 'none' }} />
+              <div style={{ width: 18, height: 1.5, background: '#202124', borderRadius: 4, transition: 'all 200ms ease', opacity: menuOpen ? 0 : 1 }} />
+              <div style={{ width: 18, height: 1.5, background: '#202124', borderRadius: 4, transition: 'all 300ms ease', transform: menuOpen ? 'rotate(-45deg) translate(4px, -4px)' : 'none' }} />
             </button>
           </div>
         </div>
       </nav>
 
-      <div className={`fixed inset-x-0 top-0 bg-white/98 backdrop-blur-2xl z-[99] md:hidden transition-all duration-500 ease-in-out border-b border-gray-200 ${menuOpen ? 'h-[100dvh] opacity-100' : 'h-0 opacity-0 overflow-hidden'}`}>
-        <div className="flex flex-col h-full pt-24 px-8 pb-12">
-          <div className="flex flex-col gap-2">
-            {links.map(([href, label]) => (
-              <a key={href} href={href} onClick={() => setMenuOpen(false)} className="text-4xl font-semibold text-gray-900 py-4 no-underline tracking-tight active:text-blue-600 transition-colors">
+      {/* ── Mobile full-screen menu ── */}
+      <div className="md:hidden" style={{
+        position: 'fixed', inset: 0, zIndex: 99,
+        background: 'rgba(255,255,255,0.97)',
+        backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)',
+        transition: 'opacity 350ms ease, transform 350ms cubic-bezier(0.4,0,0.2,1)',
+        opacity: menuOpen ? 1 : 0,
+        transform: menuOpen ? 'none' : 'translateY(-12px)',
+        pointerEvents: menuOpen ? 'all' : 'none',
+      }}>
+        {/* Top bar */}
+        <div style={{ height: 72, display: 'flex', alignItems: 'center', padding: '0 24px', justifyContent: 'space-between' }}>
+          <Logo size={28} />
+          <button onClick={() => setMenuOpen(false)} style={{
+            width: 40, height: 40, borderRadius: '50%', border: 'none',
+            background: 'rgba(0,0,0,0.04)', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            transition: 'background 150ms ease',
+          }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(0,0,0,0.08)' }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(0,0,0,0.04)' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#202124" strokeWidth="2" strokeLinecap="round">
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <div style={{ padding: '16px 32px', display: 'flex', flexDirection: 'column', height: 'calc(100% - 72px)' }}>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            {links.map(([href, label], i) => (
+              <a key={href} href={href} onClick={() => setMenuOpen(false)} style={{
+                textDecoration: 'none',
+                fontSize: '2.25rem', fontWeight: 600, color: '#202124',
+                padding: '14px 0', letterSpacing: '-0.02em',
+                borderBottom: i < links.length - 1 ? '1px solid rgba(0,0,0,0.06)' : 'none',
+                transition: 'color 150ms ease',
+              }}
+                onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => { e.currentTarget.style.color = '#4285f4' }}
+                onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => { e.currentTarget.style.color = '#202124' }}>
                 {label}
               </a>
             ))}
           </div>
-          <div className="mt-auto flex flex-col gap-4">
-            <Link href="/auth/login" onClick={() => setMenuOpen(false)} className="text-xl font-medium text-gray-500 no-underline py-4 border-t border-gray-100 text-center">
+
+          <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <Link href="/auth/login" onClick={() => setMenuOpen(false)} style={{
+              textDecoration: 'none', fontSize: '1rem', fontWeight: 500,
+              color: '#5f6368', textAlign: 'center', padding: '14px 0',
+              borderTop: '1px solid rgba(0,0,0,0.07)',
+            }}>
               Anmelden
             </Link>
-            <Link href="/auth/register" onClick={() => setMenuOpen(false)} className="no-underline">
-              <span className="block text-center py-5 bg-[#4285f4] text-white rounded-3xl font-semibold text-xl shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-transform">
+            <Link href="/auth/register" onClick={() => setMenuOpen(false)} style={{ textDecoration: 'none' }}>
+              <span style={{
+                display: 'block', textAlign: 'center', padding: '18px 0',
+                background: '#4285f4', color: '#fff', borderRadius: 18,
+                fontWeight: 600, fontSize: '1.0625rem',
+                boxShadow: '0 4px 16px rgba(66,133,244,0.28)',
+              }}>
                 Kostenlos starten
               </span>
             </Link>
