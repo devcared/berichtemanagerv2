@@ -332,7 +332,7 @@ function FaqItem({ q, a }: { q: string; a: string }) {
 }
 
 /* ═══════════════════════════════════════
-   LANDING PAGE — exact antigravity.google
+   LANDING PAGE — exact antigravity
 ═══════════════════════════════════════ */
 function LandingPage() {
   useScrollReveal()
