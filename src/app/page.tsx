@@ -180,7 +180,7 @@ function AppHome() {
 
           {/* Theme */}
           <button
-            onClick={toggleTheme} title={isDark ? 'Light Mode' : 'Dark Mode'}
+            onClick={e => toggleTheme({ x: e.clientX, y: e.clientY })} title={isDark ? 'Light Mode' : 'Dark Mode'}
             style={{ width: 36, height: 36, borderRadius: 9, border: 'none', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: fgMuted, transition: 'background 120ms, color 120ms', fontFamily: 'inherit', flexShrink: 0 }}
             onMouseEnter={e => { e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.06)'; e.currentTarget.style.color = fg }}
             onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = fgMuted }}

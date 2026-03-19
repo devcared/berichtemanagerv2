@@ -1,5 +1,21 @@
 @import "tailwindcss";
 
+/* ── Theme switch: circular reveal via View Transitions API ── */
+::view-transition-old(root) {
+  animation: none;
+  z-index: 1;
+}
+
+::view-transition-new(root) {
+  z-index: 9999;
+  animation: vt-theme-reveal 480ms cubic-bezier(0.4, 0, 0.15, 1) forwards;
+}
+
+@keyframes vt-theme-reveal {
+  from { clip-path: circle(0% at var(--vt-x, 50%) var(--vt-y, 50%)); }
+  to   { clip-path: circle(150% at var(--vt-x, 50%) var(--vt-y, 50%)); }
+}
+
 @layer base {
   :root {
     /* ── Google Light Theme ── */

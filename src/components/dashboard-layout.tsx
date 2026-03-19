@@ -246,7 +246,7 @@ export default function DashboardLayout({ children, sections, subtitle }: Props)
         }}>
           {/* Theme */}
           <button
-            onClick={toggleTheme}
+            onClick={e => toggleTheme({ x: e.clientX, y: e.clientY })}
             title={isDark ? 'Light Mode' : 'Dark Mode'}
             style={isCollapsed
               ? iconBtn({ width: 36, height: 36 })
@@ -377,7 +377,7 @@ export default function DashboardLayout({ children, sections, subtitle }: Props)
 
           {/* Theme toggle */}
           <button
-            onClick={toggleTheme}
+            onClick={e => toggleTheme({ x: e.clientX, y: e.clientY })}
             title={isDark ? 'Light Mode' : 'Dark Mode'}
             style={{ width: 34, height: 34, borderRadius: 8, border: '1px solid hsl(var(--border))', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'hsl(var(--foreground))', transition: 'background 120ms', flexShrink: 0 }}
             onMouseEnter={e => (e.currentTarget.style.background = 'hsl(var(--accent))')}

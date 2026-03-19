@@ -26,7 +26,7 @@ export function ThemeToggle() {
   const { theme, toggleTheme } = useTheme()
   return (
     <button
-      onClick={toggleTheme}
+      onClick={e => toggleTheme({ x: e.clientX, y: e.clientY })}
       className="flex items-center justify-center p-2 rounded-full hover:bg-muted transition-colors text-muted-foreground"
       title={theme === 'dark' ? 'Helles Design' : 'Dunkles Design'}
     >
