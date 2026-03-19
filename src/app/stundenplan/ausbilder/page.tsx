@@ -163,7 +163,7 @@ export default function AusbilderStundenplanPage() {
 
   useEffect(() => {
     if (profileLoading) return
-    if (trainerProfile?.role !== 'trainer') { router.push('/stundenplan'); return }
+    if (trainerProfile?.role !== 'trainer' && trainerProfile?.role !== 'admin') { router.push('/stundenplan'); return }
     load()
   }, [profileLoading, trainerProfile, router, load])
 
@@ -248,7 +248,7 @@ export default function AusbilderStundenplanPage() {
       </div>
     )
   }
-  if (trainerProfile?.role !== 'trainer') return null
+  if (trainerProfile?.role !== 'trainer' && trainerProfile?.role !== 'admin') return null
 
   /* ─── Derived ─── */
   const withDocs    = apprentices.filter(ap => documents.some(d => d.schedule_document_assignments.some(a => a.profile_id === ap.id)))

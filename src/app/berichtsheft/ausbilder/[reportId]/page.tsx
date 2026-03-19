@@ -217,7 +217,7 @@ export default function AusbilderReportDetailPage() {
         authorName: p ? `${p.first_name} ${p.last_name}` : 'Unbekannt',
         createdAt: c.created_at,
         isOwn: c.author_id === profile?.id,
-        isTrainer: p?.role === 'trainer',
+        isTrainer: p?.role === 'trainer' || p?.role === 'admin',
       }
     }))
   }, [reportId, supabase, profile?.id])
@@ -626,7 +626,7 @@ export default function AusbilderReportDetailPage() {
           <div className="space-y-4 lg:sticky lg:top-[57px] lg:max-h-[calc(100vh-100px)] lg:overflow-y-auto">
 
             {/* Action Card */}
-            {profile?.role === 'trainer' && (
+            {(profile?.role === 'trainer' || profile?.role === 'admin') && (
               <Card className={cn(
                 'border overflow-hidden',
                 report.status === 'approved' ? 'border-green-500/30 bg-green-500/5' :

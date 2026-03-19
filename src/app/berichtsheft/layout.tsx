@@ -5,6 +5,7 @@ import DashboardLayout, { NavSection } from '@/components/dashboard-layout'
 import {
   HomeIcon, CalendarIcon, AnalyticsUpIcon,
   UserCircleIcon, GridViewIcon, CheckmarkBadge01Icon,
+  Shield01Icon,
 } from '@hugeicons/core-free-icons'
 
 const sections: NavSection[] = [
@@ -21,6 +22,7 @@ const sections: NavSection[] = [
     title: 'Einstellungen',
     items: [
       { label: 'Profil',            href: '/berichtsheft/profil', icon: UserCircleIcon },
+      { label: 'Admin-Panel',       href: '/admin',               icon: Shield01Icon, adminOnly: true },
       { label: 'Zur Übersicht',     href: '/',                    icon: GridViewIcon },
     ],
   },

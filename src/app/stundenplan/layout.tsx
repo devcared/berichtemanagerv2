@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import DashboardLayout, { NavSection } from '@/components/dashboard-layout'
-import { CalendarIcon, GridViewIcon, CheckmarkBadge01Icon } from '@hugeicons/core-free-icons'
+import { CalendarIcon, GridViewIcon, CheckmarkBadge01Icon, Shield01Icon } from '@hugeicons/core-free-icons'
 
 const sections: NavSection[] = [
   {
@@ -15,7 +15,8 @@ const sections: NavSection[] = [
   {
     title: 'Allgemein',
     items: [
-      { label: 'Zur Übersicht', href: '/', icon: GridViewIcon },
+      { label: 'Admin-Panel',   href: '/admin', icon: Shield01Icon, adminOnly: true },
+      { label: 'Zur Übersicht', href: '/',      icon: GridViewIcon },
     ],
   },
 ]

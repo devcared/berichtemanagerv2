@@ -9,7 +9,7 @@ import { HugeiconsIcon } from '@hugeicons/react'
 import { Logout01Icon } from '@hugeicons/core-free-icons'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export interface NavItem { label: string; href: string; icon: any; trainerOnly?: boolean }
+export interface NavItem { label: string; href: string; icon: any; trainerOnly?: boolean; adminOnly?: boolean }
 export interface NavSection { title?: string; items: NavItem[] }
 
 /* ── SVG icons ── */
@@ -36,6 +36,13 @@ const SEGMENT_LABELS: Record<string, string> = {
   ausbilder:    'Ausbilder',
   verwaltung:   'Verwaltung',
   vorlagen:     'Vorlagen',
+  admin:        'Admin',
+  users:        'Benutzer',
+  analytics:    'Analytics',
+  audit:        'Audit-Log',
+  roles:        'Rollen',
+  settings:     'Einstellungen',
+  data:         'Datenbank',
 }
 
 function Breadcrumb({ pathname, onNavigate }: { pathname: string; onNavigate: (href: string) => void }) {
@@ -162,7 +169,11 @@ export default function DashboardLayout({ children, sections, subtitle }: Props)
         {/* ── Navigation ── */}
         <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: isCollapsed ? '0.625rem 0' : '0.75rem 0.75rem 0' }}>
           {sections.map((section, si) => {
-            const visible = section.items.filter(i => !i.trainerOnly || profile?.role === 'trainer')
+            const visible = section.items.filter(i => {
+              if (i.adminOnly) return profile?.role === 'admin'
+              if (i.trainerOnly) return profile?.role === 'trainer' || profile?.role === 'admin'
+              return true
+            })
             if (!visible.length) return null
             return (
               <div key={si} style={{ marginBottom: '0.75rem' }}>
@@ -318,7 +329,11 @@ export default function DashboardLayout({ children, sections, subtitle }: Props)
   }
 
   const bottomNavItems = (sections[0]?.items ?? [])
-    .filter(i => !i.trainerOnly || profile?.role === 'trainer')
+    .filter(i => {
+      if (i.adminOnly) return profile?.role === 'admin'
+      if (i.trainerOnly) return profile?.role === 'trainer' || profile?.role === 'admin'
+      return true
+    })
     .slice(0, 3)
 
   return (

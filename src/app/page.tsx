@@ -117,6 +117,7 @@ function AppHome() {
     ? `${profile.firstName?.[0] ?? ''}${profile.lastName?.[0] ?? ''}`.toUpperCase()
     : 'AZ'
 
+  const isAdmin = profile?.role === 'admin'
   const enabledModules = order.map(id => modules.find(m => m.id === id)!).filter(Boolean)
   const comingModules = modules.filter(m => !m.isEnabled && !m.isAdmin)
   const adminModules = modules.filter(m => m.isAdmin)
@@ -282,7 +283,7 @@ function AppHome() {
         )}
 
         {/* ── Admin modules ── */}
-        {adminModules.length > 0 && (
+        {isAdmin && adminModules.length > 0 && (
           <>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: '1rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, whiteSpace: 'nowrap' }}>

@@ -1,35 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
-
-/** Prüft ob der anfragende Nutzer ein Trainer ist */
-async function verifyTrainer(): Promise<{ userId: string } | null> {
-  const cookieStore = await cookies()
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-      ?? process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY!,
-    { cookies: { getAll: () => cookieStore.getAll() } }
-  )
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return null
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
-  if (profile?.role !== 'trainer') return null
-  return { userId: user.id }
-}
+import { verifyTrainerOrAdmin } from '@/lib/auth/verify-server'
 
 /** GET /api/admin/profiles – alle Profile mit Report-Statistiken */
 export async function GET() {
   try {
-    const trainer = await verifyTrainer()
+    const trainer = await verifyTrainerOrAdmin()
     if (!trainer) {
       return NextResponse.json({ error: 'Kein Zugriff.' }, { status: 403 })
     }
@@ -95,7 +71,7 @@ export async function GET() {
 /** PATCH /api/admin/profiles – Rolle oder Profilfelder eines Nutzers ändern */
 export async function PATCH(req: NextRequest) {
   try {
-    const trainer = await verifyTrainer()
+    const trainer = await verifyTrainerOrAdmin()
     if (!trainer) {
       return NextResponse.json({ error: 'Kein Zugriff.' }, { status: 403 })
     }
@@ -110,10 +86,10 @@ export async function PATCH(req: NextRequest) {
 
     // Rollenänderung
     if (body.role !== undefined) {
-      if (!['apprentice', 'trainer'].includes(body.role)) {
+      if (!['apprentice', 'trainer', 'admin'].includes(body.role)) {
         return NextResponse.json({ error: 'Ungültige Rolle.' }, { status: 400 })
       }
-      if (userId === trainer.userId && body.role === 'apprentice') {
+      if (userId === trainer.userId) {
         return NextResponse.json({ error: 'Du kannst deine eigene Rolle nicht ändern.' }, { status: 400 })
       }
       const { error } = await admin
@@ -149,7 +125,7 @@ export async function PATCH(req: NextRequest) {
 /** DELETE /api/admin/profiles – Nutzer vollständig löschen */
 export async function DELETE(req: NextRequest) {
   try {
-    const trainer = await verifyTrainer()
+    const trainer = await verifyTrainerOrAdmin()
     if (!trainer) {
       return NextResponse.json({ error: 'Kein Zugriff.' }, { status: 403 })
     }

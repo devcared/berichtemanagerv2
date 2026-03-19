@@ -178,7 +178,7 @@ export default function AusbilderPage() {
     return <div className="flex items-center justify-center min-h-[60vh] text-muted-foreground text-sm">Lädt…</div>
   }
 
-  if (profile?.role !== 'trainer') {
+  if (profile?.role !== 'trainer' && profile?.role !== 'admin') {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 text-center p-6">
         <div className="size-16 rounded-full bg-destructive/10 flex items-center justify-center">

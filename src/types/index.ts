@@ -1,4 +1,4 @@
-export type UserRole = 'apprentice' | 'trainer'
+export type UserRole = 'apprentice' | 'trainer' | 'admin'
 
 export type ReportStatus =
   | 'draft'           // Azubi schreibt noch
