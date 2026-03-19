@@ -113,7 +113,7 @@ export default function AusbilderPage() {
   }, [supabase])
 
   useEffect(() => {
-    if (!profileLoading && profile?.role === 'trainer') loadReports()
+    if (!profileLoading && (profile?.role === 'trainer' || profile?.role === 'admin')) loadReports()
   }, [profile, profileLoading, loadReports])
 
   const counts = useMemo(() => ({

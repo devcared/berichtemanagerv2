@@ -128,7 +128,7 @@ export default function VerwaltungPage() {
   }, [])
 
   useEffect(() => {
-    if (!profileLoading && profile?.role === 'trainer') loadProfiles()
+    if (!profileLoading && (profile?.role === 'trainer' || profile?.role === 'admin')) loadProfiles()
   }, [profile, profileLoading, loadProfiles])
 
   async function handleRoleChange(userId: string, newRole: 'apprentice' | 'trainer') {
