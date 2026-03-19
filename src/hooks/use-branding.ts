@@ -15,8 +15,6 @@ const DEFAULT_BRANDING: Branding = {
   accentColor: '#4285f4',
 }
 
-const GLOBAL_BRANDING_KEY = 'azubihub-global-branding'
-
 export function useBranding(): Branding {
   const { profile } = useProfile()
   const [branding, setBranding] = useState<Branding>(DEFAULT_BRANDING)
@@ -49,21 +47,24 @@ export function useBranding(): Branding {
             return
           }
         } catch {
-          // Fall through to defaults
+          // Fall through to global branding
         }
       }
 
-      // No company assigned — read from localStorage global branding
+      // No company assigned — read from Supabase platform_settings
       try {
-        const stored = localStorage.getItem(GLOBAL_BRANDING_KEY)
-        if (stored) {
-          const parsed = JSON.parse(stored) as Partial<Branding>
-          setBranding({
-            name: parsed.name || DEFAULT_BRANDING.name,
-            logoUrl: parsed.logoUrl ?? '',
-            accentColor: parsed.accentColor || DEFAULT_BRANDING.accentColor,
-          })
-          return
+        const res = await fetch('/api/platform-settings')
+        if (res.ok) {
+          const json = await res.json()
+          const b = json.branding
+          if (b) {
+            setBranding({
+              name: b.name || DEFAULT_BRANDING.name,
+              logoUrl: b.logoUrl ?? '',
+              accentColor: b.accentColor || DEFAULT_BRANDING.accentColor,
+            })
+            return
+          }
         }
       } catch {
         // Fall through to defaults

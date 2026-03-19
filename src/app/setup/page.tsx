@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -16,6 +16,9 @@ import {
   UserCircleIcon,
   BuildingIcon,
   Settings01Icon,
+  Building01Icon,
+  Key01Icon,
+  ArrowRight01Icon,
 } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 
@@ -65,7 +68,7 @@ function StepIndicator({ steps, current }: StepIndicatorProps) {
           </div>
           {i < steps.length - 1 && (
             <div className={cn(
-              'h-px w-12 mb-5 transition-colors',
+              'h-px w-10 mb-5 transition-colors',
               i < current ? 'bg-primary' : 'bg-border'
             )} />
           )}
@@ -75,6 +78,13 @@ function StepIndicator({ steps, current }: StepIndicatorProps) {
   )
 }
 
+interface PublicCompany {
+  id: string
+  name: string
+  logo_url: string | null
+  accent_color: string
+}
+
 export default function ProfilSetupPage() {
   const router = useRouter()
   const { saveProfile } = useProfile()
@@ -82,10 +92,19 @@ export default function ProfilSetupPage() {
   const [step, setStep] = useState(0)
   const [isSaving, setIsSaving] = useState(false)
 
-  // Step 1: Personal data
+  // Step 0: Personal data
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [birthDate, setBirthDate] = useState('')
+
+  // Step 1: Company selection (optional)
+  const [companies, setCompanies] = useState<PublicCompany[]>([])
+  const [companiesLoading, setCompaniesLoading] = useState(false)
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null)
+  const [joinCode, setJoinCode] = useState('')
+  const [joinCodeError, setJoinCodeError] = useState<string | null>(null)
+  const [joinCodeVerifying, setJoinCodeVerifying] = useState(false)
+  const [joinCodeVerified, setJoinCodeVerified] = useState(false)
 
   // Step 2: Training data
   const [occupation, setOccupation] = useState('')
@@ -102,7 +121,19 @@ export default function ProfilSetupPage() {
   const [schoolDays, setSchoolDays] = useState<number[]>([1, 2])
   const [schoolHoursPerDay, setSchoolHoursPerDay] = useState('8')
 
-  const steps = ['Persönliche Daten', 'Ausbildungsdaten', 'Einstellungen']
+  const steps = ['Persönliche Daten', 'Unternehmen', 'Ausbildungsdaten', 'Einstellungen']
+
+  // Load companies when entering step 1
+  useEffect(() => {
+    if (step === 1 && companies.length === 0 && !companiesLoading) {
+      setCompaniesLoading(true)
+      fetch('/api/companies/public')
+        .then(r => r.ok ? r.json() : { companies: [] })
+        .then(json => setCompanies(json.companies ?? []))
+        .catch(() => { /* ignore */ })
+        .finally(() => setCompaniesLoading(false))
+    }
+  }, [step, companies.length, companiesLoading])
 
   function toggleSchoolDay(day: number) {
     setSchoolDays(prev =>
@@ -110,9 +141,57 @@ export default function ProfilSetupPage() {
     )
   }
 
+  function selectCompany(id: string) {
+    if (selectedCompanyId === id) {
+      // Deselect
+      setSelectedCompanyId(null)
+      setJoinCode('')
+      setJoinCodeError(null)
+      setJoinCodeVerified(false)
+    } else {
+      setSelectedCompanyId(id)
+      setJoinCode('')
+      setJoinCodeError(null)
+      setJoinCodeVerified(false)
+      // Auto-fill company name
+      const c = companies.find(c => c.id === id)
+      if (c) setCompanyName(c.name)
+    }
+  }
+
+  async function verifyJoinCode() {
+    if (!selectedCompanyId || !joinCode.trim()) return
+    setJoinCodeVerifying(true)
+    setJoinCodeError(null)
+    try {
+      const res = await fetch('/api/companies/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ companyId: selectedCompanyId, joinCode: joinCode.trim() }),
+      })
+      const json = await res.json()
+      if (res.ok && json.success) {
+        setJoinCodeVerified(true)
+        setJoinCodeError(null)
+      } else {
+        setJoinCodeError(json.error ?? 'Ungültiger Code')
+        setJoinCodeVerified(false)
+      }
+    } catch {
+      setJoinCodeError('Verbindungsfehler')
+    } finally {
+      setJoinCodeVerifying(false)
+    }
+  }
+
   function canProceed(): boolean {
     if (step === 0) return firstName.trim() !== '' && lastName.trim() !== '' && birthDate !== ''
-    if (step === 1) return occupation.trim() !== '' && companyName.trim() !== '' && trainerName.trim() !== '' && trainingStart !== '' && trainingEnd !== ''
+    if (step === 1) {
+      // Company step is optional — if company selected, must verify code first
+      if (selectedCompanyId) return joinCodeVerified
+      return true // No company selected → skip
+    }
+    if (step === 2) return occupation.trim() !== '' && companyName.trim() !== '' && trainerName.trim() !== '' && trainingStart !== '' && trainingEnd !== ''
     return true
   }
 
@@ -139,6 +218,7 @@ export default function ProfilSetupPage() {
         role: 'apprentice',
         createdAt: now,
         updatedAt: now,
+        companyId: (joinCodeVerified && selectedCompanyId) ? selectedCompanyId : undefined,
       }
       await saveProfile(profile)
       await completeSetup()
@@ -210,8 +290,128 @@ export default function ProfilSetupPage() {
               </div>
             )}
 
-            {/* Step 1: Training Data */}
+            {/* Step 1: Company Selection */}
             {step === 1 && (
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 mb-1">
+                  <HugeiconsIcon icon={Building01Icon} size={18} className="text-primary" />
+                  <h2 className="font-semibold text-foreground">Unternehmen beitreten</h2>
+                </div>
+                <p className="text-xs text-muted-foreground -mt-2">
+                  Optional — du kannst diesen Schritt überspringen und später beitreten.
+                </p>
+
+                {companiesLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="size-5 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
+                  </div>
+                ) : companies.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground text-sm">
+                    Noch keine Unternehmen registriert.
+                  </div>
+                ) : (
+                  <div className="space-y-2 max-h-52 overflow-y-auto pr-1">
+                    {companies.map(c => {
+                      const isSelected = selectedCompanyId === c.id
+                      return (
+                        <button
+                          key={c.id}
+                          type="button"
+                          onClick={() => selectCompany(c.id)}
+                          className={cn(
+                            'w-full text-left flex items-center gap-3 p-3 rounded-xl border transition-all',
+                            isSelected
+                              ? 'border-primary/50 bg-primary/5 ring-1 ring-primary/30'
+                              : 'border-border hover:bg-muted/50'
+                          )}
+                        >
+                          {c.logo_url ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={c.logo_url}
+                              alt={c.name}
+                              style={{ width: 32, height: 32, borderRadius: 8, objectFit: 'contain', background: 'hsl(var(--muted))', flexShrink: 0 }}
+                              onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
+                            />
+                          ) : (
+                            <div style={{
+                              width: 32, height: 32, borderRadius: 8, flexShrink: 0,
+                              background: c.accent_color,
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              color: 'white', fontWeight: 700, fontSize: '0.875rem',
+                            }}>
+                              {c.name[0]?.toUpperCase()}
+                            </div>
+                          )}
+                          <span className="flex-1 text-sm font-medium text-foreground truncate">{c.name}</span>
+                          {isSelected && (
+                            <HugeiconsIcon icon={CheckmarkCircle01Icon} size={16} className="text-primary flex-shrink-0" />
+                          )}
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
+
+                {selectedCompanyId && (
+                  <div className="space-y-2 pt-2 border-t border-border">
+                    <Label htmlFor="joinCode" className="flex items-center gap-1.5">
+                      <HugeiconsIcon icon={Key01Icon} size={14} className="text-muted-foreground" />
+                      Beitrittscode eingeben
+                    </Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="joinCode"
+                        value={joinCode}
+                        onChange={e => {
+                          setJoinCode(e.target.value.toUpperCase())
+                          setJoinCodeVerified(false)
+                          setJoinCodeError(null)
+                        }}
+                        placeholder="z.B. AZUBI2024"
+                        className={cn(
+                          'bg-input border-border font-mono tracking-widest flex-1',
+                          joinCodeVerified && 'border-green-500/50 bg-green-500/5',
+                          joinCodeError && 'border-red-500/50 bg-red-500/5',
+                        )}
+                        maxLength={20}
+                        disabled={joinCodeVerified}
+                      />
+                      {joinCodeVerified ? (
+                        <div className="flex items-center gap-1.5 px-3 rounded-lg bg-green-500/10 border border-green-500/30 text-green-600 text-sm font-medium">
+                          <HugeiconsIcon icon={CheckmarkCircle01Icon} size={14} />
+                          Bestätigt
+                        </div>
+                      ) : (
+                        <Button
+                          size="sm"
+                          onClick={verifyJoinCode}
+                          disabled={!joinCode.trim() || joinCodeVerifying}
+                          className="h-10"
+                        >
+                          {joinCodeVerifying ? (
+                            <div className="size-3.5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                          ) : (
+                            <HugeiconsIcon icon={ArrowRight01Icon} size={14} />
+                          )}
+                        </Button>
+                      )}
+                    </div>
+                    {joinCodeError && (
+                      <p className="text-xs text-destructive">{joinCodeError}</p>
+                    )}
+                    {joinCodeVerified && (
+                      <p className="text-xs text-green-600">
+                        Code korrekt! Du wirst diesem Unternehmen zugewiesen.
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Step 2: Training Data */}
+            {step === 2 && (
               <div className="space-y-4">
                 <div className="flex items-center gap-2 mb-4">
                   <HugeiconsIcon icon={BuildingIcon} size={18} className="text-primary" />
@@ -301,8 +501,8 @@ export default function ProfilSetupPage() {
               </div>
             )}
 
-            {/* Step 2: Settings */}
-            {step === 2 && (
+            {/* Step 3: Settings */}
+            {step === 3 && (
               <div className="space-y-5">
                 <div className="flex items-center gap-2 mb-4">
                   <HugeiconsIcon icon={Settings01Icon} size={18} className="text-primary" />
@@ -388,12 +588,23 @@ export default function ProfilSetupPage() {
             Zurück
           </Button>
           {step < steps.length - 1 ? (
-            <Button
-              onClick={() => setStep(s => s + 1)}
-              disabled={!canProceed()}
-            >
-              Weiter
-            </Button>
+            <div className="flex items-center gap-2">
+              {step === 1 && !selectedCompanyId && (
+                <Button
+                  variant="ghost"
+                  onClick={() => setStep(s => s + 1)}
+                  className="text-muted-foreground text-sm"
+                >
+                  Überspringen
+                </Button>
+              )}
+              <Button
+                onClick={() => setStep(s => s + 1)}
+                disabled={!canProceed()}
+              >
+                Weiter
+              </Button>
+            </div>
           ) : (
             <Button
               onClick={handleFinish}

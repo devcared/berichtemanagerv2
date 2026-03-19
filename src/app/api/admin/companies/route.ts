@@ -15,7 +15,7 @@ export async function GET() {
     // Fetch all companies
     const { data: companies, error: companiesError } = await admin
       .from('companies')
-      .select('id, name, logo_url, accent_color, website, created_at, updated_at')
+      .select('id, name, logo_url, accent_color, website, join_code, created_at, updated_at')
       .order('name', { ascending: true })
 
     if (companiesError) throw companiesError
@@ -42,6 +42,7 @@ export async function GET() {
       logo_url: c.logo_url,
       accent_color: c.accent_color,
       website: c.website,
+      join_code: c.join_code,
       user_count: countMap[c.id] ?? 0,
       created_at: c.created_at,
       updated_at: c.updated_at,
@@ -63,7 +64,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json()
-    const { name, logoUrl, accentColor, website } = body
+    const { name, logoUrl, accentColor, website, joinCode } = body
 
     if (!name || typeof name !== 'string' || name.trim().length === 0) {
       return NextResponse.json({ error: 'Name ist erforderlich.' }, { status: 400 })
@@ -78,8 +79,9 @@ export async function POST(req: NextRequest) {
         logo_url: logoUrl || null,
         accent_color: accentColor || '#4285f4',
         website: website || null,
+        join_code: joinCode?.trim().toUpperCase() || null,
       })
-      .select('id, name, logo_url, accent_color, website, created_at, updated_at')
+      .select('id, name, logo_url, accent_color, website, join_code, created_at, updated_at')
       .single()
 
     if (error) throw error
@@ -100,7 +102,7 @@ export async function PATCH(req: NextRequest) {
     }
 
     const body = await req.json()
-    const { id, name, logoUrl, accentColor, website } = body
+    const { id, name, logoUrl, accentColor, website, joinCode } = body
 
     if (!id) {
       return NextResponse.json({ error: 'id fehlt.' }, { status: 400 })
@@ -115,12 +117,13 @@ export async function PATCH(req: NextRequest) {
     if (logoUrl !== undefined) updates.logo_url = logoUrl || null
     if (accentColor !== undefined) updates.accent_color = accentColor
     if (website !== undefined) updates.website = website || null
+    if (joinCode !== undefined) updates.join_code = joinCode?.trim().toUpperCase() || null
 
     const { data, error } = await admin
       .from('companies')
       .update(updates)
       .eq('id', id)
-      .select('id, name, logo_url, accent_color, website, created_at, updated_at')
+      .select('id, name, logo_url, accent_color, website, join_code, created_at, updated_at')
       .single()
 
     if (error) throw error

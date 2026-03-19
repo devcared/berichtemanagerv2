@@ -16,7 +16,8 @@ import { HugeiconsIcon } from '@hugeicons/react'
 import {
   Building01Icon, Alert01Icon, ArrowLeft01Icon, Edit01Icon,
   Delete01Icon, Add01Icon, LinkSquare01Icon, Globe02Icon,
-  Cancel01Icon, CheckmarkCircle01Icon, UserGroup02Icon,
+  Cancel01Icon, CheckmarkCircle01Icon, UserGroup02Icon, Key01Icon,
+  Refresh01Icon,
 } from '@hugeicons/core-free-icons'
 
 interface CompanyData {
@@ -25,6 +26,7 @@ interface CompanyData {
   logo_url: string | null
   accent_color: string
   website: string | null
+  join_code: string | null
   user_count: number
   created_at: string
   updated_at: string
@@ -46,6 +48,7 @@ interface FormState {
   logoUrl: string
   accentColor: string
   website: string
+  joinCode: string
 }
 
 const EMPTY_FORM: FormState = {
@@ -53,6 +56,12 @@ const EMPTY_FORM: FormState = {
   logoUrl: '',
   accentColor: '#4285f4',
   website: '',
+  joinCode: '',
+}
+
+function generateJoinCode(): string {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+  return Array.from({ length: 8 }, () => chars[Math.floor(Math.random() * chars.length)]).join('')
 }
 
 export default function AdminCompaniesPage() {
@@ -115,6 +124,7 @@ export default function AdminCompaniesPage() {
       logoUrl: c.logo_url ?? '',
       accentColor: c.accent_color ?? '#4285f4',
       website: c.website ?? '',
+      joinCode: c.join_code ?? '',
     })
     setFormVisible(true)
   }
@@ -134,6 +144,7 @@ export default function AdminCompaniesPage() {
         logoUrl: form.logoUrl.trim() || null,
         accentColor: form.accentColor,
         website: form.website.trim() || null,
+        joinCode: form.joinCode.trim().toUpperCase() || null,
       }
 
       let res: Response
@@ -354,6 +365,37 @@ export default function AdminCompaniesPage() {
                       />
                     </div>
                   </div>
+                  <div>
+                    <Label htmlFor="company-join-code" className="text-xs font-medium text-muted-foreground mb-1 block">
+                      Beitrittscode <span style={{ color: 'hsl(var(--muted-foreground))', fontWeight: 400 }}>(Nutzer brauchen diesen Code beim Beitritt)</span>
+                    </Label>
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <HugeiconsIcon icon={Key01Icon} size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                        <Input
+                          id="company-join-code"
+                          value={form.joinCode}
+                          onChange={e => updateForm('joinCode', e.target.value.toUpperCase())}
+                          placeholder="z.B. AZUBI2024"
+                          className="h-9 text-sm pl-8 font-mono tracking-widest"
+                          maxLength={20}
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => updateForm('joinCode', generateJoinCode())}
+                        title="Zufälligen Code generieren"
+                        style={{
+                          width: 36, height: 36, borderRadius: 8, border: '1px solid hsl(var(--border))',
+                          background: 'transparent', cursor: 'pointer', flexShrink: 0,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          color: 'hsl(var(--muted-foreground))',
+                        }}
+                      >
+                        <HugeiconsIcon icon={Refresh01Icon} size={14} />
+                      </button>
+                    </div>
+                  </div>
                 </div>
                 <div className="flex gap-2 mt-4">
                   <Button
@@ -497,14 +539,22 @@ export default function AdminCompaniesPage() {
                         </div>
                       </div>
 
-                      {/* User count badge */}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
+                      {/* User count badge + join code */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12, flexWrap: 'wrap' }}>
                         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '3px 10px', borderRadius: 20, background: c.accent_color + '15', border: `1px solid ${c.accent_color}25` }}>
                           <HugeiconsIcon icon={UserGroup02Icon} size={12} style={{ color: c.accent_color }} />
                           <span style={{ fontSize: '0.75rem', fontWeight: 600, color: c.accent_color }}>
                             {c.user_count} {c.user_count === 1 ? 'Nutzer' : 'Nutzer'}
                           </span>
                         </div>
+                        {c.join_code && (
+                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '3px 10px', borderRadius: 20, background: 'hsl(var(--muted))', border: '1px solid hsl(var(--border))' }}>
+                            <HugeiconsIcon icon={Key01Icon} size={11} style={{ color: 'hsl(var(--muted-foreground))' }} />
+                            <span style={{ fontSize: '0.6875rem', fontWeight: 600, fontFamily: 'monospace', letterSpacing: '0.08em', color: 'hsl(var(--foreground))' }}>
+                              {c.join_code}
+                            </span>
+                          </div>
+                        )}
                       </div>
 
                       {/* Actions */}

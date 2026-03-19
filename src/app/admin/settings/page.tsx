@@ -88,10 +88,25 @@ export default function AdminSettingsPage() {
 
   useEffect(() => {
     setIsMounted(true)
+    // Load local settings
     try {
       const stored = localStorage.getItem(SETTINGS_KEY)
       if (stored) setSettings({ ...DEFAULT_SETTINGS, ...JSON.parse(stored) })
     } catch { /* ignore */ }
+    // Load branding from Supabase
+    fetch('/api/platform-settings')
+      .then(r => r.ok ? r.json() : null)
+      .then(json => {
+        if (!json?.branding) return
+        const b = json.branding
+        setSettings(prev => ({
+          ...prev,
+          platformName: b.name ?? prev.platformName,
+          logoUrl: b.logoUrl ?? prev.logoUrl,
+          accentColor: b.accentColor ?? prev.accentColor,
+        }))
+      })
+      .catch(() => { /* ignore */ })
   }, [])
 
   function updateSetting<K extends keyof AdminSettings>(key: K, value: AdminSettings[K]) {
@@ -99,16 +114,19 @@ export default function AdminSettingsPage() {
     setSaved(false)
   }
 
-  function handleSave() {
+  async function handleSave() {
     try {
       localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings))
-      // Also persist branding separately
-      const branding = {
-        name: settings.platformName,
-        logoUrl: settings.logoUrl,
-        accentColor: settings.accentColor,
-      }
-      localStorage.setItem(BRANDING_KEY, JSON.stringify(branding))
+      // Save branding globally to Supabase
+      await fetch('/api/platform-settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: settings.platformName,
+          logoUrl: settings.logoUrl,
+          accentColor: settings.accentColor,
+        }),
+      })
       setSaved(true)
       setTimeout(() => setSaved(false), 3000)
     } catch { /* ignore */ }
@@ -147,7 +165,7 @@ export default function AdminSettingsPage() {
             </div>
             <div>
               <h1 className="text-lg font-semibold text-foreground">System-Einstellungen</h1>
-              <p className="text-xs text-muted-foreground">Globale Konfiguration der Plattform (lokal gespeichert)</p>
+              <p className="text-xs text-muted-foreground">Globale Konfiguration der Plattform</p>
             </div>
           </div>
           <Button onClick={handleSave} size="sm">
@@ -168,7 +186,7 @@ export default function AdminSettingsPage() {
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '12px 14px', borderRadius: 12, background: '#4285f408', border: '1px solid #4285f420' }}>
             <HugeiconsIcon icon={InformationCircleIcon} size={16} style={{ color: '#4285f4', flexShrink: 0, marginTop: 1 }} />
             <p style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', margin: 0, lineHeight: 1.5 }}>
-              Diese Einstellungen werden im Browser-localStorage gespeichert. Sie sind plattformweit sichtbar nur für diese Sitzung — für persistente Einstellungen eine Datenbanktabelle verwenden.
+              Branding-Einstellungen werden global in der Datenbank gespeichert und gelten für alle Nutzer ohne Unternehmens-Zuweisung. Andere Einstellungen werden lokal gespeichert.
             </p>
           </div>
 
