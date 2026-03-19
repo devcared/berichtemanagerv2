@@ -17,6 +17,10 @@ type ReactionMap = Map<string, RawReaction[]>  // messageId -> reactions
 
 const senderCache = new Map<string, { name: string; initials: string }>()
 
+// Google Material 3 elevation shadows
+const elev1 = '0 1px 2px rgba(60,64,67,.3), 0 1px 3px 1px rgba(60,64,67,.15)'
+const elev2 = '0 1px 2px rgba(60,64,67,.3), 0 2px 6px 2px rgba(60,64,67,.15)'
+
 export default function ChatPage() {
   const { profile, loading: profileLoading } = useProfile()
   const branding = useBranding()
@@ -253,7 +257,6 @@ export default function ChatPage() {
       setReplyTo(capturedReply)
       if (capturedFile) { setImageFile(capturedFile); setImagePreview(URL.createObjectURL(capturedFile)) }
     } else if (inserted) {
-      // Add own message immediately — don't wait for Realtime (which may miss new columns)
       const fn = profile.firstName ?? '', ln = profile.lastName ?? ''
       const ownInfo = senderCache.get(profile.id) ?? {
         name: `${fn} ${ln}`.trim() || 'Ich',
@@ -299,9 +302,11 @@ export default function ChatPage() {
   }
 
   if (!profileLoading && !profile?.companyId) return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3 text-center p-6">
-      <HugeiconsIcon icon={MessageMultiple01Icon} size={40} className="text-muted-foreground" />
-      <p className="text-muted-foreground text-sm">Du bist keinem Unternehmen zugeordnet.</p>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', gap: 12, textAlign: 'center', padding: '1.5rem', fontFamily: '"Google Sans","Roboto",sans-serif' }}>
+      <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'hsl(var(--muted))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <HugeiconsIcon icon={MessageMultiple01Icon} size={28} className="text-muted-foreground" />
+      </div>
+      <p style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.875rem', margin: 0 }}>Du bist keinem Unternehmen zugeordnet.</p>
     </div>
   )
 
@@ -314,94 +319,122 @@ export default function ChatPage() {
     else grouped.push({ date: d, msgs: [msg] })
   }
 
+  const hasInput = !!(input.trim() || imageFile)
+
   return (
     <div
-      style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, fontFamily: '"Google Sans","Roboto",sans-serif' }}
+      style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, fontFamily: '"Google Sans","Roboto",sans-serif', background: 'hsl(var(--background))' }}
       onClick={() => setPickerMsgId(null)}
     >
-      {/* Header */}
-      <div style={{ padding: '1rem 1.5rem', borderBottom: '1px solid hsl(var(--border))', background: 'hsl(var(--card))', flexShrink: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ width: 36, height: 36, borderRadius: 10, background: primary + '18', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <HugeiconsIcon icon={MessageMultiple01Icon} size={18} style={{ color: primary }} />
-          </div>
-          <div>
-            <h1 style={{ fontSize: '1rem', fontWeight: 600, color: 'hsl(var(--foreground))', margin: 0 }}>Firmen-Chat</h1>
-            <p style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', margin: 0 }}>{branding.name}</p>
-          </div>
+      {/* ── Header ── */}
+      <div style={{ padding: '0.875rem 1.25rem', borderBottom: '1px solid hsl(var(--border)/0.6)', background: 'hsl(var(--card))', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div style={{ width: 40, height: 40, borderRadius: '50%', background: primary + '18', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <HugeiconsIcon icon={MessageMultiple01Icon} size={18} style={{ color: primary }} />
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: '1rem', fontWeight: 600, color: 'hsl(var(--foreground))', lineHeight: 1.2 }}>Firmen-Chat</div>
+          <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', lineHeight: 1.2 }}>{branding.name}</div>
         </div>
       </div>
 
-      {/* Messages */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '1rem 1.25rem', display: 'flex', flexDirection: 'column', gap: 2, minHeight: 0 }}>
+      {/* ── Messages area ── */}
+      <div style={{ flex: 1, overflowY: 'auto', padding: '0.75rem 1rem 0.5rem', display: 'flex', flexDirection: 'column', gap: 0, minHeight: 0, background: 'hsl(var(--muted)/0.25)' }}>
         {!chatReady ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="size-5 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1, paddingTop: 48 }}>
+            <div style={{ width: 28, height: 28, borderRadius: '50%', border: `3px solid ${primary}30`, borderTopColor: primary, animation: 'spin 0.7s linear infinite' }} />
+            <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
           </div>
         ) : messages.length === 0 ? (
-          <div style={{ textAlign: 'center', margin: 'auto', color: 'hsl(var(--muted-foreground))', fontSize: '0.875rem' }}>
-            <HugeiconsIcon icon={MessageMultiple01Icon} size={32} style={{ opacity: 0.3, marginBottom: 8 }} />
-            <p>Noch keine Nachrichten. Starte die Unterhaltung!</p>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, gap: 10, color: 'hsl(var(--muted-foreground))' }}>
+            <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'hsl(var(--muted))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <HugeiconsIcon icon={MessageMultiple01Icon} size={28} style={{ opacity: 0.4 }} />
+            </div>
+            <p style={{ fontSize: '0.875rem', margin: 0, textAlign: 'center' }}>Noch keine Nachrichten.<br />Starte die Unterhaltung!</p>
           </div>
         ) : grouped.map(group => (
           <div key={group.date}>
-            {/* Date divider */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '12px 0 8px' }}>
-              <div style={{ flex: 1, height: 1, background: 'hsl(var(--border))' }} />
-              <span style={{ fontSize: '0.6875rem', color: 'hsl(var(--muted-foreground))', fontWeight: 500 }}>
+            {/* ── Date chip ── */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '12px 0 10px' }}>
+              <span style={{ fontSize: '0.6875rem', color: 'hsl(var(--muted-foreground))', fontWeight: 500, padding: '3px 12px', borderRadius: 20, background: 'hsl(var(--background))', border: '1px solid hsl(var(--border)/0.6)', letterSpacing: '0.01em' }}>
                 {format(new Date(group.date + 'T12:00:00'), 'EEEE, d. MMMM', { locale: de })}
               </span>
-              <div style={{ flex: 1, height: 1, background: 'hsl(var(--border))' }} />
             </div>
 
             {group.msgs.map((msg, i) => {
               const isOwn = msg.senderId === profile?.id
-              const showSender = !isOwn && group.msgs[i - 1]?.senderId !== msg.senderId
+              const prevMsg = group.msgs[i - 1]
+              const nextMsg = group.msgs[i + 1]
+              const isFirst = prevMsg?.senderId !== msg.senderId
+              const isLast = nextMsg?.senderId !== msg.senderId || !nextMsg
+              const showSender = !isOwn && isFirst
               const time = format(new Date(msg.createdAt), 'HH:mm')
               const msgRxns = reactions.get(msg.id) ?? []
 
-              // Group: emoji -> { count, hasOwn }
               const rxnGroups = new Map<string, { count: number; hasOwn: boolean }>()
               for (const r of msgRxns) {
                 const g = rxnGroups.get(r.emoji) ?? { count: 0, hasOwn: false }
                 rxnGroups.set(r.emoji, { count: g.count + 1, hasOwn: g.hasOwn || r.user_id === profile?.id })
               }
 
+              // Bubble tail radius
+              const ownRadius = isFirst && isLast ? '20px 20px 6px 20px'
+                : isFirst ? '20px 20px 4px 20px'
+                : isLast ? '20px 20px 6px 20px'
+                : '20px 20px 4px 20px'
+              const otherRadius = isFirst && isLast ? '20px 20px 20px 6px'
+                : isFirst ? '20px 20px 20px 4px'
+                : isLast ? '20px 20px 20px 6px'
+                : '20px 20px 20px 4px'
+
+              const marginBottom = rxnGroups.size > 0 ? 20 : isLast ? 8 : 2
+
               return (
                 <div
                   key={msg.id}
-                  style={{ display: 'flex', flexDirection: isOwn ? 'row-reverse' : 'row', alignItems: 'flex-end', gap: 6, marginBottom: rxnGroups.size > 0 ? 22 : 3, position: 'relative' }}
+                  style={{ display: 'flex', flexDirection: isOwn ? 'row-reverse' : 'row', alignItems: 'flex-end', gap: 6, marginBottom, position: 'relative' }}
                   onMouseEnter={() => setHoveredId(msg.id)}
                   onMouseLeave={() => setHoveredId(null)}
                 >
                   {/* Avatar */}
                   {!isOwn && (
-                    <div style={{ width: 28, height: 28, borderRadius: '50%', flexShrink: 0, background: primary, color: 'white', fontWeight: 700, fontSize: '0.625rem', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: showSender ? 1 : 0, marginBottom: rxnGroups.size > 0 ? 18 : 0 }}>
+                    <div style={{ width: 30, height: 30, borderRadius: '50%', flexShrink: 0, background: primary, color: 'white', fontWeight: 700, fontSize: '0.625rem', display: 'flex', alignItems: 'center', justifyContent: 'center', visibility: isLast ? 'visible' : 'hidden', marginBottom: rxnGroups.size > 0 ? 18 : 0, boxShadow: elev1 }}>
                       {msg.senderInitials}
                     </div>
                   )}
 
                   {/* Bubble column */}
-                  <div style={{ maxWidth: '68%', display: 'flex', flexDirection: 'column', alignItems: isOwn ? 'flex-end' : 'flex-start' }}>
-                    {showSender && <span style={{ fontSize: '0.6875rem', color: 'hsl(var(--muted-foreground))', marginBottom: 2, paddingLeft: 4 }}>{msg.senderName}</span>}
+                  <div style={{ maxWidth: '70%', display: 'flex', flexDirection: 'column', alignItems: isOwn ? 'flex-end' : 'flex-start' }}>
+                    {showSender && (
+                      <span style={{ fontSize: '0.6875rem', fontWeight: 600, color: primary, marginBottom: 3, paddingLeft: 14, letterSpacing: '0.01em' }}>
+                        {msg.senderName}
+                      </span>
+                    )}
 
                     {/* Bubble */}
                     <div
                       id={`msg-${msg.id}`}
-                      style={{ padding: msg.imageUrl && !msg.replyToId && !msg.content.trim() ? 4 : '8px 12px', borderRadius: isOwn ? '16px 16px 4px 16px' : '16px 16px 16px 4px', background: isOwn ? primary : 'hsl(var(--muted))', color: isOwn ? 'white' : 'hsl(var(--foreground))', fontSize: '0.875rem', lineHeight: 1.5, wordBreak: 'break-word', whiteSpace: 'pre-wrap', overflow: 'hidden' }}
+                      style={{
+                        padding: msg.imageUrl && !msg.replyToId && msg.content === '📷' ? 4 : '10px 14px',
+                        borderRadius: isOwn ? ownRadius : otherRadius,
+                        background: isOwn ? primary : 'hsl(var(--card))',
+                        color: isOwn ? 'white' : 'hsl(var(--foreground))',
+                        fontSize: '0.875rem', lineHeight: 1.5,
+                        wordBreak: 'break-word', whiteSpace: 'pre-wrap', overflow: 'hidden',
+                        boxShadow: isOwn ? `0 1px 2px ${primary}40` : elev1,
+                      }}
                     >
-                      {/* Reply quote — inside bubble */}
+                      {/* Reply quote */}
                       {msg.replyToId && (
                         <div
                           onClick={() => document.getElementById(`msg-${msg.replyToId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
-                          style={{ display: 'flex', gap: 0, marginBottom: 7, borderRadius: 8, overflow: 'hidden', cursor: 'pointer', background: isOwn ? 'rgba(0,0,0,0.15)' : 'rgba(0,0,0,0.06)' }}
+                          style={{ display: 'flex', gap: 0, marginBottom: 8, borderRadius: 10, overflow: 'hidden', cursor: 'pointer', background: isOwn ? 'rgba(0,0,0,0.18)' : 'rgba(0,0,0,0.05)' }}
                         >
-                          <div style={{ width: 3, flexShrink: 0, background: isOwn ? 'rgba(255,255,255,0.7)' : primary }} />
-                          <div style={{ padding: '5px 9px', minWidth: 0 }}>
-                            <div style={{ fontSize: '0.6875rem', fontWeight: 700, marginBottom: 1, color: isOwn ? 'rgba(255,255,255,0.9)' : primary, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          <div style={{ width: 3, flexShrink: 0, background: isOwn ? 'rgba(255,255,255,0.8)' : primary }} />
+                          <div style={{ padding: '5px 10px', minWidth: 0 }}>
+                            <div style={{ fontSize: '0.6875rem', fontWeight: 700, marginBottom: 1, color: isOwn ? 'rgba(255,255,255,0.95)' : primary, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                               {msg.replyToSenderName ?? '…'}
                             </div>
-                            <div style={{ fontSize: '0.75rem', opacity: 0.75, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 200 }}>
+                            <div style={{ fontSize: '0.75rem', opacity: 0.75, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 220 }}>
                               {msg.replyToContent ?? '📷 Bild'}
                             </div>
                           </div>
@@ -412,17 +445,17 @@ export default function ChatPage() {
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
                           src={msg.imageUrl} alt="Bild"
-                          style={{ display: 'block', maxWidth: 260, maxHeight: 320, borderRadius: msg.content.trim() && msg.content !== '📷' ? '8px 8px 0 0' : 8, objectFit: 'cover', cursor: 'pointer', margin: msg.replyToId ? '0 -12px' : '-4px' }}
-                          onClick={() => window.open(msg.imageUrl!, '_blank')}
+                          style={{ display: 'block', maxWidth: 260, maxHeight: 320, borderRadius: msg.content !== '📷' ? 10 : msg.replyToId ? 10 : 16, objectFit: 'cover', cursor: 'pointer', margin: msg.replyToId ? '0 -14px' : '-4px' }}
+                          onClick={(e) => { e.stopPropagation(); window.open(msg.imageUrl!, '_blank') }}
                         />
                       )}
-                      {msg.content.trim() && msg.content !== '📷' && (
-                        <span style={{ display: 'block', paddingTop: msg.imageUrl ? 6 : 0 }}>{msg.content}</span>
+                      {msg.content !== '📷' && (
+                        <span style={{ display: 'block', paddingTop: msg.imageUrl ? 7 : 0 }}>{msg.content}</span>
                       )}
                     </div>
 
                     {/* Time */}
-                    <span style={{ fontSize: '0.625rem', color: 'hsl(var(--muted-foreground))', marginTop: 2, paddingLeft: 4, paddingRight: 4 }}>{time}</span>
+                    <span style={{ fontSize: '0.625rem', color: 'hsl(var(--muted-foreground))', marginTop: 3, paddingLeft: isOwn ? 0 : 4, paddingRight: isOwn ? 4 : 0, letterSpacing: '0.01em' }}>{time}</span>
 
                     {/* Reactions */}
                     {rxnGroups.size > 0 && (
@@ -431,7 +464,7 @@ export default function ChatPage() {
                           <button
                             key={emoji}
                             onClick={(e) => { e.stopPropagation(); toggleReaction(msg.id, emoji) }}
-                            style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '2px 8px', borderRadius: 12, border: `1px solid ${hasOwn ? primary : 'hsl(var(--border))'}`, background: hasOwn ? primary + '18' : 'hsl(var(--card))', cursor: 'pointer', fontSize: '0.8rem', color: hasOwn ? primary : 'hsl(var(--foreground))', fontWeight: hasOwn ? 600 : 400 }}
+                            style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '3px 9px', borderRadius: 14, border: `1.5px solid ${hasOwn ? primary : 'hsl(var(--border))'}`, background: hasOwn ? primary + '15' : 'hsl(var(--card))', cursor: 'pointer', fontSize: '0.8125rem', color: hasOwn ? primary : 'hsl(var(--foreground))', fontWeight: hasOwn ? 600 : 400, boxShadow: elev1 }}
                           >
                             {emoji} <span style={{ fontSize: '0.7rem' }}>{count}</span>
                           </button>
@@ -440,70 +473,74 @@ export default function ChatPage() {
                     )}
                   </div>
 
-                  {/* Action strip */}
-                  <div style={{ visibility: hoveredId === msg.id || pickerMsgId === msg.id ? 'visible' : 'hidden', display: 'flex', flexDirection: 'column', gap: 3, alignSelf: 'flex-end', paddingBottom: rxnGroups.size > 0 ? 22 : 4, position: 'relative' }}>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); setPickerMsgId(prev => prev === msg.id ? null : msg.id) }}
-                      title="Reaktion"
-                      style={{ width: 28, height: 28, borderRadius: '50%', border: '1px solid hsl(var(--border))', background: 'hsl(var(--card))', cursor: 'pointer', fontSize: '0.875rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                    >😊</button>
-                    <button
-                      onClick={() => { setReplyTo(msg); inputRef.current?.focus() }}
-                      title="Antworten"
-                      style={{ width: 28, height: 28, borderRadius: '50%', border: '1px solid hsl(var(--border))', background: 'hsl(var(--card))', cursor: 'pointer', fontSize: '0.875rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                    >↩</button>
+                  {/* Action strip — appears on hover */}
+                  {(hoveredId === msg.id || pickerMsgId === msg.id) && (
+                    <div
+                      style={{ display: 'flex', flexDirection: 'column', gap: 4, alignSelf: 'flex-end', paddingBottom: rxnGroups.size > 0 ? 26 : 6, position: 'relative' }}
+                      onClick={e => e.stopPropagation()}
+                    >
+                      <button
+                        onClick={() => setPickerMsgId(prev => prev === msg.id ? null : msg.id)}
+                        title="Reaktion"
+                        style={{ width: 30, height: 30, borderRadius: '50%', border: '1px solid hsl(var(--border))', background: 'hsl(var(--card))', cursor: 'pointer', fontSize: '0.875rem', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: elev1 }}
+                      >😊</button>
+                      <button
+                        onClick={() => { setReplyTo(msg); inputRef.current?.focus() }}
+                        title="Antworten"
+                        style={{ width: 30, height: 30, borderRadius: '50%', border: '1px solid hsl(var(--border))', background: 'hsl(var(--card))', cursor: 'pointer', fontSize: '0.875rem', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: elev1 }}
+                      >↩</button>
 
-                    {/* Emoji picker */}
-                    {pickerMsgId === msg.id && (
-                      <div
-                        onClick={e => e.stopPropagation()}
-                        style={{ position: 'absolute', [isOwn ? 'right' : 'left']: 34, bottom: rxnGroups.size > 0 ? 40 : 0, zIndex: 200, background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 14, padding: '6px 8px', display: 'flex', gap: 4, boxShadow: '0 4px 16px rgba(0,0,0,0.15)', whiteSpace: 'nowrap' }}
-                      >
-                        {EMOJIS.map(e => (
-                          <button
-                            key={e}
-                            onClick={() => toggleReaction(msg.id, e)}
-                            style={{ fontSize: '1.25rem', background: 'none', border: 'none', cursor: 'pointer', padding: '3px 5px', borderRadius: 8, transition: 'transform 100ms' }}
-                            onMouseEnter={el => (el.currentTarget.style.transform = 'scale(1.3)')}
-                            onMouseLeave={el => (el.currentTarget.style.transform = 'scale(1)')}
-                          >{e}</button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                      {/* Emoji picker */}
+                      {pickerMsgId === msg.id && (
+                        <div
+                          style={{ position: 'absolute', [isOwn ? 'right' : 'left']: 36, bottom: rxnGroups.size > 0 ? 44 : 4, zIndex: 200, background: 'hsl(var(--card))', border: '1px solid hsl(var(--border)/0.5)', borderRadius: 16, padding: '6px 8px', display: 'flex', gap: 2, boxShadow: elev2, whiteSpace: 'nowrap' }}
+                        >
+                          {EMOJIS.map(e => (
+                            <button
+                              key={e}
+                              onClick={() => toggleReaction(msg.id, e)}
+                              style={{ fontSize: '1.25rem', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 5px', borderRadius: 8, transition: 'transform 120ms, background 120ms' }}
+                              onMouseEnter={el => { el.currentTarget.style.transform = 'scale(1.35)'; el.currentTarget.style.background = 'hsl(var(--muted))' }}
+                              onMouseLeave={el => { el.currentTarget.style.transform = 'scale(1)'; el.currentTarget.style.background = 'none' }}
+                            >{e}</button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               )
             })}
           </div>
         ))}
-        <div ref={bottomRef} />
+        <div ref={bottomRef} style={{ height: 4 }} />
       </div>
 
-      {/* Reply preview */}
+      {/* ── Reply preview ── */}
       {replyTo && (
-        <div style={{ padding: '8px 1.25rem', borderTop: '1px solid hsl(var(--border))', background: 'hsl(var(--muted)/0.4)', display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
-          <div style={{ width: 3, height: 36, borderRadius: 2, background: primary, flexShrink: 0 }} />
+        <div style={{ padding: '8px 1rem 8px 1.25rem', background: 'hsl(var(--card))', borderTop: `2px solid ${primary}20`, display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+          <div style={{ width: 3, alignSelf: 'stretch', borderRadius: 2, background: primary, flexShrink: 0 }} />
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: '0.75rem', fontWeight: 600, color: primary }}>{replyTo.senderName}</div>
-            <div style={{ fontSize: '0.8125rem', color: 'hsl(var(--muted-foreground))', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {replyTo.imageUrl && !replyTo.content.trim() ? '📷 Bild' : replyTo.content}
+            <div style={{ fontSize: '0.75rem', fontWeight: 600, color: primary, lineHeight: 1.3 }}>{replyTo.senderName}</div>
+            <div style={{ fontSize: '0.8125rem', color: 'hsl(var(--muted-foreground))', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.3 }}>
+              {replyTo.imageUrl && replyTo.content === '📷' ? '📷 Bild' : replyTo.content}
             </div>
           </div>
-          <button onClick={() => setReplyTo(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--muted-foreground))', padding: 4 }}>
-            <HugeiconsIcon icon={Cancel01Icon} size={14} />
+          <button onClick={() => setReplyTo(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--muted-foreground))', padding: 6, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <HugeiconsIcon icon={Cancel01Icon} size={15} />
           </button>
         </div>
       )}
 
-      {/* Image preview */}
+      {/* ── Image preview ── */}
       {imagePreview && (
-        <div style={{ padding: '8px 1.25rem', borderTop: '1px solid hsl(var(--border))', background: 'hsl(var(--card))', display: 'flex', alignItems: 'flex-end', gap: 10, flexShrink: 0 }}>
+        <div style={{ padding: '8px 1.25rem', background: 'hsl(var(--card))', borderTop: '1px solid hsl(var(--border)/0.4)', display: 'flex', alignItems: 'flex-end', gap: 10, flexShrink: 0 }}>
           <div style={{ position: 'relative', display: 'inline-block' }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={imagePreview} alt="Vorschau" style={{ height: 80, borderRadius: 10, objectFit: 'cover', border: '1px solid hsl(var(--border))' }} />
+            <img src={imagePreview} alt="Vorschau" style={{ height: 76, borderRadius: 10, objectFit: 'cover', border: '1px solid hsl(var(--border))' }} />
             <button
               onClick={clearImage}
-              style={{ position: 'absolute', top: -6, right: -6, width: 20, height: 20, borderRadius: '50%', background: '#ea4335', border: 'none', cursor: 'pointer', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              style={{ position: 'absolute', top: -7, right: -7, width: 22, height: 22, borderRadius: '50%', background: '#ea4335', border: '2px solid hsl(var(--card))', cursor: 'pointer', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             >
               <HugeiconsIcon icon={Cancel01Icon} size={10} />
             </button>
@@ -512,37 +549,47 @@ export default function ChatPage() {
         </div>
       )}
 
-      {/* Input bar */}
-      <div style={{ padding: '0.75rem 1.25rem', borderTop: replyTo || imagePreview ? 'none' : '1px solid hsl(var(--border))', background: 'hsl(var(--card))', flexShrink: 0 }}>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', maxWidth: 720, margin: '0 auto' }}>
-          {/* Image button */}
+      {/* ── Input bar ── */}
+      <div style={{ padding: '0.625rem 1rem', background: 'hsl(var(--card))', borderTop: replyTo || imagePreview ? 'none' : '1px solid hsl(var(--border)/0.5)', flexShrink: 0 }}>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', maxWidth: 760, margin: '0 auto' }}>
+          {/* Attach image */}
           <button
             onClick={() => fileRef.current?.click()}
             title="Bild senden"
-            style={{ width: 36, height: 36, borderRadius: '50%', border: '1px solid hsl(var(--border))', background: 'hsl(var(--muted))', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'hsl(var(--muted-foreground))', flexShrink: 0 }}
+            style={{ width: 38, height: 38, borderRadius: '50%', border: 'none', background: 'hsl(var(--muted))', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'hsl(var(--muted-foreground))', flexShrink: 0, transition: 'background 150ms' }}
+            onMouseEnter={e => (e.currentTarget.style.background = 'hsl(var(--muted)/0.7)')}
+            onMouseLeave={e => (e.currentTarget.style.background = 'hsl(var(--muted))')}
           >
-            <HugeiconsIcon icon={Image01Icon} size={16} />
+            <HugeiconsIcon icon={Image01Icon} size={17} />
           </button>
           <input ref={fileRef} type="file" accept="image/*" onChange={handleImageSelect} style={{ display: 'none' }} />
 
-          <textarea
-            ref={inputRef}
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            onPaste={handlePaste}
-            placeholder="Nachricht schreiben… (Enter zum Senden)"
-            rows={1}
-            style={{ flex: 1, resize: 'none', borderRadius: 20, border: '1px solid hsl(var(--border))', background: 'hsl(var(--background))', color: 'hsl(var(--foreground))', padding: '10px 16px', fontSize: '0.875rem', fontFamily: 'inherit', outline: 'none', maxHeight: 120, overflowY: 'auto', lineHeight: 1.5 }}
-            maxLength={2000}
-          />
+          {/* Text input — pill style */}
+          <div style={{ flex: 1, background: 'hsl(var(--muted)/0.5)', borderRadius: 22, border: '1px solid hsl(var(--border)/0.6)', display: 'flex', alignItems: 'flex-end', padding: '0 12px', minHeight: 38 }}>
+            <textarea
+              ref={inputRef}
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              onPaste={handlePaste}
+              placeholder="Nachricht schreiben…"
+              rows={1}
+              style={{ flex: 1, resize: 'none', border: 'none', background: 'transparent', color: 'hsl(var(--foreground))', padding: '9px 0', fontSize: '0.875rem', fontFamily: 'inherit', outline: 'none', maxHeight: 120, overflowY: 'auto', lineHeight: 1.5 }}
+              maxLength={2000}
+            />
+          </div>
 
+          {/* Send button — FAB style */}
           <button
             onClick={sendMessage}
-            disabled={(!input.trim() && !imageFile) || sending || uploading}
-            style={{ width: 40, height: 40, borderRadius: '50%', border: 'none', background: (input.trim() || imageFile) ? primary : 'hsl(var(--muted))', color: (input.trim() || imageFile) ? 'white' : 'hsl(var(--muted-foreground))', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: (input.trim() || imageFile) ? 'pointer' : 'not-allowed', transition: 'background 200ms, color 200ms', flexShrink: 0 }}
+            disabled={!hasInput || sending || uploading}
+            style={{ width: 42, height: 42, borderRadius: '50%', border: 'none', background: hasInput ? primary : 'hsl(var(--muted))', color: hasInput ? 'white' : 'hsl(var(--muted-foreground))', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: hasInput ? 'pointer' : 'not-allowed', transition: 'background 200ms, color 200ms, box-shadow 200ms', flexShrink: 0, boxShadow: hasInput ? `0 2px 8px ${primary}50` : 'none' }}
           >
-            {sending ? <div className="size-4 rounded-full border-2 border-white/30 border-t-white animate-spin" /> : <HugeiconsIcon icon={MailSend01Icon} size={16} />}
+            {sending ? (
+              <div style={{ width: 16, height: 16, borderRadius: '50%', border: '2.5px solid rgba(255,255,255,0.3)', borderTopColor: 'white', animation: 'spin 0.7s linear infinite' }} />
+            ) : (
+              <HugeiconsIcon icon={MailSend01Icon} size={17} />
+            )}
           </button>
         </div>
       </div>
