@@ -311,12 +311,13 @@ function AppHome() {
               {adminModules.map(mod => (
                 <ModuleCard
                   key={mod.id}
-                  mod={mod}
+                  mod={{ ...mod, isEnabled: true }}
                   icon={moduleIconMap[mod.icon]}
                   {...sharedCardProps}
+                  primary="#ea4335"
                   draggable={false}
                   isDragOver={false}
-                  onOpen={() => { }}
+                  onOpen={() => router.push(mod.routePath)}
                   onDragStart={() => { }}
                   onDragOver={() => { }}
                   onDrop={() => { }}
