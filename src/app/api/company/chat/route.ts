@@ -47,8 +47,9 @@ export async function GET() {
 
     return NextResponse.json({ messages })
   } catch (err) {
-    console.error('GET /api/company/chat:', err)
-    return NextResponse.json({ error: 'Interner Fehler.' }, { status: 500 })
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error('GET /api/company/chat:', msg)
+    return NextResponse.json({ error: 'Interner Fehler.', detail: msg }, { status: 500 })
   }
 }
 
@@ -83,7 +84,8 @@ export async function POST(req: NextRequest) {
       }
     }, { status: 201 })
   } catch (err) {
-    console.error('POST /api/company/chat:', err)
-    return NextResponse.json({ error: 'Interner Fehler.' }, { status: 500 })
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error('POST /api/company/chat:', msg)
+    return NextResponse.json({ error: 'Interner Fehler.', detail: msg }, { status: 500 })
   }
 }
