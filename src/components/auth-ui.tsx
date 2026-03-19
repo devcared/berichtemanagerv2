@@ -14,8 +14,9 @@ export function AuthLogo({ size = 40 }: { size?: number }) {
         className="rounded-xl object-cover"
         priority
       />
-      <span className="text-[1.25rem] font-semibold tracking-tight text-foreground">
-        Azubi<span className="text-muted-foreground">Hub</span>
+      <span className="text-[1.25rem] font-semibold tracking-tight" style={{ letterSpacing: '-0.025em' }}>
+        <span style={{ color: '#4285f4' }}>Azubi</span>
+        <span className="text-foreground/65 font-normal">Hub</span>
       </span>
     </div>
   )

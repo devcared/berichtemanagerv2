@@ -149,7 +149,10 @@ export default function DashboardLayout({ children, sections, subtitle }: Props)
             />
             {!isCollapsed && (
               <div style={{ textAlign: 'left', lineHeight: 1, overflow: 'hidden' }}>
-                <div style={{ fontSize: '0.875rem', fontWeight: 600, color: 'hsl(var(--sidebar-foreground))', whiteSpace: 'nowrap' }}>AzubiHub</div>
+                <div style={{ fontSize: '0.875rem', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                  <span style={{ color: '#4285f4' }}>Azubi</span>
+                  <span style={{ color: 'hsl(var(--sidebar-foreground) / 0.7)', fontWeight: 400 }}>Hub</span>
+                </div>
                 <div style={{ fontSize: '0.6875rem', color: 'hsl(var(--muted-foreground))', whiteSpace: 'nowrap' }}>{subtitle}</div>
               </div>
             )}

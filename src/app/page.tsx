@@ -17,6 +17,8 @@ import {
   Mail01Icon, LockPasswordIcon,
   MessageMultiple01Icon, StarAward01Icon, InboxIcon,
   FolderLockedIcon, CalendarCheckIn01Icon, Award01Icon,
+  Analytics01Icon, Audit01Icon, Settings01Icon,
+  Database01Icon, Crown02Icon, UserGroup02Icon,
 } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 
@@ -35,12 +37,21 @@ const modules: AppModule[] = [
   { id: 'dokumente', title: 'Dokumenten-Tresor', description: 'Sichere Ablage für wichtige Ausbildungsunterlagen', icon: 'FolderLockedIcon', accentColor: '#8B5CF6', routePath: '/dokumente', isEnabled: false },
   { id: 'termine', title: 'Termine & Fristen', description: 'Behalte Abgaben, Prüfungen und wichtige Daten im Blick', icon: 'CalendarCheckIn01Icon', accentColor: '#EA4335', routePath: '/termine', isEnabled: false },
   { id: 'achievements', title: 'Achievements & Badges', description: 'Sammle Auszeichnungen für deinen Ausbildungsfortschritt', icon: 'Award01Icon', accentColor: '#10B981', routePath: '/achievements', isEnabled: false },
+  // Admin modules
+  { id: 'admin-users', title: 'Benutzerverwaltung', description: 'Alle Nutzer, Rollen und Berechtigungen zentral verwalten', icon: 'UserGroup02Icon', accentColor: '#4285f4', routePath: '/admin/users', isEnabled: false, isAdmin: true },
+  { id: 'admin-analytics', title: 'Plattform-Analytics', description: 'Nutzungsstatistiken und Aktivitäten der gesamten Plattform', icon: 'Analytics01Icon', accentColor: '#10B981', routePath: '/admin/analytics', isEnabled: false, isAdmin: true },
+  { id: 'admin-audit', title: 'Audit-Log', description: 'Lückenlose Protokollierung aller sicherheitsrelevanten Aktionen', icon: 'Audit01Icon', accentColor: '#F59E0B', routePath: '/admin/audit', isEnabled: false, isAdmin: true },
+  { id: 'admin-settings', title: 'System-Einstellungen', description: 'Globale Konfiguration, Feature-Flags und Plattform-Parameter', icon: 'Settings01Icon', accentColor: '#8B5CF6', routePath: '/admin/settings', isEnabled: false, isAdmin: true },
+  { id: 'admin-data', title: 'Datenbankmanager', description: 'Datenbankstrukturen einsehen, exportieren und warten', icon: 'Database01Icon', accentColor: '#EA4335', routePath: '/admin/data', isEnabled: false, isAdmin: true },
+  { id: 'admin-roles', title: 'Rollen & Rechte', description: 'Zugriffsebenen und Rollenkonzepte plattformweit konfigurieren', icon: 'Crown02Icon', accentColor: '#3c4043', routePath: '/admin/roles', isEnabled: false, isAdmin: true },
 ]
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const moduleIconMap: Record<string, any> = {
   BookOpenIcon, CheckListIcon, GridViewIcon, CalendarIcon,
   MessageMultiple01Icon, StarAward01Icon, InboxIcon,
   FolderLockedIcon, CalendarCheckIn01Icon, Award01Icon,
+  Analytics01Icon, Audit01Icon, Settings01Icon,
+  Database01Icon, Crown02Icon, UserGroup02Icon,
 }
 function getGreeting() {
   const h = new Date().getHours()
@@ -107,7 +118,8 @@ function AppHome() {
     : 'AZ'
 
   const enabledModules = order.map(id => modules.find(m => m.id === id)!).filter(Boolean)
-  const comingModules = modules.filter(m => !m.isEnabled)
+  const comingModules = modules.filter(m => !m.isEnabled && !m.isAdmin)
+  const adminModules = modules.filter(m => m.isAdmin)
 
   function handleDragStart(id: string) { draggedId.current = id }
   function handleDragOver(e: React.DragEvent, id: string) {
@@ -156,7 +168,7 @@ function AppHome() {
       }}>
         {/* Logo */}
         <div style={{ flex: 1 }}>
-          <Logo size={scrolled ? 24 : 28} />
+          <Logo size={scrolled ? 24 : 28} useThemeColor />
         </div>
 
         {/* Right cluster */}
@@ -251,6 +263,36 @@ function AppHome() {
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(260px,1fr))', gap: '1rem', marginBottom: '4rem' }}>
               {comingModules.map(mod => (
+                <ModuleCard
+                  key={mod.id}
+                  mod={mod}
+                  icon={moduleIconMap[mod.icon]}
+                  {...sharedCardProps}
+                  draggable={false}
+                  isDragOver={false}
+                  onOpen={() => { }}
+                  onDragStart={() => { }}
+                  onDragOver={() => { }}
+                  onDrop={() => { }}
+                  onDragEnd={() => { }}
+                />
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* ── Admin modules ── */}
+        {adminModules.length > 0 && (
+          <>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: '1rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, whiteSpace: 'nowrap' }}>
+                <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#ea4335' }} />
+                <p style={{ fontSize: '0.6875rem', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#ea4335', margin: 0 }}>Administrator</p>
+              </div>
+              <div style={{ flex: 1, height: 1, background: `color-mix(in srgb, #ea4335 25%, ${borderC})` }} />
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(260px,1fr))', gap: '1rem', marginBottom: '4rem' }}>
+              {adminModules.map(mod => (
                 <ModuleCard
                   key={mod.id}
                   mod={mod}
@@ -504,10 +546,14 @@ function useScrollReveal() {
 ═══════════════════════════════════════ */
 
 /* Logo — App Icon.png + wordmark */
-function Logo({ size = 28, dark = false }: { size?: number; dark?: boolean }) {
+function Logo({ size = 28, dark = false, useThemeColor = false }: { size?: number; dark?: boolean; useThemeColor?: boolean }) {
   const fs = size * 0.54
   const c1 = '#4285f4'
-  const c2 = dark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.45)'
+  // useThemeColor: adapts to CSS theme (for authenticated app views)
+  // dark: explicit override for dark backgrounds (landing page hero/footer)
+  const c2 = useThemeColor
+    ? 'hsl(var(--foreground) / 0.65)'
+    : dark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.45)'
 
   return (
     <div className="flex items-center gap-2 select-none group cursor-pointer">

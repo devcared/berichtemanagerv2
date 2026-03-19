@@ -78,6 +78,7 @@ export interface AppModule {
   routePath: string
   isEnabled: boolean
   lastUsed?: string
+  isAdmin?: boolean
 }
 
 /* ─── STUNDENPLAN ─── */
