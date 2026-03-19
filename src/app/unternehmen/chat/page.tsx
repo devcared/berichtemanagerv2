@@ -8,7 +8,7 @@ import type { ChatMessage } from '@/types'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
 import { HugeiconsIcon } from '@hugeicons/react'
-import { Send01Icon, MessageMultiple01Icon } from '@hugeicons/core-free-icons'
+import { MailSend01Icon, MessageMultiple01Icon } from '@hugeicons/core-free-icons'
 
 function getInitials(name: string) {
   return name.split(' ').map(p => p[0]).join('').toUpperCase().slice(0, 2)
@@ -238,7 +238,7 @@ export default function ChatPage() {
               flexShrink: 0,
             }}
           >
-            <HugeiconsIcon icon={Send01Icon} size={16} />
+            <HugeiconsIcon icon={MailSend01Icon} size={16} />
           </button>
         </div>
       </div>
