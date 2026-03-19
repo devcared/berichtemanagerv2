@@ -10,52 +10,78 @@ import { de } from 'date-fns/locale'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { MailSend01Icon, MessageMultiple01Icon } from '@hugeicons/core-free-icons'
 
+// Cache sender names so we don't re-fetch on every message
+const senderCache = new Map<string, { name: string; initials: string }>()
+
 export default function ChatPage() {
   const { profile, loading: profileLoading } = useProfile()
   const branding = useBranding()
   const primary = branding.accentColor || '#4285f4'
 
   const [messages, setMessages] = useState<ChatMessage[]>([])
-  const [chatReady, setChatReady] = useState(false)   // true after first history load
+  const [chatReady, setChatReady] = useState(false)
   const [input, setInput] = useState('')
   const [sending, setSending] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
-
-  // Stable refs — prevent effects from re-running on profile re-renders
   const fetchedRef = useRef(false)
-  const companyIdRef = useRef<string | null>(null)
   const profileRef = useRef(profile)
   useEffect(() => { profileRef.current = profile }, [profile])
 
-  const scrollToBottom = useCallback((smooth = true) => {
-    bottomRef.current?.scrollIntoView({ behavior: smooth ? 'smooth' : 'instant' })
+  const scrollToBottom = useCallback(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [])
 
-  // ── Load history ONCE when companyId is known ──────────────
+  // ── Load history + subscribe to realtime ──────────────────
   useEffect(() => {
-    if (profileLoading || !profile?.companyId) return
-    if (fetchedRef.current) return          // already loaded — don't overwrite realtime messages
-    if (companyIdRef.current === profile.companyId) return  // same company, skip
-
-    companyIdRef.current = profile.companyId
+    if (profileLoading || !profile?.companyId || !profile?.id) return
+    if (fetchedRef.current) return
     fetchedRef.current = true
 
-    fetch('/api/company/chat')
-      .then(r => r.ok ? r.json() : { messages: [] })
-      .then(json => {
-        setMessages(json.messages ?? [])
+    const supabase = createClient()
+    const companyId = profile.companyId
+
+    // Pre-populate own sender info in cache
+    const ownFn = profile.firstName ?? ''
+    const ownLn = profile.lastName ?? ''
+    senderCache.set(profile.id, {
+      name: `${ownFn} ${ownLn}`.trim() || 'Ich',
+      initials: `${ownFn[0] ?? ''}${ownLn[0] ?? ''}`.toUpperCase() || '??',
+    })
+
+    // ── 1. Fetch history directly from Supabase ────────────
+    supabase
+      .from('chat_messages')
+      .select('id, company_id, sender_id, content, created_at, sender:profiles!sender_id(first_name, last_name)')
+      .eq('company_id', companyId)
+      .order('created_at', { ascending: true })
+      .limit(200)
+      .then(({ data, error }) => {
+        if (error) { console.error('chat history:', error.message); setChatReady(true); return }
+
+        const msgs: ChatMessage[] = (data ?? []).map((row: Record<string, unknown>) => {
+          const s = row.sender as { first_name?: string; last_name?: string } | null
+          const fn = s?.first_name ?? ''
+          const ln = s?.last_name ?? ''
+          const senderId = row.sender_id as string
+          const info = { name: `${fn} ${ln}`.trim() || 'Unbekannt', initials: `${fn[0] ?? ''}${ln[0] ?? ''}`.toUpperCase() || '??' }
+          senderCache.set(senderId, info)
+          return {
+            id: row.id as string,
+            companyId: row.company_id as string,
+            senderId,
+            senderName: info.name,
+            senderInitials: info.initials,
+            content: row.content as string,
+            createdAt: row.created_at as string,
+          }
+        })
+
+        setMessages(msgs)
         setChatReady(true)
       })
-      .catch(() => setChatReady(true))
-  }, [profileLoading, profile?.companyId])
 
-  // ── Realtime subscription ──────────────────────────────────
-  useEffect(() => {
-    if (!profile?.companyId) return
-    const companyId = profile.companyId
-    const supabase = createClient()
-
+    // ── 2. Realtime subscription ───────────────────────────
     const channel = supabase
       .channel(`chat-${companyId}`)
       .on(
@@ -66,69 +92,60 @@ export default function ChatPage() {
             id: string; company_id: string; sender_id: string; content: string; created_at: string
           }
 
-          // Skip dedup check will be done below in setState
-          let fn = '', ln = ''
-          if (raw.sender_id === profileRef.current?.id) {
-            // Own message — use profile we already have
-            fn = profileRef.current?.firstName ?? ''
-            ln = profileRef.current?.lastName ?? ''
-          } else {
-            // Other sender — fetch name
+          // Get sender info from cache or fetch
+          let info = senderCache.get(raw.sender_id)
+          if (!info) {
             const { data } = await supabase
-              .from('profiles').select('first_name, last_name').eq('id', raw.sender_id).single()
-            fn = data?.first_name ?? ''
-            ln = data?.last_name ?? ''
+              .from('profiles')
+              .select('first_name, last_name')
+              .eq('id', raw.sender_id)
+              .single()
+            const fn = data?.first_name ?? ''
+            const ln = data?.last_name ?? ''
+            info = { name: `${fn} ${ln}`.trim() || 'Unbekannt', initials: `${fn[0] ?? ''}${ln[0] ?? ''}`.toUpperCase() || '??' }
+            senderCache.set(raw.sender_id, info)
           }
 
           const msg: ChatMessage = {
-            id: raw.id,
-            companyId: raw.company_id,
-            senderId: raw.sender_id,
-            senderName: `${fn} ${ln}`.trim() || 'Unbekannt',
-            senderInitials: `${fn[0] ?? ''}${ln[0] ?? ''}`.toUpperCase() || '??',
-            content: raw.content,
-            createdAt: raw.created_at,
+            id: raw.id, companyId: raw.company_id, senderId: raw.sender_id,
+            senderName: info.name, senderInitials: info.initials,
+            content: raw.content, createdAt: raw.created_at,
           }
 
-          setMessages(prev => {
-            if (prev.some(m => m.id === msg.id)) return prev
-            return [...prev, msg]
-          })
+          setMessages(prev => prev.some(m => m.id === msg.id) ? prev : [...prev, msg])
         }
       )
       .subscribe()
 
     return () => { supabase.removeChannel(channel) }
-  }, [profile?.companyId]) // only re-subscribe if company changes
+  }, [profileLoading, profile?.companyId, profile?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Scroll to bottom when new messages arrive
-  useEffect(() => {
-    if (chatReady) scrollToBottom()
-  }, [messages, chatReady, scrollToBottom])
+  useEffect(() => { if (chatReady) scrollToBottom() }, [messages, chatReady, scrollToBottom])
 
+  // ── Send message directly via Supabase ────────────────────
   async function sendMessage() {
     const content = input.trim()
-    if (!content || sending) return
+    if (!content || sending || !profile?.companyId || !profile?.id) return
     setSending(true)
     setInput('')
-    try {
-      await fetch('/api/company/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content }),
-      })
-      // Realtime will deliver the message — no need to manually add it
-    } finally {
-      setSending(false)
-      inputRef.current?.focus()
+
+    const supabase = createClient()
+    const { error } = await supabase
+      .from('chat_messages')
+      .insert({ company_id: profile.companyId, sender_id: profile.id, content })
+
+    if (error) {
+      console.error('send message:', error.message)
+      setInput(content) // restore on failure
     }
+    setSending(false)
+    inputRef.current?.focus()
   }
 
   function handleKeyDown(e: React.KeyboardEvent) {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage() }
   }
 
-  // ── Only block render if we have NO companyId at all ──────
   if (!profileLoading && !profile?.companyId) return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3 text-center p-6">
       <HugeiconsIcon icon={MessageMultiple01Icon} size={40} className="text-muted-foreground" />
@@ -173,7 +190,6 @@ export default function ChatPage() {
           </div>
         ) : grouped.map(group => (
           <div key={group.date}>
-            {/* Date divider */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '12px 0 8px' }}>
               <div style={{ flex: 1, height: 1, background: 'hsl(var(--border))' }} />
               <span style={{ fontSize: '0.6875rem', color: 'hsl(var(--muted-foreground))', fontWeight: 500 }}>
@@ -184,13 +200,11 @@ export default function ChatPage() {
 
             {group.msgs.map((msg, i) => {
               const isOwn = msg.senderId === profile?.id
-              const prevMsg = group.msgs[i - 1]
-              const showSender = !isOwn && prevMsg?.senderId !== msg.senderId
+              const showSender = !isOwn && group.msgs[i - 1]?.senderId !== msg.senderId
               const time = format(new Date(msg.createdAt), 'HH:mm')
 
               return (
                 <div key={msg.id} style={{ display: 'flex', flexDirection: isOwn ? 'row-reverse' : 'row', alignItems: 'flex-end', gap: 8, marginBottom: 2 }}>
-                  {/* Avatar */}
                   {!isOwn && (
                     <div style={{
                       width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
@@ -201,7 +215,6 @@ export default function ChatPage() {
                       {msg.senderInitials}
                     </div>
                   )}
-
                   <div style={{ maxWidth: '70%', display: 'flex', flexDirection: 'column', alignItems: isOwn ? 'flex-end' : 'flex-start' }}>
                     {showSender && (
                       <span style={{ fontSize: '0.6875rem', color: 'hsl(var(--muted-foreground))', marginBottom: 2, paddingLeft: 4 }}>
@@ -247,8 +260,7 @@ export default function ChatPage() {
               color: 'hsl(var(--foreground))',
               padding: '10px 16px', fontSize: '0.875rem',
               fontFamily: 'inherit', outline: 'none',
-              maxHeight: 120, overflowY: 'auto',
-              lineHeight: 1.5,
+              maxHeight: 120, overflowY: 'auto', lineHeight: 1.5,
             }}
             maxLength={2000}
           />
@@ -261,8 +273,7 @@ export default function ChatPage() {
               color: input.trim() ? 'white' : 'hsl(var(--muted-foreground))',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               cursor: input.trim() ? 'pointer' : 'not-allowed',
-              transition: 'background 200ms, color 200ms',
-              flexShrink: 0,
+              transition: 'background 200ms, color 200ms', flexShrink: 0,
             }}
           >
             <HugeiconsIcon icon={MailSend01Icon} size={16} />
