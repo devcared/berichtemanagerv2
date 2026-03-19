@@ -92,6 +92,7 @@ export function useProfile() {
         weekly_hours: p.weeklyHours,
         school_days: p.schoolDays,
         school_hours_per_day: p.schoolHoursPerDay,
+        company_id: p.companyId ?? null,
         updated_at: new Date().toISOString()
       }
 

@@ -100,7 +100,7 @@ export default function DashboardLayout({ children, sections, subtitle }: Props)
   const initials     = profile ? `${profile.firstName?.[0] ?? ''}${profile.lastName?.[0] ?? ''}`.toUpperCase() : 'AZ'
   const isDark       = theme === 'dark'
   const primaryColor = branding.accentColor || (isDark ? '#8ab4f8' : '#4285f4')
-  const activeBg     = isDark ? 'rgba(138,180,248,0.14)' : 'rgba(66,133,244,0.10)'
+  const activeBg     = primaryColor + '22'
   const hoverBg      = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)'
 
   function isActive(item: NavItem): boolean {
