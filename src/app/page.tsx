@@ -683,11 +683,10 @@ function Nav() {
             {/* Mobile hamburger */}
             <button
               onClick={() => setMenuOpen(o => !o)}
-              className="md:hidden"
+              className="md:hidden flex flex-col items-center justify-center"
               style={{
                 width: 40, height: 40, borderRadius: '50%', border: 'none',
-                background: 'transparent', cursor: 'pointer',
-                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 5,
+                background: 'transparent', cursor: 'pointer', gap: 5,
                 transition: 'background 150ms ease',
               }}
               onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(0,0,0,0.06)' }}

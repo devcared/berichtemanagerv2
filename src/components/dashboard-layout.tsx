@@ -374,12 +374,12 @@ export default function DashboardLayout({ children, sections, subtitle }: Props)
       </div>
 
       {/* ── Mobile bottom navigation bar ── */}
-      <nav className="md:hidden" style={{
+      <nav className="flex md:hidden" style={{
         position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 40,
         height: 60,
         background: 'hsl(var(--background))',
         borderTop: '1px solid hsl(var(--border))',
-        display: 'flex', alignItems: 'stretch',
+        alignItems: 'stretch',
         paddingBottom: 'env(safe-area-inset-bottom, 0px)',
       }}>
 
