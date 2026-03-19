@@ -3,31 +3,18 @@
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import {
-  format,
-  startOfMonth,
-  endOfMonth,
-  eachDayOfInterval,
-  getDay,
-  isSameMonth,
-  isToday,
-  addMonths,
-  subMonths,
+  format, startOfMonth, endOfMonth, eachDayOfInterval,
+  getDay, isSameMonth, isToday, addMonths, subMonths, startOfWeek, endOfWeek, isSameWeek,
 } from 'date-fns'
 import { de } from 'date-fns/locale'
+import { getISOWeekYear } from 'date-fns'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 import { useReports } from '@/hooks/use-reports'
 import { formatWeekId, getISOWeek } from '@/lib/week-utils'
 import { StatusBadge } from '@/components/berichtsheft/status-badge'
 import { cn } from '@/lib/utils'
-import {
-  ChevronLeft,
-  ChevronRight,
-  Add01Icon,
-  Calendar01Icon,
-} from '@hugeicons/core-free-icons'
+import { ChevronLeft, ChevronRight, Add01Icon, Calendar01Icon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
-import { getISOWeekYear } from 'date-fns'
 import type { WeeklyReport } from '@/types'
 
 const DAY_LABELS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So']
@@ -37,262 +24,224 @@ function getDayIndex(date: Date): number {
   return d === 0 ? 6 : d - 1
 }
 
+function statusColor(status: WeeklyReport['status']): string {
+  if (status === 'approved')       return 'rgba(34,197,94,0.08)'
+  if (status === 'submitted' || status === 'in_review') return 'rgba(59,130,246,0.08)'
+  if (status === 'needs_revision') return 'rgba(239,68,68,0.08)'
+  if (status === 'draft')          return 'rgba(234,179,8,0.08)'
+  return 'transparent'
+}
+
+function statusDot(status: WeeklyReport['status']): string {
+  if (status === 'approved')       return '#22c55e'
+  if (status === 'submitted' || status === 'in_review') return '#3b82f6'
+  if (status === 'needs_revision') return '#ef4444'
+  if (status === 'draft')          return '#eab308'
+  return 'transparent'
+}
+
 export default function KalenderPage() {
   const router = useRouter()
   const { reports } = useReports()
   const [currentMonth, setCurrentMonth] = useState(new Date())
-  const [hoveredDay, setHoveredDay] = useState<string | null>(null)
+  const today = new Date()
 
   const reportsByWeek = useMemo(() => {
     const map: Record<string, WeeklyReport> = {}
-    reports.forEach(r => {
-      const key = formatWeekId(r.year, r.calendarWeek)
-      map[key] = r
-    })
+    reports.forEach(r => { map[formatWeekId(r.year, r.calendarWeek)] = r })
     return map
   }, [reports])
 
   const { days, prefixDays } = useMemo(() => {
     const start = startOfMonth(currentMonth)
-    const end = endOfMonth(currentMonth)
-    const d = eachDayOfInterval({ start, end })
-    const prefix: null[] = Array(getDayIndex(start)).fill(null)
-    return { days: d, prefixDays: prefix }
+    const end   = endOfMonth(currentMonth)
+    const days  = eachDayOfInterval({ start, end })
+    return { days, prefixDays: Array<null>(getDayIndex(start)).fill(null) }
   }, [currentMonth])
 
-  function getDayReport(date: Date): WeeklyReport | undefined {
-    const week = getISOWeek(date)
-    const year = getISOWeekYear(date)
-    return reportsByWeek[formatWeekId(year, week)]
+  function getReport(date: Date) {
+    return reportsByWeek[formatWeekId(getISOWeekYear(date), getISOWeek(date))]
   }
 
   function navigateToWeek(date: Date) {
-    const week = getISOWeek(date)
-    const year = getISOWeekYear(date)
-    router.push(`/berichtsheft/editor/${formatWeekId(year, week)}`)
+    router.push(`/berichtsheft/editor/${formatWeekId(getISOWeekYear(date), getISOWeek(date))}`)
   }
 
-  function getDotStyle(date: Date): { className: string; show: boolean } {
-    const report = getDayReport(date)
-    if (!report) return { className: '', show: false }
-    if (report.status === 'approved')
-      return { className: 'bg-green-500', show: true }
-    if (report.status === 'submitted' || report.status === 'in_review')
-      return { className: 'bg-blue-500', show: true }
-    if (report.status === 'needs_revision')
-      return { className: 'bg-red-500', show: true }
-    if (report.status === 'draft')
-      return { className: 'bg-yellow-500', show: true }
-    return { className: '', show: false }
-  }
+  /* Build week rows for the current month */
+  const weekRows = useMemo(() => {
+    const rows: Date[][] = []
+    if (days.length === 0) return rows
 
-  const today = new Date()
+    // Start from first Monday on or before the first day
+    const firstDay = startOfMonth(currentMonth)
+    const startMon = startOfWeek(firstDay, { weekStartsOn: 1 })
+    const lastDay  = endOfMonth(currentMonth)
+    const endSun   = endOfWeek(lastDay, { weekStartsOn: 1 })
+
+    const allDays = eachDayOfInterval({ start: startMon, end: endSun })
+    for (let i = 0; i < allDays.length; i += 7) {
+      rows.push(allDays.slice(i, i + 7))
+    }
+    return rows
+  }, [currentMonth, days.length])
 
   return (
-    <div className="flex flex-col flex-1 gap-6 p-6">
-      {/* Page header */}
-      <div className="flex items-center justify-between">
+    <div style={{ display: 'flex', flexDirection: 'column', flex: 1, padding: 'clamp(1rem, 3vw, 1.5rem)', gap: '1.25rem', fontFamily: '"Google Sans","Roboto",-apple-system,sans-serif' }}>
+
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Kalender</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Übersicht aller Berichtswochen</p>
+          <h1 style={{ fontSize: '1.25rem', fontWeight: 500, color: 'hsl(var(--foreground))', marginBottom: 2 }}>Kalender</h1>
+          <p style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>
+            Alle Berichtswochen auf einen Blick
+          </p>
         </div>
         <Button
-          onClick={() => {
-            const week = getISOWeek(today)
-            const year = getISOWeekYear(today)
-            router.push(`/berichtsheft/editor/${formatWeekId(year, week)}`)
-          }}
+          onClick={() => navigateToWeek(today)}
+          size="sm"
         >
-          <HugeiconsIcon icon={Add01Icon} size={16} data-icon="inline-start" />
+          <HugeiconsIcon icon={Add01Icon} size={15} style={{ marginRight: 6 }} />
           Neue Woche
         </Button>
       </div>
 
-      <Card className="bg-card border-border flex-1">
-        <CardContent className="p-6">
-          {/* Top bar */}
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-8"
-                onClick={() => setCurrentMonth(m => subMonths(m, 1))}
-              >
-                <HugeiconsIcon icon={ChevronLeft} size={16} />
-              </Button>
-              <h2 className="text-lg font-semibold text-foreground min-w-[180px] text-center">
-                {format(currentMonth, 'MMMM yyyy', { locale: de })}
-              </h2>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-8"
-                onClick={() => setCurrentMonth(m => addMonths(m, 1))}
-              >
-                <HugeiconsIcon icon={ChevronRight} size={16} />
-              </Button>
-            </div>
+      {/* Calendar card */}
+      <div style={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 12, overflow: 'hidden', flex: 1 }}>
 
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentMonth(new Date())}
-                className="text-xs"
-              >
-                <HugeiconsIcon icon={Calendar01Icon} size={14} data-icon="inline-start" />
-                Heute
-              </Button>
-            </div>
+        {/* Month navigation */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem 1.25rem', borderBottom: '1px solid hsl(var(--border))' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <button
+              onClick={() => setCurrentMonth(m => subMonths(m, 1))}
+              style={{ width: 32, height: 32, border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'hsl(var(--foreground))', transition: 'background 100ms' }}
+              onMouseEnter={e => (e.currentTarget.style.background = 'hsl(var(--accent))')}
+              onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+            >
+              <HugeiconsIcon icon={ChevronLeft} size={16} />
+            </button>
+            <h2 style={{ fontSize: '1rem', fontWeight: 600, color: 'hsl(var(--foreground))', minWidth: 160, textAlign: 'center' }}>
+              {format(currentMonth, 'MMMM yyyy', { locale: de })}
+            </h2>
+            <button
+              onClick={() => setCurrentMonth(m => addMonths(m, 1))}
+              style={{ width: 32, height: 32, border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'hsl(var(--foreground))', transition: 'background 100ms' }}
+              onMouseEnter={e => (e.currentTarget.style.background = 'hsl(var(--accent))')}
+              onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+            >
+              <HugeiconsIcon icon={ChevronRight} size={16} />
+            </button>
           </div>
 
-          {/* Day headers */}
-          <div className="grid grid-cols-7 mb-2">
-            {DAY_LABELS.map(d => (
-              <div key={d} className="text-center text-xs font-medium text-muted-foreground py-2">
-                {d}
-              </div>
-            ))}
+          <button
+            onClick={() => setCurrentMonth(new Date())}
+            style={{ padding: '6px 14px', borderRadius: 6, border: '1px solid hsl(var(--border))', background: 'transparent', cursor: 'pointer', fontSize: '0.8125rem', color: 'hsl(var(--foreground))', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 6, transition: 'background 100ms' }}
+            onMouseEnter={e => (e.currentTarget.style.background = 'hsl(var(--accent))')}
+            onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+          >
+            <HugeiconsIcon icon={Calendar01Icon} size={14} />
+            Heute
+          </button>
+        </div>
+
+        {/* Day headers */}
+        <div style={{ display: 'grid', gridTemplateColumns: '48px repeat(7, 1fr)', borderBottom: '1px solid hsl(var(--border))' }}>
+          <div style={{ padding: '8px 0', textAlign: 'center', fontSize: '0.6875rem', fontWeight: 600, color: 'hsl(var(--muted-foreground))', letterSpacing: '0.04em' }}>
+            KW
           </div>
-
-          {/* Calendar grid */}
-          <div className="grid grid-cols-7 gap-px bg-border rounded-lg overflow-hidden">
-            {prefixDays.map((_, i) => (
-              <div key={`prefix-${i}`} className="bg-background min-h-[80px]" />
-            ))}
-
-            {days.map(day => {
-              const dayIdx = getDayIndex(day)
-              const isWeekend = dayIdx >= 5
-              const isCurrentDay = isToday(day)
-              const inMonth = isSameMonth(day, currentMonth)
-              const dot = getDotStyle(day)
-              const dayKey = day.toISOString()
-              const isHovered = hoveredDay === dayKey
-              const report = getDayReport(day)
-
-              return (
-                <div
-                  key={dayKey}
-                  onClick={() => !isWeekend && navigateToWeek(day)}
-                  onMouseEnter={() => !isWeekend && setHoveredDay(dayKey)}
-                  onMouseLeave={() => setHoveredDay(null)}
-                  className={cn(
-                    'bg-background min-h-[80px] p-2 flex flex-col gap-1 relative transition-colors',
-                    !isWeekend && 'cursor-pointer hover:bg-accent/30',
-                    isCurrentDay && 'bg-primary/5',
-                  )}
-                  style={
-                    isWeekend
-                      ? {
-                          backgroundImage:
-                            'repeating-linear-gradient(-45deg, transparent, transparent 4px, rgba(255,255,255,0.02) 4px, rgba(255,255,255,0.02) 8px)',
-                        }
-                      : undefined
-                  }
-                >
-                  <div className="flex items-center justify-between">
-                    <span className={cn(
-                      'text-xs font-medium size-6 flex items-center justify-center rounded-full',
-                      isCurrentDay
-                        ? 'bg-primary text-primary-foreground'
-                        : isWeekend
-                          ? 'text-muted-foreground/40'
-                          : 'text-foreground',
-                      !inMonth && 'opacity-40',
-                    )}>
-                      {format(day, 'd')}
-                    </span>
-
-                    {!isWeekend && isHovered && !report && (
-                      <div className="size-5 rounded-full bg-primary/20 flex items-center justify-center">
-                        <HugeiconsIcon icon={Add01Icon} size={10} className="text-primary" />
-                      </div>
-                    )}
-                  </div>
-
-                  {dot.show && !isWeekend && (
-                    <div className="flex items-center gap-1">
-                      <div className={cn('size-1.5 rounded-full', dot.className)} />
-                      {report && (
-                        <span className="text-[10px] text-muted-foreground truncate">
-                          {report.totalHours}h
-                        </span>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )
-            })}
-
-            {/* Fill remaining cells */}
-            {Array.from({
-              length: (7 - ((prefixDays.length + days.length) % 7)) % 7,
-            }).map((_, i) => (
-              <div key={`suffix-${i}`} className="bg-background min-h-[80px]" />
-            ))}
-          </div>
-
-          {/* Legend */}
-          <div className="flex gap-6 mt-6 pt-4 border-t border-border text-xs text-muted-foreground">
-            <div className="flex items-center gap-1.5">
-              <div className="size-2 rounded-full bg-green-500" />
-              <span>Abgeschlossen</span>
+          {DAY_LABELS.map(d => (
+            <div key={d} style={{ padding: '8px 0', textAlign: 'center', fontSize: '0.6875rem', fontWeight: 600, color: 'hsl(var(--muted-foreground))', letterSpacing: '0.04em' }}>
+              {d}
             </div>
-            <div className="flex items-center gap-1.5">
-              <div className="size-2 rounded-full bg-yellow-500" />
-              <span>Entwurf</span>
-            </div>
-            <div className="flex items-center gap-1.5">
+          ))}
+        </div>
+
+        {/* Week rows */}
+        <div>
+          {weekRows.map((week, wi) => {
+            const mondayOfWeek = week[0]
+            const kw = getISOWeek(mondayOfWeek)
+            const yr = getISOWeekYear(mondayOfWeek)
+            const report = reportsByWeek[formatWeekId(yr, kw)]
+            const isCurrentWeek = isSameWeek(mondayOfWeek, today, { weekStartsOn: 1 })
+
+            return (
               <div
-                className="size-3 rounded-sm"
+                key={wi}
+                onClick={() => navigateToWeek(mondayOfWeek)}
                 style={{
-                  backgroundImage:
-                    'repeating-linear-gradient(-45deg, transparent, transparent 2px, rgba(255,255,255,0.1) 2px, rgba(255,255,255,0.1) 4px)',
-                  backgroundColor: 'transparent',
-                  border: '1px solid rgba(255,255,255,0.1)',
+                  display: 'grid',
+                  gridTemplateColumns: '48px repeat(7, 1fr)',
+                  borderBottom: '1px solid hsl(var(--border))',
+                  cursor: 'pointer',
+                  background: report ? statusColor(report.status) : isCurrentWeek ? 'hsl(var(--primary) / 0.04)' : 'transparent',
+                  transition: 'background 100ms',
+                  minHeight: 72,
                 }}
-              />
-              <span>Wochenende</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Recent reports list */}
-      {reports.length > 0 && (
-        <Card className="bg-card border-border">
-          <CardContent className="p-5">
-            <h3 className="text-sm font-semibold text-foreground mb-3">Alle Berichte</h3>
-            <div className="space-y-2">
-              {reports.map(report => (
-                <div
-                  key={report.id}
-                  className="flex items-center justify-between p-3 rounded-lg bg-muted/40 hover:bg-muted/60 cursor-pointer transition-colors"
-                  onClick={() => router.push(`/berichtsheft/editor/${formatWeekId(report.year, report.calendarWeek)}`)}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                      <span className="text-primary text-xs font-bold">{report.calendarWeek}</span>
-                    </div>
-                    <div>
-                      <div className="text-sm font-medium text-foreground">
-                        KW {report.calendarWeek} / {report.year}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {format(new Date(report.weekStart), 'd. MMM', { locale: de })} –{' '}
-                        {format(new Date(report.weekEnd), 'd. MMM yyyy', { locale: de })} · {report.totalHours}h
-                      </div>
-                    </div>
-                  </div>
-                  <StatusBadge status={report.status} />
+                onMouseEnter={e => (e.currentTarget.style.background = 'hsl(var(--accent))')}
+                onMouseLeave={e => (e.currentTarget.style.background = report ? statusColor(report.status) : isCurrentWeek ? 'hsl(var(--primary) / 0.04)' : 'transparent')}
+              >
+                {/* KW cell */}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '8px 4px', borderRight: '1px solid hsl(var(--border))', gap: 4 }}>
+                  <span style={{ fontSize: '0.75rem', fontWeight: isCurrentWeek ? 700 : 500, color: isCurrentWeek ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))' }}>
+                    {kw}
+                  </span>
+                  {report && (
+                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: statusDot(report.status), flexShrink: 0 }} />
+                  )}
                 </div>
-              ))}
+
+                {/* Day cells */}
+                {week.map((date, di) => {
+                  const inMonth = isSameMonth(date, currentMonth)
+                  const isWeekend = di >= 5
+                  const isCurrent = isToday(date)
+
+                  return (
+                    <div
+                      key={di}
+                      style={{
+                        padding: '8px 6px',
+                        borderRight: di < 6 ? '1px solid hsl(var(--border) / 0.4)' : 'none',
+                        opacity: inMonth ? 1 : 0.35,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: 4,
+                      }}
+                    >
+                      <span style={{
+                        width: 26, height: 26, borderRadius: '50%',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: '0.8125rem',
+                        fontWeight: isCurrent ? 700 : 400,
+                        background: isCurrent ? 'hsl(var(--primary))' : 'transparent',
+                        color: isCurrent ? 'white' : isWeekend ? 'hsl(var(--muted-foreground))' : 'hsl(var(--foreground))',
+                      }}>
+                        {format(date, 'd')}
+                      </span>
+                    </div>
+                  )
+                })}
+              </div>
+            )
+          })}
+        </div>
+
+        {/* Status legend */}
+        <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', padding: '0.875rem 1.25rem', borderTop: '1px solid hsl(var(--border))' }}>
+          {[
+            { color: '#22c55e', label: 'Freigegeben' },
+            { color: '#3b82f6', label: 'Eingereicht / In Prüfung' },
+            { color: '#eab308', label: 'Entwurf' },
+            { color: '#ef4444', label: 'Überarbeitung nötig' },
+          ].map(({ color, label }) => (
+            <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: color, flexShrink: 0 }} />
+              <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>{label}</span>
             </div>
-          </CardContent>
-        </Card>
-      )}
+          ))}
+        </div>
+      </div>
     </div>
   )
 }
