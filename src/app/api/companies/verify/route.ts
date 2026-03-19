@@ -6,21 +6,13 @@ import { createServerClient } from '@supabase/ssr'
 /** POST /api/companies/verify – verify join code and link user to company */
 export async function POST(req: NextRequest) {
   try {
-    // Get authenticated user via server-side Supabase client
+    // Get authenticated user (read-only cookies, same pattern as verify-server.ts)
     const cookieStore = await cookies()
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll: () => cookieStore.getAll(),
-          setAll: (cookiesToSet) => {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            )
-          },
-        },
-      }
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+        ?? process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY!,
+      { cookies: { getAll: () => cookieStore.getAll() } }
     )
 
     const { data: { user } } = await supabase.auth.getUser()
