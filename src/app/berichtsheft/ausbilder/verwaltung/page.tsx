@@ -302,7 +302,7 @@ export default function VerwaltungPage() {
       )}
 
       {/* Hero Header */}
-      <div className="border-b border-border bg-card px-6 py-6">
+      <div className="border-b border-border bg-card px-3 sm:px-6 py-4 sm:py-6">
         <div className="max-w-5xl mx-auto">
           <div className="flex items-center gap-3 mb-4">
             <Button variant="ghost" size="sm" className="h-8 gap-1.5 text-xs"
@@ -312,13 +312,13 @@ export default function VerwaltungPage() {
             </Button>
           </div>
 
-          <div className="flex items-start justify-between gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
             <div className="flex items-center gap-4">
-              <div className="size-12 bg-primary rounded-2xl flex items-center justify-center shadow-lg shadow-primary/25">
+              <div className="size-12 bg-primary rounded-2xl flex items-center justify-center shadow-lg shadow-primary/25 shrink-0">
                 <HugeiconsIcon icon={Group01Icon} size={24} className="text-primary-foreground" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold tracking-tight">Benutzerverwaltung</h1>
+                <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Benutzerverwaltung</h1>
                 <p className="text-sm text-muted-foreground mt-0.5">
                   Auszubildende & Ausbilder verwalten · Einladungen versenden
                 </p>
@@ -330,13 +330,13 @@ export default function VerwaltungPage() {
           </div>
 
           {/* Stats Row */}
-          <div className="grid grid-cols-3 gap-3 mt-5">
+          <div className="grid grid-cols-3 gap-2 sm:gap-3 mt-4 sm:mt-5">
             {[
               { label: 'Auszubildende', value: apprentices.length, icon: UserCircleIcon, color: 'text-blue-500', bg: 'bg-blue-500/10' },
               { label: 'Ausbilder', value: trainers.length, icon: CheckmarkBadge01Icon, color: 'text-primary', bg: 'bg-primary/10' },
               { label: 'Berichte gesamt', value: profiles.reduce((s, p) => s + p.stats.total, 0), icon: Shield01Icon, color: 'text-green-500', bg: 'bg-green-500/10' },
             ].map(s => (
-              <div key={s.label} className="rounded-2xl border border-border bg-card/50 px-4 py-3 flex items-center gap-3">
+              <div key={s.label} className="rounded-2xl border border-border bg-card/50 px-2 sm:px-4 py-2.5 sm:py-3 flex items-center gap-2 sm:gap-3">
                 <div className={cn('size-9 rounded-xl flex items-center justify-center shrink-0', s.bg, s.color)}>
                   <HugeiconsIcon icon={s.icon} size={16} />
                 </div>
@@ -351,7 +351,7 @@ export default function VerwaltungPage() {
       </div>
 
       {/* Main */}
-      <div className="flex-1 px-6 py-6 max-w-5xl mx-auto w-full">
+      <div className="flex-1 px-3 sm:px-6 py-4 sm:py-6 max-w-5xl mx-auto w-full">
 
         {/* Load Error */}
         {loadError && (
@@ -787,7 +787,7 @@ function TrainerRow({
 }) {
   return (
     <div className={cn(
-      'flex items-center gap-4 rounded-2xl border px-5 py-4 transition-colors',
+      'flex items-center gap-3 sm:gap-4 rounded-2xl border px-3 sm:px-5 py-3 sm:py-4 transition-colors',
       isSelf ? 'border-primary/30 bg-primary/5' : 'border-border bg-card hover:bg-muted/30'
     )}>
       <div className={cn(

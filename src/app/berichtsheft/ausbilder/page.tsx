@@ -195,16 +195,16 @@ export default function AusbilderPage() {
   return (
     <div className="flex flex-col min-h-full bg-background">
       {/* Hero Header */}
-      <div className="border-b border-border bg-card px-6 py-6">
+      <div className="border-b border-border bg-card px-3 sm:px-6 py-4 sm:py-6">
         <div className="max-w-5xl mx-auto">
-          <div className="flex items-start justify-between gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
             <div className="flex items-center gap-4">
               <div className="size-12 bg-primary rounded-2xl flex items-center justify-center shadow-lg shadow-primary/25">
                 <HugeiconsIcon icon={CheckmarkBadge01Icon} size={24} className="text-primary-foreground" />
               </div>
               <div>
                 <p className="text-xs text-muted-foreground font-medium mb-0.5">Willkommen zurück,</p>
-                <h1 className="text-2xl font-bold tracking-tight">
+                <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
                   {profile.firstName} {profile.lastName}
                 </h1>
                 <p className="text-sm text-muted-foreground mt-0.5">
@@ -226,7 +226,7 @@ export default function AusbilderPage() {
 
           {/* Urgent Banner */}
           {urgentCount > 0 && (
-            <div className="mt-4 flex items-center gap-3 rounded-xl border border-orange-500/30 bg-orange-500/8 px-4 py-3">
+            <div className="mt-4 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 rounded-xl border border-orange-500/30 bg-orange-500/8 px-3 sm:px-4 py-3">
               <div className="size-7 rounded-lg bg-orange-500/15 flex items-center justify-center shrink-0">
                 <HugeiconsIcon icon={Notification01Icon} size={14} className="text-orange-500" />
               </div>
@@ -246,7 +246,7 @@ export default function AusbilderPage() {
         </div>
       </div>
 
-      <div className="flex-1 px-6 py-6 max-w-5xl mx-auto w-full">
+      <div className="flex-1 px-3 sm:px-6 py-4 sm:py-6 max-w-5xl mx-auto w-full">
         {/* Stats Row */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
           {[
@@ -295,7 +295,7 @@ export default function AusbilderPage() {
         {/* Search + Tabs */}
         <Card className="border-border overflow-hidden">
           {/* Toolbar */}
-          <div className="border-b border-border px-4 py-3 flex items-center gap-3">
+          <div className="border-b border-border px-3 sm:px-4 py-2.5 sm:py-3 flex items-center gap-2 sm:gap-3">
             <div className="relative flex-1 max-w-xs">
               <HugeiconsIcon
                 icon={Search01Icon}
@@ -399,7 +399,7 @@ export default function AusbilderPage() {
                       key={report.id}
                       onClick={() => router.push(`/berichtsheft/ausbilder/${report.id}`)}
                       className={cn(
-                        'w-full flex items-center gap-4 px-5 py-4 hover:bg-muted/30 transition-colors text-left group',
+                        'w-full flex items-center gap-2 sm:gap-4 px-3 sm:px-5 py-3 sm:py-4 hover:bg-muted/30 transition-colors text-left group',
                         isUrgent && 'border-l-2 border-orange-500'
                       )}
                     >

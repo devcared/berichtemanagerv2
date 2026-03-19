@@ -346,7 +346,7 @@ export default function AusbilderReportDetailPage() {
     <div className="flex flex-col min-h-full">
       {/* Sticky Top Bar */}
       <div className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur-sm">
-        <div className="max-w-6xl mx-auto flex items-center justify-between px-5 py-3 gap-4">
+        <div className="max-w-6xl mx-auto flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 gap-3 sm:gap-4">
           <div className="flex items-center gap-3">
             <Button
               variant="ghost"
@@ -395,17 +395,17 @@ export default function AusbilderReportDetailPage() {
         </div>
       </div>
 
-      <div className="flex-1 px-5 py-6 max-w-6xl mx-auto w-full">
+      <div className="flex-1 px-3 sm:px-5 py-4 sm:py-6 max-w-6xl mx-auto w-full">
         {/* Azubi Hero */}
         <Card className="border-border overflow-hidden mb-6">
-          <div className="p-5">
+          <div className="p-3 sm:p-5">
             {/* Header */}
-            <div className="flex items-start gap-4 mb-5">
+            <div className="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4 mb-4 sm:mb-5">
               <div className="size-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-bold text-lg shrink-0">
                 {report.apprentice.firstName[0]}{report.apprentice.lastName[0]}
               </div>
               <div className="flex-1 min-w-0">
-                <h2 className="text-xl font-bold text-foreground">
+                <h2 className="text-lg sm:text-xl font-bold text-foreground">
                   {report.apprentice.firstName} {report.apprentice.lastName}
                 </h2>
                 <p className="text-sm text-muted-foreground">{report.apprentice.occupation}</p>

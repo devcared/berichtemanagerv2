@@ -286,15 +286,15 @@ export default function AusbilderStundenplanPage() {
       )}
 
       {/* ── Hero Header ── */}
-      <div className="border-b border-border bg-card px-6 py-6">
-        <div className="max-w-4xl mx-auto flex items-center justify-between gap-4 flex-wrap">
+      <div className="border-b border-border bg-card px-3 sm:px-6 py-4 sm:py-6">
+        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
           <div className="flex items-center gap-4">
             <div className="size-12 bg-primary rounded-2xl flex items-center justify-center shadow-lg shadow-primary/25 shrink-0">
               <HugeiconsIcon icon={CheckmarkBadge01Icon} size={24} className="text-primary-foreground" />
             </div>
             <div>
               <p className="text-xs text-muted-foreground font-medium mb-0.5">Ausbilder-Bereich · Stundenplan</p>
-              <h1 className="text-2xl font-bold tracking-tight">
+              <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
                 {trainerProfile.firstName} {trainerProfile.lastName}
               </h1>
               <p className="text-sm text-muted-foreground mt-0.5">
@@ -314,7 +314,7 @@ export default function AusbilderStundenplanPage() {
         </div>
       </div>
 
-      <div className="flex-1 px-6 py-8 max-w-4xl mx-auto w-full space-y-10">
+      <div className="flex-1 px-3 sm:px-6 py-5 sm:py-8 max-w-4xl mx-auto w-full space-y-8 sm:space-y-10">
 
         {/* ── Summary pills ── */}
         <div className="grid grid-cols-3 gap-3">
@@ -406,7 +406,7 @@ export default function AusbilderStundenplanPage() {
                     {/* Category accent top bar */}
                     <div className="h-0.5 w-full" style={{ backgroundColor: cat.color }} />
 
-                    <div className="p-5 flex items-start gap-4">
+                    <div className="p-3 sm:p-5 flex items-start gap-3 sm:gap-4">
                       {/* PDF icon */}
                       <div className="size-12 rounded-xl bg-red-500/10 flex items-center justify-center shrink-0">
                         <HugeiconsIcon icon={File01Icon} size={22} className="text-red-400" />
@@ -515,7 +515,7 @@ export default function AusbilderStundenplanPage() {
               {apprenticeDocs.map(doc => {
                 const cat = getCat(doc.category)
                 return (
-                  <div key={doc.id} className="flex items-center gap-4 px-5 py-4">
+                  <div key={doc.id} className="flex items-center gap-3 sm:gap-4 px-3 sm:px-5 py-3 sm:py-4">
                     <div className="size-9 rounded-xl bg-red-500/10 flex items-center justify-center shrink-0">
                       <HugeiconsIcon icon={File01Icon} size={16} className="text-red-400" />
                     </div>
@@ -566,7 +566,7 @@ export default function AusbilderStundenplanPage() {
                     d.schedule_document_reads.some(r => r.profile_id === ap.id)
                   ).length
                   return (
-                    <div key={ap.id} className="flex items-center gap-4 px-5 py-4">
+                    <div key={ap.id} className="flex items-center gap-3 sm:gap-4 px-3 sm:px-5 py-3 sm:py-4">
                       <div className="size-9 rounded-xl flex items-center justify-center text-xs font-bold text-white shrink-0"
                         style={{ backgroundColor: color }}>
                         {initials}
