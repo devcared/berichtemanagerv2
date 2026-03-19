@@ -250,46 +250,69 @@ function AppHome() {
           <p style={{ fontSize: '0.9375rem', color: fgMuted }}>{today}</p>
         </div>
 
-        {/* ── Company banner ── */}
+        {/* ── Company card (Google style) ── */}
         {profile?.companyId && (
           <div style={{
             marginBottom: '2rem',
-            padding: '1rem 1.25rem',
             borderRadius: 16,
-            background: primary + '0d',
-            border: `1px solid ${primary}28`,
-            display: 'flex', alignItems: 'center', gap: '0.875rem',
+            background: cardBg,
+            border: `1px solid ${borderC}`,
+            overflow: 'hidden',
+            boxShadow: isDark
+              ? '0 1px 3px rgba(0,0,0,0.3)'
+              : '0 1px 3px rgba(60,64,67,0.08), 0 1px 2px rgba(60,64,67,0.06)',
           }}>
-            {/* Logo or initial */}
-            {branding.logoUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={branding.logoUrl}
-                alt={branding.name}
-                style={{ width: 40, height: 40, borderRadius: 10, objectFit: 'contain', flexShrink: 0, background: primary + '18' }}
-                onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
-              />
-            ) : (
+            {/* Accent top bar */}
+            <div style={{ height: 3, background: primary }} />
+
+            <div style={{ padding: '1rem 1.25rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              {/* Logo */}
+              {branding.logoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={branding.logoUrl}
+                  alt={branding.name}
+                  style={{ width: 44, height: 44, borderRadius: 10, objectFit: 'contain', flexShrink: 0, background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)', padding: 2 }}
+                  onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
+                />
+              ) : (
+                <div style={{
+                  width: 44, height: 44, borderRadius: 10, flexShrink: 0,
+                  background: primary,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: 'white', fontWeight: 700, fontSize: '1.25rem',
+                  letterSpacing: '-0.01em',
+                }}>
+                  {(branding.name || 'U')[0].toUpperCase()}
+                </div>
+              )}
+
+              {/* Text */}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: '0.75rem', color: fgMuted, marginBottom: '0.125rem', fontWeight: 400 }}>
+                  Ausbildungsbetrieb
+                </div>
+                <div style={{ fontSize: '1rem', fontWeight: 600, color: fg, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', letterSpacing: '-0.01em' }}>
+                  {branding.name}
+                </div>
+                {profile.occupation && (
+                  <div style={{ fontSize: '0.8125rem', color: fgMuted, marginTop: '0.125rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {profile.occupation}{profile.currentYear ? ` · ${profile.currentYear}. Lehrjahr` : ''}
+                  </div>
+                )}
+              </div>
+
+              {/* Status chip */}
               <div style={{
-                width: 40, height: 40, borderRadius: 10, flexShrink: 0,
-                background: primary,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: 'white', fontWeight: 700, fontSize: '1.125rem',
+                display: 'flex', alignItems: 'center', gap: 6,
+                padding: '5px 12px', borderRadius: 20, flexShrink: 0,
+                background: primary + '14',
               }}>
-                {(branding.name || 'U')[0].toUpperCase()}
+                <div style={{ width: 7, height: 7, borderRadius: '50%', background: primary, flexShrink: 0 }} />
+                <span style={{ fontSize: '0.75rem', fontWeight: 500, color: primary, whiteSpace: 'nowrap' }}>
+                  Aktiv
+                </span>
               </div>
-            )}
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: '0.6875rem', fontWeight: 600, letterSpacing: '0.07em', textTransform: 'uppercase', color: primary, marginBottom: 2 }}>
-                Dein Unternehmen
-              </div>
-              <div style={{ fontSize: '0.9375rem', fontWeight: 600, color: fg, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {branding.name}
-              </div>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 20, background: primary + '18', border: `1px solid ${primary}30`, flexShrink: 0 }}>
-              <div style={{ width: 6, height: 6, borderRadius: '50%', background: primary }} />
-              <span style={{ fontSize: '0.6875rem', fontWeight: 600, color: primary }}>Mitglied</span>
             </div>
           </div>
         )}
