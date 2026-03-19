@@ -244,13 +244,35 @@ export default function ChatPage() {
     if (imageUrl !== null) payload.image_url = imageUrl
     if (capturedReply?.id) payload.reply_to_id = capturedReply.id
 
-    const { error } = await supabase.from('chat_messages').insert(payload)
+    const { data: inserted, error } = await supabase
+      .from('chat_messages').insert(payload).select('id, created_at').single()
 
     if (error) {
       console.error('send:', error.message)
       setInput(content)
       setReplyTo(capturedReply)
       if (capturedFile) { setImageFile(capturedFile); setImagePreview(URL.createObjectURL(capturedFile)) }
+    } else if (inserted) {
+      // Add own message immediately — don't wait for Realtime (which may miss new columns)
+      const fn = profile.firstName ?? '', ln = profile.lastName ?? ''
+      const ownInfo = senderCache.get(profile.id) ?? {
+        name: `${fn} ${ln}`.trim() || 'Ich',
+        initials: `${fn[0] ?? ''}${ln[0] ?? ''}`.toUpperCase() || '??',
+      }
+      const newMsg: ChatMessage = {
+        id: inserted.id,
+        companyId: profile.companyId,
+        senderId: profile.id,
+        senderName: ownInfo.name,
+        senderInitials: ownInfo.initials,
+        content: content || '📷',
+        imageUrl: imageUrl,
+        replyToId: capturedReply?.id ?? null,
+        replyToContent: capturedReply?.content ?? null,
+        replyToSenderName: capturedReply?.senderName ?? null,
+        createdAt: inserted.created_at,
+      }
+      setMessages(prev => prev.some(m => m.id === newMsg.id) ? prev : [...prev, newMsg])
     }
     setSending(false)
     inputRef.current?.focus()
@@ -363,32 +385,34 @@ export default function ChatPage() {
                   <div style={{ maxWidth: '68%', display: 'flex', flexDirection: 'column', alignItems: isOwn ? 'flex-end' : 'flex-start' }}>
                     {showSender && <span style={{ fontSize: '0.6875rem', color: 'hsl(var(--muted-foreground))', marginBottom: 2, paddingLeft: 4 }}>{msg.senderName}</span>}
 
-                    {/* Reply quote */}
-                    {msg.replyToId && (
-                      <div style={{ marginBottom: 4, paddingLeft: isOwn ? 0 : 4, paddingRight: isOwn ? 4 : 0, maxWidth: '100%' }}>
-                        <div style={{ padding: '6px 10px', borderRadius: 10, background: 'hsl(var(--muted))', borderLeft: `3px solid ${primary}`, opacity: 0.85, cursor: 'pointer' }}
-                          onClick={() => {
-                            const el = document.getElementById(`msg-${msg.replyToId}`)
-                            el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-                          }}>
-                          <div style={{ fontSize: '0.6875rem', fontWeight: 600, color: primary, marginBottom: 1 }}>{msg.replyToSenderName ?? '...'}</div>
-                          <div style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 220 }}>
-                            {msg.replyToContent ?? '📷 Bild'}
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
                     {/* Bubble */}
                     <div
                       id={`msg-${msg.id}`}
-                      style={{ padding: msg.imageUrl && !msg.content.trim() ? 4 : '8px 12px', borderRadius: isOwn ? '16px 16px 4px 16px' : '16px 16px 16px 4px', background: isOwn ? primary : 'hsl(var(--muted))', color: isOwn ? 'white' : 'hsl(var(--foreground))', fontSize: '0.875rem', lineHeight: 1.5, wordBreak: 'break-word', whiteSpace: 'pre-wrap', overflow: 'hidden' }}
+                      style={{ padding: msg.imageUrl && !msg.replyToId && !msg.content.trim() ? 4 : '8px 12px', borderRadius: isOwn ? '16px 16px 4px 16px' : '16px 16px 16px 4px', background: isOwn ? primary : 'hsl(var(--muted))', color: isOwn ? 'white' : 'hsl(var(--foreground))', fontSize: '0.875rem', lineHeight: 1.5, wordBreak: 'break-word', whiteSpace: 'pre-wrap', overflow: 'hidden' }}
                     >
+                      {/* Reply quote — inside bubble */}
+                      {msg.replyToId && (
+                        <div
+                          onClick={() => document.getElementById(`msg-${msg.replyToId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
+                          style={{ display: 'flex', gap: 0, marginBottom: 7, borderRadius: 8, overflow: 'hidden', cursor: 'pointer', background: isOwn ? 'rgba(0,0,0,0.15)' : 'rgba(0,0,0,0.06)' }}
+                        >
+                          <div style={{ width: 3, flexShrink: 0, background: isOwn ? 'rgba(255,255,255,0.7)' : primary }} />
+                          <div style={{ padding: '5px 9px', minWidth: 0 }}>
+                            <div style={{ fontSize: '0.6875rem', fontWeight: 700, marginBottom: 1, color: isOwn ? 'rgba(255,255,255,0.9)' : primary, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {msg.replyToSenderName ?? '…'}
+                            </div>
+                            <div style={{ fontSize: '0.75rem', opacity: 0.75, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 200 }}>
+                              {msg.replyToContent ?? '📷 Bild'}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
                       {msg.imageUrl && (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
                           src={msg.imageUrl} alt="Bild"
-                          style={{ display: 'block', maxWidth: 260, maxHeight: 320, borderRadius: msg.content.trim() ? '10px 10px 0 0' : 12, objectFit: 'cover', cursor: 'pointer' }}
+                          style={{ display: 'block', maxWidth: 260, maxHeight: 320, borderRadius: msg.content.trim() && msg.content !== '📷' ? '8px 8px 0 0' : 8, objectFit: 'cover', cursor: 'pointer', margin: msg.replyToId ? '0 -12px' : '-4px' }}
                           onClick={() => window.open(msg.imageUrl!, '_blank')}
                         />
                       )}
