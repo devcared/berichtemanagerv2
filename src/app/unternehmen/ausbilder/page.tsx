@@ -68,7 +68,7 @@ export default function AusbilderPage() {
             const fn = a.trainerFirstName ?? a.trainerName?.split(' ')[0] ?? ''
             const ln = a.trainerLastName ?? a.trainerName?.split(' ')[1] ?? ''
             const initials = `${fn[0] ?? ''}${ln[0] ?? ''}`.toUpperCase() || '?'
-            const fullName = a.trainerName ?? `${fn} ${ln}`.trim() || 'Unbekannt'
+            const fullName = (a.trainerName ?? `${fn} ${ln}`.trim()) || 'Unbekannt'
             return (
               <div key={`${a.apprenticeId}-${a.trainerId}`} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '1rem 1.25rem', borderRadius: 16, background: 'hsl(var(--card))', boxShadow: elev1, border: '1px solid hsl(var(--border)/0.4)' }}>
                 <div style={{ width: 48, height: 48, borderRadius: '50%', background: primary, color: 'white', fontWeight: 700, fontSize: '1.0625rem', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: `0 2px 6px ${primary}40` }}>
