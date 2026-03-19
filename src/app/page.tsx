@@ -8,6 +8,7 @@ import { de } from 'date-fns/locale'
 import { useProfile } from '@/hooks/use-profile'
 import { useAuth } from '@/contexts/AuthContext'
 import { useTheme } from '@/contexts/ThemeContext'
+import { useBranding } from '@/hooks/use-branding'
 import type { AppModule } from '@/types'
 import {
   BookOpenIcon, CheckListIcon, CalendarIcon, GridViewIcon, Logout01Icon,
@@ -76,6 +77,7 @@ function AppHome() {
   const { profile, loading: profileLoading } = useProfile()
   const { logout } = useAuth()
   const { theme, toggleTheme } = useTheme()
+  const branding = useBranding()
   const [isMounted, setIsMounted] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
@@ -112,7 +114,7 @@ function AppHome() {
   const bg = 'hsl(var(--background))'
   const cardBg = 'hsl(var(--card))'
   const borderC = 'hsl(var(--border))'
-  const primary = isDark ? '#8ab4f8' : '#4285f4'
+  const primary = branding.accentColor || (isDark ? '#8ab4f8' : '#4285f4')
 
   const initials = profile
     ? `${profile.firstName?.[0] ?? ''}${profile.lastName?.[0] ?? ''}`.toUpperCase()
@@ -247,6 +249,50 @@ function AppHome() {
           <h1 style={{ fontSize: 'clamp(1.625rem,4vw,2.375rem)', fontWeight: 400, color: fg, lineHeight: 1.2, marginBottom: '0.375rem', letterSpacing: '-0.02em' }}>{greeting}</h1>
           <p style={{ fontSize: '0.9375rem', color: fgMuted }}>{today}</p>
         </div>
+
+        {/* ── Company banner ── */}
+        {profile?.companyId && (
+          <div style={{
+            marginBottom: '2rem',
+            padding: '1rem 1.25rem',
+            borderRadius: 16,
+            background: primary + '0d',
+            border: `1px solid ${primary}28`,
+            display: 'flex', alignItems: 'center', gap: '0.875rem',
+          }}>
+            {/* Logo or initial */}
+            {branding.logoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={branding.logoUrl}
+                alt={branding.name}
+                style={{ width: 40, height: 40, borderRadius: 10, objectFit: 'contain', flexShrink: 0, background: primary + '18' }}
+                onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
+              />
+            ) : (
+              <div style={{
+                width: 40, height: 40, borderRadius: 10, flexShrink: 0,
+                background: primary,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: 'white', fontWeight: 700, fontSize: '1.125rem',
+              }}>
+                {(branding.name || 'U')[0].toUpperCase()}
+              </div>
+            )}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: '0.6875rem', fontWeight: 600, letterSpacing: '0.07em', textTransform: 'uppercase', color: primary, marginBottom: 2 }}>
+                Dein Unternehmen
+              </div>
+              <div style={{ fontSize: '0.9375rem', fontWeight: 600, color: fg, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {branding.name}
+              </div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 20, background: primary + '18', border: `1px solid ${primary}30`, flexShrink: 0 }}>
+              <div style={{ width: 6, height: 6, borderRadius: '50%', background: primary }} />
+              <span style={{ fontSize: '0.6875rem', fontWeight: 600, color: primary }}>Mitglied</span>
+            </div>
+          </div>
+        )}
 
         {/* ── Active modules ── */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
