@@ -15,6 +15,8 @@ import {
   Shield01Icon, CheckmarkCircle01Icon,
   Add01Icon, MinusSignIcon,
   Mail01Icon, LockPasswordIcon,
+  MessageMultiple01Icon, StarAward01Icon, InboxIcon,
+  FolderLockedIcon, CalendarCheckIn01Icon, Award01Icon,
 } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 
@@ -24,12 +26,22 @@ import { HugeiconsIcon } from '@hugeicons/react'
 
 const modules: AppModule[] = [
   { id: 'berichtsheft', title: 'Berichtsheft-Manager', description: 'Verwalte und exportiere deine Ausbildungsnachweise', icon: 'BookOpenIcon', accentColor: '#3B82F6', routePath: '/berichtsheft', isEnabled: true, lastUsed: new Date().toISOString() },
+  { id: 'stundenplan', title: 'Stunden- / Blockplan', description: 'Plane deine Woche in Stunden und Blöcken', icon: 'CalendarIcon', accentColor: '#8B5CF6', routePath: '/stundenplan', isEnabled: true },
   { id: 'lernfeld', title: 'Lernfeld-Tracker', description: 'Behalte den Überblick über deine Lernfelder', icon: 'CheckListIcon', accentColor: '#10B981', routePath: '/lernfeld', isEnabled: false },
   { id: 'pruefung', title: 'Prüfungsvorbereitung', description: 'Bereite dich auf deine Prüfungen vor', icon: 'GridViewIcon', accentColor: '#F59E0B', routePath: '/pruefung', isEnabled: false },
-  { id: 'stundenplan', title: 'Stunden- / Blockplan', description: 'Plane deine Woche in Stunden und Blöcken', icon: 'CalendarIcon', accentColor: '#8B5CF6', routePath: '/stundenplan', isEnabled: true },
+  { id: 'forum', title: 'Forum', description: 'Stell Fragen und tausch dich mit anderen Azubis aus', icon: 'MessageMultiple01Icon', accentColor: '#06B6D4', routePath: '/forum', isEnabled: false },
+  { id: 'feedback', title: 'Ausbilder-Feedback', description: 'Erhalte und verwalte Feedback von deinem Ausbilder', icon: 'StarAward01Icon', accentColor: '#F59E0B', routePath: '/feedback', isEnabled: false },
+  { id: 'nachrichten', title: 'Nachrichten-Center', description: 'Alle Nachrichten und Benachrichtigungen auf einen Blick', icon: 'InboxIcon', accentColor: '#3B82F6', routePath: '/nachrichten', isEnabled: false },
+  { id: 'dokumente', title: 'Dokumenten-Tresor', description: 'Sichere Ablage für wichtige Ausbildungsunterlagen', icon: 'FolderLockedIcon', accentColor: '#8B5CF6', routePath: '/dokumente', isEnabled: false },
+  { id: 'termine', title: 'Termine & Fristen', description: 'Behalte Abgaben, Prüfungen und wichtige Daten im Blick', icon: 'CalendarCheckIn01Icon', accentColor: '#EA4335', routePath: '/termine', isEnabled: false },
+  { id: 'achievements', title: 'Achievements & Badges', description: 'Sammle Auszeichnungen für deinen Ausbildungsfortschritt', icon: 'Award01Icon', accentColor: '#10B981', routePath: '/achievements', isEnabled: false },
 ]
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const moduleIconMap: Record<string, any> = { BookOpenIcon, CheckListIcon, GridViewIcon, CalendarIcon }
+const moduleIconMap: Record<string, any> = {
+  BookOpenIcon, CheckListIcon, GridViewIcon, CalendarIcon,
+  MessageMultiple01Icon, StarAward01Icon, InboxIcon,
+  FolderLockedIcon, CalendarCheckIn01Icon, Award01Icon,
+}
 function getGreeting() {
   const h = new Date().getHours()
   return h < 12 ? 'Guten Morgen' : h < 18 ? 'Guten Tag' : 'Guten Abend'
