@@ -133,7 +133,17 @@ export interface ChatMessage {
   senderName: string
   senderInitials: string
   content: string
+  imageUrl?: string | null
+  replyToId?: string | null
+  replyToContent?: string | null
+  replyToSenderName?: string | null
   createdAt: string
+}
+
+export interface ChatReaction {
+  messageId: string
+  userId: string
+  emoji: string
 }
 
 export interface ApprenticeTrainer {

@@ -8,9 +8,13 @@ import type { ChatMessage } from '@/types'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
 import { HugeiconsIcon } from '@hugeicons/react'
-import { MailSend01Icon, MessageMultiple01Icon } from '@hugeicons/core-free-icons'
+import { MailSend01Icon, MessageMultiple01Icon, Cancel01Icon, Image01Icon } from '@hugeicons/core-free-icons'
 
-// Cache sender names so we don't re-fetch on every message
+const EMOJIS = ['👍', '❤️', '😂', '😮', '😢', '🙏', '🔥', '✅']
+
+type RawReaction = { message_id: string; user_id: string; emoji: string }
+type ReactionMap = Map<string, RawReaction[]>  // messageId -> reactions
+
 const senderCache = new Map<string, { name: string; initials: string }>()
 
 export default function ChatPage() {
@@ -19,20 +23,31 @@ export default function ChatPage() {
   const primary = branding.accentColor || '#4285f4'
 
   const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [reactions, setReactions] = useState<ReactionMap>(new Map())
   const [chatReady, setChatReady] = useState(false)
   const [input, setInput] = useState('')
   const [sending, setSending] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const [replyTo, setReplyTo] = useState<ChatMessage | null>(null)
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [hoveredId, setHoveredId] = useState<string | null>(null)
+  const [pickerMsgId, setPickerMsgId] = useState<string | null>(null)
+
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
+  const fileRef = useRef<HTMLInputElement>(null)
   const fetchedRef = useRef(false)
+  const messagesRef = useRef<ChatMessage[]>([])
   const profileRef = useRef(profile)
   useEffect(() => { profileRef.current = profile }, [profile])
+  useEffect(() => { messagesRef.current = messages }, [messages])
 
   const scrollToBottom = useCallback(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [])
 
-  // ── Load history + subscribe to realtime ──────────────────
+  // ── Bootstrap: history + realtime ─────────────────────────
   useEffect(() => {
     if (profileLoading || !profile?.companyId || !profile?.id) return
     if (fetchedRef.current) return
@@ -41,109 +56,210 @@ export default function ChatPage() {
     const supabase = createClient()
     const companyId = profile.companyId
 
-    // Pre-populate own sender info in cache
-    const ownFn = profile.firstName ?? ''
-    const ownLn = profile.lastName ?? ''
+    // Seed own info in sender cache
+    const fn0 = profile.firstName ?? '', ln0 = profile.lastName ?? ''
     senderCache.set(profile.id, {
-      name: `${ownFn} ${ownLn}`.trim() || 'Ich',
-      initials: `${ownFn[0] ?? ''}${ownLn[0] ?? ''}`.toUpperCase() || '??',
+      name: `${fn0} ${ln0}`.trim() || 'Ich',
+      initials: `${fn0[0] ?? ''}${ln0[0] ?? ''}`.toUpperCase() || '??',
     })
 
-    // ── 1. Fetch history directly from Supabase ────────────
+    // ── Load history ─────────────────────────────────────────
     supabase
       .from('chat_messages')
-      .select('id, company_id, sender_id, content, created_at, sender:profiles!sender_id(first_name, last_name)')
+      .select('id, company_id, sender_id, content, image_url, reply_to_id, created_at, sender:profiles!sender_id(first_name, last_name), reactions:chat_reactions(message_id, user_id, emoji)')
       .eq('company_id', companyId)
       .order('created_at', { ascending: true })
       .limit(200)
       .then(({ data, error }) => {
-        if (error) { console.error('chat history:', error.message); setChatReady(true); return }
+        if (error) { console.error('chat load:', error.message); setChatReady(true); return }
 
-        const msgs: ChatMessage[] = (data ?? []).map((row: Record<string, unknown>) => {
+        const contentMap = new Map<string, { content: string; senderName: string }>()
+        const rxnMap: ReactionMap = new Map()
+        const msgs: ChatMessage[] = []
+
+        for (const row of (data ?? [])) {
           const s = row.sender as { first_name?: string; last_name?: string } | null
-          const fn = s?.first_name ?? ''
-          const ln = s?.last_name ?? ''
-          const senderId = row.sender_id as string
+          const fn = s?.first_name ?? '', ln = s?.last_name ?? ''
           const info = { name: `${fn} ${ln}`.trim() || 'Unbekannt', initials: `${fn[0] ?? ''}${ln[0] ?? ''}`.toUpperCase() || '??' }
-          senderCache.set(senderId, info)
-          return {
-            id: row.id as string,
-            companyId: row.company_id as string,
-            senderId,
-            senderName: info.name,
-            senderInitials: info.initials,
-            content: row.content as string,
-            createdAt: row.created_at as string,
+          senderCache.set(row.sender_id, info)
+
+          const rxns = (row.reactions ?? []) as RawReaction[]
+          if (rxns.length > 0) rxnMap.set(row.id, rxns)
+
+          contentMap.set(row.id, { content: row.content, senderName: info.name })
+          msgs.push({
+            id: row.id, companyId: row.company_id, senderId: row.sender_id,
+            senderName: info.name, senderInitials: info.initials,
+            content: row.content, imageUrl: row.image_url,
+            replyToId: row.reply_to_id, createdAt: row.created_at,
+          })
+        }
+
+        // Resolve reply previews
+        for (const msg of msgs) {
+          if (msg.replyToId) {
+            const ref = contentMap.get(msg.replyToId)
+            if (ref) { msg.replyToContent = ref.content; msg.replyToSenderName = ref.senderName }
           }
-        })
+        }
 
         setMessages(msgs)
+        setReactions(rxnMap)
         setChatReady(true)
       })
 
-    // ── 2. Realtime subscription ───────────────────────────
-    const channel = supabase
-      .channel(`chat-${companyId}`)
-      .on(
-        'postgres_changes',
+    // ── Realtime: new messages ────────────────────────────────
+    const msgCh = supabase
+      .channel(`chat-msg-${companyId}`)
+      .on('postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'chat_messages', filter: `company_id=eq.${companyId}` },
         async (payload) => {
-          const raw = payload.new as {
-            id: string; company_id: string; sender_id: string; content: string; created_at: string
-          }
+          const raw = payload.new as { id: string; company_id: string; sender_id: string; content: string; image_url: string | null; reply_to_id: string | null; created_at: string }
 
-          // Get sender info from cache or fetch
           let info = senderCache.get(raw.sender_id)
           if (!info) {
-            const { data } = await supabase
-              .from('profiles')
-              .select('first_name, last_name')
-              .eq('id', raw.sender_id)
-              .single()
-            const fn = data?.first_name ?? ''
-            const ln = data?.last_name ?? ''
+            const { data } = await supabase.from('profiles').select('first_name, last_name').eq('id', raw.sender_id).single()
+            const fn = data?.first_name ?? '', ln = data?.last_name ?? ''
             info = { name: `${fn} ${ln}`.trim() || 'Unbekannt', initials: `${fn[0] ?? ''}${ln[0] ?? ''}`.toUpperCase() || '??' }
             senderCache.set(raw.sender_id, info)
           }
 
+          const replyRef = raw.reply_to_id ? messagesRef.current.find(m => m.id === raw.reply_to_id) : null
+
           const msg: ChatMessage = {
             id: raw.id, companyId: raw.company_id, senderId: raw.sender_id,
             senderName: info.name, senderInitials: info.initials,
-            content: raw.content, createdAt: raw.created_at,
+            content: raw.content, imageUrl: raw.image_url,
+            replyToId: raw.reply_to_id,
+            replyToContent: replyRef?.content ?? null,
+            replyToSenderName: replyRef?.senderName ?? null,
+            createdAt: raw.created_at,
           }
 
           setMessages(prev => prev.some(m => m.id === msg.id) ? prev : [...prev, msg])
         }
-      )
-      .subscribe()
+      ).subscribe()
 
-    return () => { supabase.removeChannel(channel) }
-  }, [profileLoading, profile?.companyId, profile?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+    // ── Realtime: reactions ───────────────────────────────────
+    const rxnCh = supabase
+      .channel(`chat-rxn-${companyId}`)
+      .on('postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'chat_reactions' },
+        (payload) => {
+          const r = payload.new as RawReaction
+          setReactions(prev => {
+            const next = new Map(prev)
+            const list = next.get(r.message_id) ?? []
+            if (list.some(x => x.user_id === r.user_id && x.emoji === r.emoji)) return prev
+            next.set(r.message_id, [...list, r])
+            return next
+          })
+        }
+      )
+      .on('postgres_changes',
+        { event: 'DELETE', schema: 'public', table: 'chat_reactions' },
+        (payload) => {
+          const r = payload.old as RawReaction
+          setReactions(prev => {
+            const next = new Map(prev)
+            const list = next.get(r.message_id) ?? []
+            next.set(r.message_id, list.filter(x => !(x.user_id === r.user_id && x.emoji === r.emoji)))
+            return next
+          })
+        }
+      ).subscribe()
+
+    return () => { supabase.removeChannel(msgCh); supabase.removeChannel(rxnCh) }
+  }, [profileLoading, profile?.companyId, profile?.id]) // eslint-disable-line
 
   useEffect(() => { if (chatReady) scrollToBottom() }, [messages, chatReady, scrollToBottom])
 
-  // ── Send message directly via Supabase ────────────────────
+  // ── Image handling ─────────────────────────────────────────
+  function handleImageSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setImageFile(file)
+    setImagePreview(URL.createObjectURL(file))
+    if (fileRef.current) fileRef.current.value = ''
+  }
+
+  function clearImage() {
+    if (imagePreview) URL.revokeObjectURL(imagePreview)
+    setImageFile(null); setImagePreview(null)
+  }
+
+  function handlePaste(e: React.ClipboardEvent) {
+    for (const item of e.clipboardData.items) {
+      if (item.type.startsWith('image/')) {
+        const file = item.getAsFile()
+        if (file) { setImageFile(file); setImagePreview(URL.createObjectURL(file)) }
+        break
+      }
+    }
+  }
+
+  // ── Send ───────────────────────────────────────────────────
   async function sendMessage() {
     const content = input.trim()
-    if (!content || sending || !profile?.companyId || !profile?.id) return
-    setSending(true)
-    setInput('')
+    if ((!content && !imageFile) || sending || !profile?.companyId || !profile?.id) return
+
+    const capturedReply = replyTo
+    const capturedFile = imageFile
+    const capturedPreview = imagePreview
+    setSending(true); setInput(''); setReplyTo(null); setImageFile(null); setImagePreview(null)
+
+    let imageUrl: string | null = null
+    if (capturedFile) {
+      setUploading(true)
+      const supabase = createClient()
+      const ext = capturedFile.name.split('.').pop() ?? 'jpg'
+      const path = `${profile.companyId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+      const { error: upErr } = await supabase.storage.from('chat-images').upload(path, capturedFile)
+      if (!upErr) {
+        const { data } = supabase.storage.from('chat-images').getPublicUrl(path)
+        imageUrl = data.publicUrl
+      } else { console.error('upload:', upErr.message) }
+      if (capturedPreview) URL.revokeObjectURL(capturedPreview)
+      setUploading(false)
+    }
 
     const supabase = createClient()
-    const { error } = await supabase
-      .from('chat_messages')
-      .insert({ company_id: profile.companyId, sender_id: profile.id, content })
+    const { error } = await supabase.from('chat_messages').insert({
+      company_id: profile.companyId,
+      sender_id: profile.id,
+      content: content || '📷',
+      image_url: imageUrl,
+      reply_to_id: capturedReply?.id ?? null,
+    })
 
     if (error) {
-      console.error('send message:', error.message)
-      setInput(content) // restore on failure
+      console.error('send:', error.message)
+      setInput(content)
+      setReplyTo(capturedReply)
+      if (capturedFile) { setImageFile(capturedFile); setImagePreview(URL.createObjectURL(capturedFile)) }
     }
     setSending(false)
     inputRef.current?.focus()
   }
 
+  // ── Reactions ──────────────────────────────────────────────
+  async function toggleReaction(messageId: string, emoji: string) {
+    if (!profile?.id) return
+    const supabase = createClient()
+    const list = reactions.get(messageId) ?? []
+    const mine = list.find(r => r.user_id === profile.id && r.emoji === emoji)
+    if (mine) {
+      await supabase.from('chat_reactions').delete()
+        .eq('message_id', messageId).eq('user_id', profile.id).eq('emoji', emoji)
+    } else {
+      await supabase.from('chat_reactions').insert({ message_id: messageId, user_id: profile.id, emoji })
+    }
+    setPickerMsgId(null)
+  }
+
   function handleKeyDown(e: React.KeyboardEvent) {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage() }
+    if (e.key === 'Escape') { setReplyTo(null); setPickerMsgId(null) }
   }
 
   if (!profileLoading && !profile?.companyId) return (
@@ -153,7 +269,7 @@ export default function ChatPage() {
     </div>
   )
 
-  // ── Group messages by date ─────────────────────────────────
+  // Group messages by date
   const grouped: { date: string; msgs: ChatMessage[] }[] = []
   for (const msg of messages) {
     const d = msg.createdAt.slice(0, 10)
@@ -163,7 +279,10 @@ export default function ChatPage() {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0, fontFamily: '"Google Sans","Roboto",sans-serif' }}>
+    <div
+      style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0, fontFamily: '"Google Sans","Roboto",sans-serif' }}
+      onClick={() => setPickerMsgId(null)}
+    >
       {/* Header */}
       <div style={{ padding: '1rem 1.5rem', borderBottom: '1px solid hsl(var(--border))', background: 'hsl(var(--card))', flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -178,7 +297,7 @@ export default function ChatPage() {
       </div>
 
       {/* Messages */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '1rem 1.5rem', display: 'flex', flexDirection: 'column', gap: 4, minHeight: 0 }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '1rem 1.25rem', display: 'flex', flexDirection: 'column', gap: 2, minHeight: 0 }}>
         {!chatReady ? (
           <div className="flex items-center justify-center py-12">
             <div className="size-5 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
@@ -190,6 +309,7 @@ export default function ChatPage() {
           </div>
         ) : grouped.map(group => (
           <div key={group.date}>
+            {/* Date divider */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '12px 0 8px' }}>
               <div style={{ flex: 1, height: 1, background: 'hsl(var(--border))' }} />
               <span style={{ fontSize: '0.6875rem', color: 'hsl(var(--muted-foreground))', fontWeight: 500 }}>
@@ -202,38 +322,116 @@ export default function ChatPage() {
               const isOwn = msg.senderId === profile?.id
               const showSender = !isOwn && group.msgs[i - 1]?.senderId !== msg.senderId
               const time = format(new Date(msg.createdAt), 'HH:mm')
+              const msgRxns = reactions.get(msg.id) ?? []
+
+              // Group: emoji -> { count, hasOwn }
+              const rxnGroups = new Map<string, { count: number; hasOwn: boolean }>()
+              for (const r of msgRxns) {
+                const g = rxnGroups.get(r.emoji) ?? { count: 0, hasOwn: false }
+                rxnGroups.set(r.emoji, { count: g.count + 1, hasOwn: g.hasOwn || r.user_id === profile?.id })
+              }
 
               return (
-                <div key={msg.id} style={{ display: 'flex', flexDirection: isOwn ? 'row-reverse' : 'row', alignItems: 'flex-end', gap: 8, marginBottom: 2 }}>
+                <div
+                  key={msg.id}
+                  style={{ display: 'flex', flexDirection: isOwn ? 'row-reverse' : 'row', alignItems: 'flex-end', gap: 6, marginBottom: rxnGroups.size > 0 ? 22 : 3, position: 'relative' }}
+                  onMouseEnter={() => setHoveredId(msg.id)}
+                  onMouseLeave={() => setHoveredId(null)}
+                >
+                  {/* Avatar */}
                   {!isOwn && (
-                    <div style={{
-                      width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
-                      background: primary, color: 'white', fontWeight: 700,
-                      fontSize: '0.625rem', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      opacity: showSender ? 1 : 0,
-                    }}>
+                    <div style={{ width: 28, height: 28, borderRadius: '50%', flexShrink: 0, background: primary, color: 'white', fontWeight: 700, fontSize: '0.625rem', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: showSender ? 1 : 0, marginBottom: rxnGroups.size > 0 ? 18 : 0 }}>
                       {msg.senderInitials}
                     </div>
                   )}
-                  <div style={{ maxWidth: '70%', display: 'flex', flexDirection: 'column', alignItems: isOwn ? 'flex-end' : 'flex-start' }}>
-                    {showSender && (
-                      <span style={{ fontSize: '0.6875rem', color: 'hsl(var(--muted-foreground))', marginBottom: 2, paddingLeft: 4 }}>
-                        {msg.senderName}
-                      </span>
+
+                  {/* Bubble column */}
+                  <div style={{ maxWidth: '68%', display: 'flex', flexDirection: 'column', alignItems: isOwn ? 'flex-end' : 'flex-start' }}>
+                    {showSender && <span style={{ fontSize: '0.6875rem', color: 'hsl(var(--muted-foreground))', marginBottom: 2, paddingLeft: 4 }}>{msg.senderName}</span>}
+
+                    {/* Reply quote */}
+                    {msg.replyToId && (
+                      <div style={{ marginBottom: 4, paddingLeft: isOwn ? 0 : 4, paddingRight: isOwn ? 4 : 0, maxWidth: '100%' }}>
+                        <div style={{ padding: '6px 10px', borderRadius: 10, background: 'hsl(var(--muted))', borderLeft: `3px solid ${primary}`, opacity: 0.85, cursor: 'pointer' }}
+                          onClick={() => {
+                            const el = document.getElementById(`msg-${msg.replyToId}`)
+                            el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                          }}>
+                          <div style={{ fontSize: '0.6875rem', fontWeight: 600, color: primary, marginBottom: 1 }}>{msg.replyToSenderName ?? '...'}</div>
+                          <div style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 220 }}>
+                            {msg.replyToContent ?? '📷 Bild'}
+                          </div>
+                        </div>
+                      </div>
                     )}
-                    <div style={{
-                      padding: '8px 12px',
-                      borderRadius: isOwn ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
-                      background: isOwn ? primary : 'hsl(var(--muted))',
-                      color: isOwn ? 'white' : 'hsl(var(--foreground))',
-                      fontSize: '0.875rem', lineHeight: 1.5,
-                      wordBreak: 'break-word', whiteSpace: 'pre-wrap',
-                    }}>
-                      {msg.content}
+
+                    {/* Bubble */}
+                    <div
+                      id={`msg-${msg.id}`}
+                      style={{ padding: msg.imageUrl && !msg.content.trim() ? 4 : '8px 12px', borderRadius: isOwn ? '16px 16px 4px 16px' : '16px 16px 16px 4px', background: isOwn ? primary : 'hsl(var(--muted))', color: isOwn ? 'white' : 'hsl(var(--foreground))', fontSize: '0.875rem', lineHeight: 1.5, wordBreak: 'break-word', whiteSpace: 'pre-wrap', overflow: 'hidden' }}
+                    >
+                      {msg.imageUrl && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={msg.imageUrl} alt="Bild"
+                          style={{ display: 'block', maxWidth: 260, maxHeight: 320, borderRadius: msg.content.trim() ? '10px 10px 0 0' : 12, objectFit: 'cover', cursor: 'pointer' }}
+                          onClick={() => window.open(msg.imageUrl!, '_blank')}
+                        />
+                      )}
+                      {msg.content.trim() && msg.content !== '📷' && (
+                        <span style={{ display: 'block', paddingTop: msg.imageUrl ? 6 : 0 }}>{msg.content}</span>
+                      )}
                     </div>
-                    <span style={{ fontSize: '0.625rem', color: 'hsl(var(--muted-foreground))', marginTop: 2, paddingLeft: 4, paddingRight: 4 }}>
-                      {time}
-                    </span>
+
+                    {/* Time */}
+                    <span style={{ fontSize: '0.625rem', color: 'hsl(var(--muted-foreground))', marginTop: 2, paddingLeft: 4, paddingRight: 4 }}>{time}</span>
+
+                    {/* Reactions */}
+                    {rxnGroups.size > 0 && (
+                      <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 4 }}>
+                        {[...rxnGroups.entries()].map(([emoji, { count, hasOwn }]) => (
+                          <button
+                            key={emoji}
+                            onClick={(e) => { e.stopPropagation(); toggleReaction(msg.id, emoji) }}
+                            style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '2px 8px', borderRadius: 12, border: `1px solid ${hasOwn ? primary : 'hsl(var(--border))'}`, background: hasOwn ? primary + '18' : 'hsl(var(--card))', cursor: 'pointer', fontSize: '0.8rem', color: hasOwn ? primary : 'hsl(var(--foreground))', fontWeight: hasOwn ? 600 : 400 }}
+                          >
+                            {emoji} <span style={{ fontSize: '0.7rem' }}>{count}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Action strip */}
+                  <div style={{ visibility: hoveredId === msg.id || pickerMsgId === msg.id ? 'visible' : 'hidden', display: 'flex', flexDirection: 'column', gap: 3, alignSelf: 'flex-end', paddingBottom: rxnGroups.size > 0 ? 22 : 4, position: 'relative' }}>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setPickerMsgId(prev => prev === msg.id ? null : msg.id) }}
+                      title="Reaktion"
+                      style={{ width: 28, height: 28, borderRadius: '50%', border: '1px solid hsl(var(--border))', background: 'hsl(var(--card))', cursor: 'pointer', fontSize: '0.875rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    >😊</button>
+                    <button
+                      onClick={() => { setReplyTo(msg); inputRef.current?.focus() }}
+                      title="Antworten"
+                      style={{ width: 28, height: 28, borderRadius: '50%', border: '1px solid hsl(var(--border))', background: 'hsl(var(--card))', cursor: 'pointer', fontSize: '0.875rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    >↩</button>
+
+                    {/* Emoji picker */}
+                    {pickerMsgId === msg.id && (
+                      <div
+                        onClick={e => e.stopPropagation()}
+                        style={{ position: 'absolute', [isOwn ? 'right' : 'left']: 34, bottom: rxnGroups.size > 0 ? 40 : 0, zIndex: 200, background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 14, padding: '6px 8px', display: 'flex', gap: 4, boxShadow: '0 4px 16px rgba(0,0,0,0.15)', whiteSpace: 'nowrap' }}
+                      >
+                        {EMOJIS.map(e => (
+                          <button
+                            key={e}
+                            onClick={() => toggleReaction(msg.id, e)}
+                            style={{ fontSize: '1.25rem', background: 'none', border: 'none', cursor: 'pointer', padding: '3px 5px', borderRadius: 8, transition: 'transform 100ms' }}
+                            onMouseEnter={el => (el.currentTarget.style.transform = 'scale(1.3)')}
+                            onMouseLeave={el => (el.currentTarget.style.transform = 'scale(1)')}
+                          >{e}</button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               )
@@ -243,40 +441,70 @@ export default function ChatPage() {
         <div ref={bottomRef} />
       </div>
 
+      {/* Reply preview */}
+      {replyTo && (
+        <div style={{ padding: '8px 1.25rem', borderTop: '1px solid hsl(var(--border))', background: 'hsl(var(--muted)/0.4)', display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+          <div style={{ width: 3, height: 36, borderRadius: 2, background: primary, flexShrink: 0 }} />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: '0.75rem', fontWeight: 600, color: primary }}>{replyTo.senderName}</div>
+            <div style={{ fontSize: '0.8125rem', color: 'hsl(var(--muted-foreground))', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {replyTo.imageUrl && !replyTo.content.trim() ? '📷 Bild' : replyTo.content}
+            </div>
+          </div>
+          <button onClick={() => setReplyTo(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--muted-foreground))', padding: 4 }}>
+            <HugeiconsIcon icon={Cancel01Icon} size={14} />
+          </button>
+        </div>
+      )}
+
+      {/* Image preview */}
+      {imagePreview && (
+        <div style={{ padding: '8px 1.25rem', borderTop: '1px solid hsl(var(--border))', background: 'hsl(var(--card))', display: 'flex', alignItems: 'flex-end', gap: 10, flexShrink: 0 }}>
+          <div style={{ position: 'relative', display: 'inline-block' }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={imagePreview} alt="Vorschau" style={{ height: 80, borderRadius: 10, objectFit: 'cover', border: '1px solid hsl(var(--border))' }} />
+            <button
+              onClick={clearImage}
+              style={{ position: 'absolute', top: -6, right: -6, width: 20, height: 20, borderRadius: '50%', background: '#ea4335', border: 'none', cursor: 'pointer', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            >
+              <HugeiconsIcon icon={Cancel01Icon} size={10} />
+            </button>
+          </div>
+          {uploading && <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>Wird hochgeladen…</span>}
+        </div>
+      )}
+
       {/* Input bar */}
-      <div style={{ padding: '0.75rem 1.5rem', borderTop: '1px solid hsl(var(--border))', background: 'hsl(var(--card))', flexShrink: 0 }}>
+      <div style={{ padding: '0.75rem 1.25rem', borderTop: replyTo || imagePreview ? 'none' : '1px solid hsl(var(--border))', background: 'hsl(var(--card))', flexShrink: 0 }}>
         <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', maxWidth: 720, margin: '0 auto' }}>
+          {/* Image button */}
+          <button
+            onClick={() => fileRef.current?.click()}
+            title="Bild senden"
+            style={{ width: 36, height: 36, borderRadius: '50%', border: '1px solid hsl(var(--border))', background: 'hsl(var(--muted))', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'hsl(var(--muted-foreground))', flexShrink: 0 }}
+          >
+            <HugeiconsIcon icon={Image01Icon} size={16} />
+          </button>
+          <input ref={fileRef} type="file" accept="image/*" onChange={handleImageSelect} style={{ display: 'none' }} />
+
           <textarea
             ref={inputRef}
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
+            onPaste={handlePaste}
             placeholder="Nachricht schreiben… (Enter zum Senden)"
             rows={1}
-            style={{
-              flex: 1, resize: 'none', borderRadius: 20,
-              border: '1px solid hsl(var(--border))',
-              background: 'hsl(var(--background))',
-              color: 'hsl(var(--foreground))',
-              padding: '10px 16px', fontSize: '0.875rem',
-              fontFamily: 'inherit', outline: 'none',
-              maxHeight: 120, overflowY: 'auto', lineHeight: 1.5,
-            }}
+            style={{ flex: 1, resize: 'none', borderRadius: 20, border: '1px solid hsl(var(--border))', background: 'hsl(var(--background))', color: 'hsl(var(--foreground))', padding: '10px 16px', fontSize: '0.875rem', fontFamily: 'inherit', outline: 'none', maxHeight: 120, overflowY: 'auto', lineHeight: 1.5 }}
             maxLength={2000}
           />
+
           <button
             onClick={sendMessage}
-            disabled={!input.trim() || sending}
-            style={{
-              width: 40, height: 40, borderRadius: '50%', border: 'none',
-              background: input.trim() ? primary : 'hsl(var(--muted))',
-              color: input.trim() ? 'white' : 'hsl(var(--muted-foreground))',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              cursor: input.trim() ? 'pointer' : 'not-allowed',
-              transition: 'background 200ms, color 200ms', flexShrink: 0,
-            }}
+            disabled={(!input.trim() && !imageFile) || sending || uploading}
+            style={{ width: 40, height: 40, borderRadius: '50%', border: 'none', background: (input.trim() || imageFile) ? primary : 'hsl(var(--muted))', color: (input.trim() || imageFile) ? 'white' : 'hsl(var(--muted-foreground))', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: (input.trim() || imageFile) ? 'pointer' : 'not-allowed', transition: 'background 200ms, color 200ms', flexShrink: 0 }}
           >
-            <HugeiconsIcon icon={MailSend01Icon} size={16} />
+            {sending ? <div className="size-4 rounded-full border-2 border-white/30 border-t-white animate-spin" /> : <HugeiconsIcon icon={MailSend01Icon} size={16} />}
           </button>
         </div>
       </div>
