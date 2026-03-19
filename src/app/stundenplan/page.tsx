@@ -237,11 +237,11 @@ export default function StundenplanPage() {
 
   /* ── Document list ── */
   return (
-    <div className="flex-1 p-6 overflow-y-auto">
+    <div className="flex-1 p-3 sm:p-6 overflow-y-auto">
       <div className="max-w-2xl w-full mx-auto">
 
         {/* ── Header ── */}
-        <div className="mb-8 flex items-start justify-between gap-4">
+        <div className="mb-6 sm:mb-8 flex items-start justify-between gap-3 sm:gap-4">
           <div>
             <div className="flex items-center gap-3 mb-1">
               <div className="size-9 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -298,7 +298,7 @@ export default function StundenplanPage() {
               const cat = getCat(doc.category)
               return (
                 <button key={doc.id} onClick={() => openDoc(doc)}
-                  className="w-full flex items-center gap-4 rounded-2xl border bg-card p-5 hover:border-primary/40 hover:bg-primary/[0.025] transition-all text-left group shadow-sm hover:shadow-md border-border/50">
+                  className="w-full flex items-center gap-3 sm:gap-4 rounded-2xl border bg-card p-3 sm:p-5 hover:border-primary/40 hover:bg-primary/[0.025] transition-all text-left group shadow-sm hover:shadow-md border-border/50">
 
                   {/* Left: category accent + PDF icon */}
                   <div className="relative shrink-0">
@@ -368,7 +368,7 @@ export default function StundenplanPage() {
               {myDocs.map(doc => {
                 const cat = getCat(doc.category)
                 return (
-                  <div key={doc.id} className="flex items-center gap-4 px-5 py-4">
+                  <div key={doc.id} className="flex items-center gap-3 sm:gap-4 px-3 sm:px-5 py-3 sm:py-4">
                     <div className="size-9 rounded-xl bg-red-500/10 flex items-center justify-center shrink-0">
                       <HugeiconsIcon icon={File01Icon} size={16} className="text-red-400" />
                     </div>

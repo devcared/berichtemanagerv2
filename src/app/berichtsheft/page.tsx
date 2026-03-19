@@ -110,21 +110,22 @@ export default function BerichtsheftDashboard() {
   const recentReports = reports.slice(0, 5)
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-6">
-      <div className="flex items-center justify-between">
+    <div className="flex flex-1 flex-col gap-4 sm:gap-6 p-3 sm:p-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground">Dashboard</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
             {format(new Date(), "EEEE, d. MMMM yyyy", { locale: de })}
           </p>
         </div>
-        <Button onClick={() => router.push(`/berichtsheft/editor/${currentWeekId}`)}>
+        <Button className="self-start sm:self-auto" onClick={() => router.push(`/berichtsheft/editor/${currentWeekId}`)}>
           <HugeiconsIcon icon={Add01Icon} size={16} data-icon="inline-start" />
-          Aktuelle KW ausfüllen
+          <span className="hidden sm:inline">Aktuelle KW ausfüllen</span>
+          <span className="sm:hidden">KW ausfüllen</span>
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Left: Profile Panel */}
         <div className="lg:col-span-1 flex flex-col gap-4">
           {/* Profile Card */}

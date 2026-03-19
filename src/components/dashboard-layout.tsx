@@ -314,6 +314,10 @@ export default function DashboardLayout({ children, sections, subtitle }: Props)
     )
   }
 
+  const bottomNavItems = (sections[0]?.items ?? [])
+    .filter(i => !i.trainerOnly || profile?.role === 'trainer')
+    .slice(0, 3)
+
   return (
     <div style={{ display: 'flex', minHeight: '100svh', background: 'hsl(var(--background))', fontFamily: '"Google Sans","Roboto",-apple-system,"Segoe UI",sans-serif', WebkitFontSmoothing: 'antialiased', color: 'hsl(var(--foreground))' }}>
 
@@ -334,18 +338,7 @@ export default function DashboardLayout({ children, sections, subtitle }: Props)
 
       {/* Main */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
-        <header style={{ height: 56, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 12, padding: '0 1.5rem', borderBottom: '1px solid hsl(var(--border))', background: 'hsl(var(--background))', position: 'sticky', top: 0, zIndex: 10 }}>
-
-          {/* Hamburger — mobile only (no inline display to avoid override) */}
-          <button
-            className="md:hidden"
-            onClick={() => setMobileOpen(o => !o)}
-            style={{ width: 34, height: 34, borderRadius: 8, border: 'none', background: 'transparent', cursor: 'pointer', alignItems: 'center', justifyContent: 'center', color: 'hsl(var(--foreground))', transition: 'background 120ms', flexShrink: 0 }}
-            onMouseEnter={e => (e.currentTarget.style.background = 'hsl(var(--accent))')}
-            onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-          >
-            {mobileOpen ? <CloseIcon /> : <MenuIcon />}
-          </button>
+        <header className="px-3 md:px-6" style={{ height: 56, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 12, borderBottom: '1px solid hsl(var(--border))', background: 'hsl(var(--background))', position: 'sticky', top: 0, zIndex: 10 }}>
 
           {/* Breadcrumb — always visible */}
           <Breadcrumb pathname={pathname} onNavigate={href => router.push(href)} />
@@ -375,10 +368,94 @@ export default function DashboardLayout({ children, sections, subtitle }: Props)
           </button>
         </header>
 
-        <main style={{ flex: 1, overflowY: 'auto' }}>
+        <main className="pb-16 md:pb-0" style={{ flex: 1, overflowY: 'auto' }}>
           {children}
         </main>
       </div>
+
+      {/* ── Mobile bottom navigation bar ── */}
+      <nav className="md:hidden" style={{
+        position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 40,
+        height: 60,
+        background: 'hsl(var(--background))',
+        borderTop: '1px solid hsl(var(--border))',
+        display: 'flex', alignItems: 'stretch',
+        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+      }}>
+
+        {/* ☰  Menü — öffnet Sidebar */}
+        <button
+          onClick={() => setMobileOpen(o => !o)}
+          style={{
+            flex: 1, display: 'flex', flexDirection: 'column',
+            alignItems: 'center', justifyContent: 'center', gap: 3,
+            border: 'none', cursor: 'pointer', padding: 0,
+            background: mobileOpen ? activeBg : 'transparent',
+            color: mobileOpen ? primaryColor : 'hsl(var(--muted-foreground))',
+            transition: 'background 150ms, color 150ms',
+          }}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round">
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <line x1="3" y1="12" x2="21" y2="12" />
+            <line x1="3" y1="18" x2="21" y2="18" />
+          </svg>
+          <span style={{ fontSize: '0.5625rem', fontWeight: 600, letterSpacing: '0.04em', lineHeight: 1 }}>Menü</span>
+        </button>
+
+        {/* Section nav items */}
+        {bottomNavItems.map(item => {
+          const active = isActive(item)
+          return (
+            <button
+              key={item.href}
+              onClick={() => { router.push(item.href); setMobileOpen(false) }}
+              style={{
+                flex: 1, display: 'flex', flexDirection: 'column',
+                alignItems: 'center', justifyContent: 'center', gap: 3,
+                border: 'none', cursor: 'pointer', padding: 0,
+                background: 'transparent',
+                color: active ? primaryColor : 'hsl(var(--muted-foreground))',
+                transition: 'color 150ms', position: 'relative',
+              }}
+            >
+              {active && (
+                <span style={{
+                  position: 'absolute', top: 0, left: '20%', right: '20%',
+                  height: 2, background: primaryColor, borderRadius: '0 0 3px 3px',
+                }} />
+              )}
+              <HugeiconsIcon icon={item.icon} size={19} />
+              <span style={{ fontSize: '0.5625rem', fontWeight: active ? 700 : 500, letterSpacing: '0.03em', lineHeight: 1, whiteSpace: 'nowrap' }}>
+                {item.label}
+              </span>
+            </button>
+          )
+        })}
+
+        {/* Profil */}
+        <button
+          onClick={() => { router.push('/berichtsheft/profil'); setMobileOpen(false) }}
+          style={{
+            flex: 1, display: 'flex', flexDirection: 'column',
+            alignItems: 'center', justifyContent: 'center', gap: 3,
+            border: 'none', cursor: 'pointer', padding: 0,
+            background: 'transparent',
+            color: 'hsl(var(--muted-foreground))',
+            transition: 'color 150ms',
+          }}
+        >
+          <div style={{
+            width: 24, height: 24, borderRadius: '50%',
+            background: primaryColor,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: '0.5rem', fontWeight: 700, color: 'white',
+          }}>
+            {initials}
+          </div>
+          <span style={{ fontSize: '0.5625rem', fontWeight: 500, letterSpacing: '0.03em', lineHeight: 1 }}>Profil</span>
+        </button>
+      </nav>
     </div>
   )
 }

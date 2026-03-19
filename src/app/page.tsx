@@ -133,7 +133,7 @@ function AppHome() {
         maxWidth: scrolled ? 'min(960px, calc(100% - 2rem))' : '100%',
         margin: '0 auto',
         display: 'flex', alignItems: 'center',
-        padding: scrolled ? '0 1.25rem' : '0 1.5rem',
+        padding: scrolled ? '0 1rem' : '0 clamp(0.75rem, 4vw, 1.5rem)',
         background: scrolled ? (isDark ? 'rgba(30,31,36,0.85)' : 'rgba(255,255,255,0.85)') : 'transparent',
         backdropFilter: 'blur(16px)',
         WebkitBackdropFilter: 'blur(16px)',
@@ -199,10 +199,10 @@ function AppHome() {
         </div>
       </header>
 
-      <div style={{ maxWidth: 960, margin: '0 auto', padding: '0 1.5rem' }}>
+      <div style={{ maxWidth: 960, margin: '0 auto', padding: '0 clamp(1rem, 4vw, 1.5rem)' }}>
 
         {/* ── Greeting ── */}
-        <div style={{ paddingTop: '3rem', paddingBottom: '2.75rem' }}>
+        <div style={{ paddingTop: 'clamp(1.5rem, 5vw, 3rem)', paddingBottom: '2.75rem' }}>
           <h1 style={{ fontSize: 'clamp(1.625rem,4vw,2.375rem)', fontWeight: 400, color: fg, lineHeight: 1.2, marginBottom: '0.375rem', letterSpacing: '-0.02em' }}>{greeting}</h1>
           <p style={{ fontSize: '0.9375rem', color: fgMuted }}>{today}</p>
         </div>
