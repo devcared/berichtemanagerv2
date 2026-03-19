@@ -317,6 +317,40 @@ function AppHome() {
           </div>
         )}
 
+        {/* ── Company modules ── */}
+        {profile?.companyId && (
+          <>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: '1rem' }}>
+              <div style={{ width: 8, height: 8, borderRadius: '50%', background: primary, flexShrink: 0 }} />
+              <p style={{ fontSize: '0.6875rem', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: primary, margin: 0, whiteSpace: 'nowrap' }}>Mein Unternehmen</p>
+              <div style={{ flex: 1, height: 1, background: `color-mix(in srgb, ${primary} 25%, ${borderC})` }} />
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(220px,1fr))', gap: '0.875rem', marginBottom: '3rem' }}>
+              {[
+                { id: 'company-chat', title: 'Firmen-Chat', description: 'Nachrichten mit deinem Team', icon: MessageMultiple01Icon, path: '/unternehmen/chat' },
+                { id: 'company-rotations', title: 'Rotationsplan', description: 'Deine Abteilungseinsätze', icon: CalendarCheckIn01Icon, path: '/unternehmen/rotationsplan' },
+                { id: 'company-feedback', title: 'Mein Feedback', description: 'Bewertungen deiner Ausbilder', icon: StarAward01Icon, path: '/unternehmen/feedback' },
+                { id: 'company-ausbilder', title: 'Meine Ausbilder', description: 'Deine Ansprechpartner', icon: UserGroup02Icon, path: '/unternehmen/ausbilder' },
+              ].map(item => (
+                <CompanyModuleCard
+                  key={item.id}
+                  title={item.title}
+                  description={item.description}
+                  icon={item.icon}
+                  path={item.path}
+                  primary={primary}
+                  cardBg={cardBg}
+                  borderC={borderC}
+                  fg={fg}
+                  fgMuted={fgMuted}
+                  isDark={isDark}
+                  onClick={() => router.push(item.path)}
+                />
+              ))}
+            </div>
+          </>
+        )}
+
         {/* ── Active modules ── */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
           <p style={{ fontSize: '0.6875rem', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: fgMuted, margin: 0 }}>Deine Module</p>
@@ -516,6 +550,42 @@ function ModuleCard({ mod, icon: I, isDark, cardBg, borderC, fg, fgMuted, primar
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+/* ── Company module card ── */
+function CompanyModuleCard({ title, description, icon: I, primary, cardBg, borderC, fg, fgMuted, isDark, onClick }: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  title: string; description: string; icon: any; path: string
+  primary: string; cardBg: string; borderC: string; fg: string; fgMuted: string; isDark: boolean
+  onClick: () => void
+}) {
+  const [hovered, setHovered] = useState(false)
+  return (
+    <div
+      onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        borderRadius: 16, border: `1px solid ${hovered ? primary : borderC}`,
+        background: hovered ? (isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.01)') : cardBg,
+        padding: '1.125rem 1.25rem',
+        cursor: 'pointer',
+        transition: 'all 200ms cubic-bezier(0.4,0,0.2,1)',
+        display: 'flex', alignItems: 'center', gap: 12,
+        boxShadow: hovered ? `0 0 0 1px ${primary}40` : 'none',
+        transform: hovered ? 'translateY(-1px)' : 'none',
+      }}
+    >
+      <div style={{ width: 40, height: 40, borderRadius: 12, background: primary + (isDark ? '22' : '15'), display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        {I && <HugeiconsIcon icon={I} size={18} style={{ color: primary }} />}
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: '0.9rem', fontWeight: 600, color: fg, marginBottom: 2 }}>{title}</div>
+        <div style={{ fontSize: '0.78rem', color: fgMuted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{description}</div>
+      </div>
+      <HugeiconsIcon icon={ArrowRight01Icon} size={14} style={{ color: hovered ? primary : fgMuted, transition: 'color 200ms', flexShrink: 0 }} />
     </div>
   )
 }

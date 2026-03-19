@@ -93,6 +93,63 @@ export interface AppModule {
   isAdmin?: boolean
 }
 
+/* ─── COMPANY FEATURES ─── */
+
+export interface DepartmentRotation {
+  id: string
+  companyId: string
+  apprenticeId: string
+  apprenticeName?: string
+  department: string
+  startDate: string   // ISO date
+  endDate: string | null
+  notes: string | null
+  createdBy: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface TrainerFeedback {
+  id: string
+  companyId: string
+  trainerId: string
+  trainerName?: string
+  apprenticeId: string
+  apprenticeName?: string
+  periodLabel: string
+  ratingPunctuality: number | null
+  ratingEffort: number | null
+  ratingExpertise: number | null
+  ratingSocial: number | null
+  comment: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface ChatMessage {
+  id: string
+  companyId: string
+  senderId: string
+  senderName: string
+  senderInitials: string
+  content: string
+  createdAt: string
+}
+
+export interface ApprenticeTrainer {
+  apprenticeId: string
+  trainerId: string
+  companyId: string
+  assignedBy: string
+  assignedAt: string
+  trainerName?: string
+  trainerFirstName?: string
+  trainerLastName?: string
+  apprenticeName?: string
+  apprenticeFirstName?: string
+  apprenticeLastName?: string
+}
+
 /* ─── STUNDENPLAN ─── */
 
 export type ScheduleCategory = 'arbeit' | 'schule' | 'lernen' | 'sport' | 'freizeit' | 'sonstiges'
