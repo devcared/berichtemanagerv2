@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/contexts/AuthContext'
 import { AuthLogo, ThemeToggle, HomeButton } from '@/components/auth-ui'
@@ -15,6 +16,7 @@ const AppleIcon = () => (
 
 export default function LoginPage() {
   const { login, signInWithGoogle, signInWithApple } = useAuth()
+  const router = useRouter()
   const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -25,9 +27,12 @@ export default function LoginPage() {
     setIsLoading(true)
     setErrorMsg('')
     const { error } = await login(email, password)
-    if (error) { 
+    if (error) {
       setErrorMsg(error)
-      setIsLoading(false) 
+      setIsLoading(false)
+    } else {
+      router.push('/')
+      router.refresh()
     }
   }
 

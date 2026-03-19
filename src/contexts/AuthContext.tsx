@@ -41,30 +41,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let mounted = true
 
-    async function initializeAuth() {
-      const { data: { session } } = await supabase.auth.getSession()
-      
-      if (mounted) {
-        setUser(session?.user ?? null)
-        setAuthState({
-          isAuthenticated: !!session,
-          // Wir lesen needsSetup aus den user_metadata (falls vorhanden) - Standardmäßig ist es false
-          needsSetup: session?.user?.user_metadata?.needsSetup === true,
-        })
-        setIsLoading(false)
-      }
-    }
-
-    initializeAuth()
-
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         if (!mounted) return
         setUser(session?.user ?? null)
         setAuthState({
           isAuthenticated: !!session,
           needsSetup: session?.user?.user_metadata?.needsSetup === true,
         })
+        setIsLoading(false)
       }
     )
 

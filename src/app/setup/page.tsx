@@ -139,7 +139,7 @@ export default function ProfilSetupPage() {
         updatedAt: now,
       }
       await saveProfile(profile)
-      completeSetup()
+      await completeSetup()
     } finally {
       setIsSaving(false)
     }
