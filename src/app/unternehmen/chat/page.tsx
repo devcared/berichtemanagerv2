@@ -66,15 +66,14 @@ export default function ChatPage() {
     // ── Load history ─────────────────────────────────────────
     supabase
       .from('chat_messages')
-      .select('id, company_id, sender_id, content, image_url, reply_to_id, created_at, sender:profiles!sender_id(first_name, last_name), reactions:chat_reactions(message_id, user_id, emoji)')
+      .select('id, company_id, sender_id, content, image_url, reply_to_id, created_at, sender:profiles!sender_id(first_name, last_name)')
       .eq('company_id', companyId)
       .order('created_at', { ascending: true })
       .limit(200)
-      .then(({ data, error }) => {
+      .then(async ({ data, error }) => {
         if (error) { console.error('chat load:', error.message); setChatReady(true); return }
 
         const contentMap = new Map<string, { content: string; senderName: string }>()
-        const rxnMap: ReactionMap = new Map()
         const msgs: ChatMessage[] = []
 
         for (const row of (data ?? [])) {
@@ -82,16 +81,14 @@ export default function ChatPage() {
           const fn = s?.first_name ?? '', ln = s?.last_name ?? ''
           const info = { name: `${fn} ${ln}`.trim() || 'Unbekannt', initials: `${fn[0] ?? ''}${ln[0] ?? ''}`.toUpperCase() || '??' }
           senderCache.set(row.sender_id, info)
-
-          const rxns = (row.reactions ?? []) as RawReaction[]
-          if (rxns.length > 0) rxnMap.set(row.id, rxns)
-
           contentMap.set(row.id, { content: row.content, senderName: info.name })
           msgs.push({
             id: row.id, companyId: row.company_id, senderId: row.sender_id,
             senderName: info.name, senderInitials: info.initials,
-            content: row.content, imageUrl: row.image_url,
-            replyToId: row.reply_to_id, createdAt: row.created_at,
+            content: row.content,
+            imageUrl: (row as Record<string, unknown>).image_url as string | null ?? null,
+            replyToId: (row as Record<string, unknown>).reply_to_id as string | null ?? null,
+            createdAt: row.created_at,
           })
         }
 
@@ -104,7 +101,22 @@ export default function ChatPage() {
         }
 
         setMessages(msgs)
-        setReactions(rxnMap)
+
+        // Load reactions separately (table may not exist yet if migration pending)
+        const { data: rxnData, error: rxnErr } = await supabase
+          .from('chat_reactions')
+          .select('message_id, user_id, emoji')
+          .in('message_id', msgs.map(m => m.id))
+
+        if (!rxnErr && rxnData) {
+          const rxnMap: ReactionMap = new Map()
+          for (const r of rxnData as RawReaction[]) {
+            const list = rxnMap.get(r.message_id) ?? []
+            rxnMap.set(r.message_id, [...list, r])
+          }
+          setReactions(rxnMap)
+        }
+
         setChatReady(true)
       })
 
@@ -224,13 +236,15 @@ export default function ChatPage() {
     }
 
     const supabase = createClient()
-    const { error } = await supabase.from('chat_messages').insert({
+    const payload: Record<string, unknown> = {
       company_id: profile.companyId,
       sender_id: profile.id,
       content: content || '📷',
-      image_url: imageUrl,
-      reply_to_id: capturedReply?.id ?? null,
-    })
+    }
+    if (imageUrl !== null) payload.image_url = imageUrl
+    if (capturedReply?.id) payload.reply_to_id = capturedReply.id
+
+    const { error } = await supabase.from('chat_messages').insert(payload)
 
     if (error) {
       console.error('send:', error.message)
