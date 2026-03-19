@@ -349,7 +349,7 @@ export default function DashboardLayout({ children, sections, subtitle }: Props)
     .slice(0, 3)
 
   return (
-    <div style={{ display: 'flex', minHeight: '100svh', background: 'hsl(var(--background))', fontFamily: '"Google Sans","Roboto",-apple-system,"Segoe UI",sans-serif', WebkitFontSmoothing: 'antialiased', color: 'hsl(var(--foreground))' }}>
+    <div style={{ display: 'flex', height: '100svh', background: 'hsl(var(--background))', fontFamily: '"Google Sans","Roboto",-apple-system,"Segoe UI",sans-serif', WebkitFontSmoothing: 'antialiased', color: 'hsl(var(--foreground))' }}>
 
       {/* Desktop sidebar */}
       <div className="hidden md:block" style={{ flexShrink: 0, position: 'sticky', top: 0, height: '100svh', width: collapsed ? SIDEBAR_COLLAPSED : SIDEBAR_FULL, transition: 'width 220ms cubic-bezier(0.4,0,0.2,1)' }}>
