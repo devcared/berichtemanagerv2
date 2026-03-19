@@ -316,7 +316,7 @@ export default function ChatPage() {
 
   return (
     <div
-      style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0, fontFamily: '"Google Sans","Roboto",sans-serif' }}
+      style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, fontFamily: '"Google Sans","Roboto",sans-serif' }}
       onClick={() => setPickerMsgId(null)}
     >
       {/* Header */}

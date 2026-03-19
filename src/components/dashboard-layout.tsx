@@ -398,7 +398,7 @@ export default function DashboardLayout({ children, sections, subtitle }: Props)
           </button>
         </header>
 
-        <main className="pb-16 md:pb-0" style={{ flex: 1, overflowY: 'auto' }}>
+        <main className="pb-16 md:pb-0" style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, overflowY: 'auto' }}>
           {children}
         </main>
       </div>
