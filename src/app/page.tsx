@@ -18,7 +18,7 @@ import {
   MessageMultiple01Icon, StarAward01Icon, InboxIcon,
   FolderLockedIcon, CalendarCheckIn01Icon, Award01Icon,
   Analytics01Icon, Audit01Icon, Settings01Icon,
-  Database01Icon, Crown02Icon, UserGroup02Icon,
+  Database01Icon, Crown02Icon, UserGroup02Icon, Building01Icon,
 } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 
@@ -38,12 +38,13 @@ const modules: AppModule[] = [
   { id: 'termine', title: 'Termine & Fristen', description: 'Behalte Abgaben, Prüfungen und wichtige Daten im Blick', icon: 'CalendarCheckIn01Icon', accentColor: '#EA4335', routePath: '/termine', isEnabled: false },
   { id: 'achievements', title: 'Achievements & Badges', description: 'Sammle Auszeichnungen für deinen Ausbildungsfortschritt', icon: 'Award01Icon', accentColor: '#10B981', routePath: '/achievements', isEnabled: false },
   // Admin modules
-  { id: 'admin-users', title: 'Benutzerverwaltung', description: 'Alle Nutzer, Rollen und Berechtigungen zentral verwalten', icon: 'UserGroup02Icon', accentColor: '#4285f4', routePath: '/admin/users', isEnabled: false, isAdmin: true },
-  { id: 'admin-analytics', title: 'Plattform-Analytics', description: 'Nutzungsstatistiken und Aktivitäten der gesamten Plattform', icon: 'Analytics01Icon', accentColor: '#10B981', routePath: '/admin/analytics', isEnabled: false, isAdmin: true },
-  { id: 'admin-audit', title: 'Audit-Log', description: 'Lückenlose Protokollierung aller sicherheitsrelevanten Aktionen', icon: 'Audit01Icon', accentColor: '#F59E0B', routePath: '/admin/audit', isEnabled: false, isAdmin: true },
-  { id: 'admin-settings', title: 'System-Einstellungen', description: 'Globale Konfiguration, Feature-Flags und Plattform-Parameter', icon: 'Settings01Icon', accentColor: '#8B5CF6', routePath: '/admin/settings', isEnabled: false, isAdmin: true },
-  { id: 'admin-data', title: 'Datenbankmanager', description: 'Datenbankstrukturen einsehen, exportieren und warten', icon: 'Database01Icon', accentColor: '#EA4335', routePath: '/admin/data', isEnabled: false, isAdmin: true },
-  { id: 'admin-roles', title: 'Rollen & Rechte', description: 'Zugriffsebenen und Rollenkonzepte plattformweit konfigurieren', icon: 'Crown02Icon', accentColor: '#3c4043', routePath: '/admin/roles', isEnabled: false, isAdmin: true },
+  { id: 'admin-users',     title: 'Benutzerverwaltung',    description: 'Alle Nutzer, Rollen und Berechtigungen zentral verwalten',         icon: 'UserGroup02Icon', accentColor: '#4285f4', routePath: '/admin/users',     isEnabled: false, isAdmin: true },
+  { id: 'admin-companies', title: 'Unternehmen verwalten', description: 'Unternehmen anlegen und Branding pro Firma konfigurieren',           icon: 'Building01Icon',  accentColor: '#0f9d58', routePath: '/admin/companies', isEnabled: false, isAdmin: true },
+  { id: 'admin-roles',     title: 'Rollen & Rechte',       description: 'Zugriffsebenen und Rollenkonzepte plattformweit konfigurieren',      icon: 'Crown02Icon',     accentColor: '#3c4043', routePath: '/admin/roles',     isEnabled: false, isAdmin: true },
+  { id: 'admin-analytics', title: 'Plattform-Analytics',   description: 'Nutzungsstatistiken und Aktivitäten der gesamten Plattform',         icon: 'Analytics01Icon', accentColor: '#10B981', routePath: '/admin/analytics', isEnabled: false, isAdmin: true },
+  { id: 'admin-audit',     title: 'Audit-Log',             description: 'Lückenlose Protokollierung aller sicherheitsrelevanten Aktionen',    icon: 'Audit01Icon',     accentColor: '#F59E0B', routePath: '/admin/audit',     isEnabled: false, isAdmin: true },
+  { id: 'admin-settings',  title: 'System-Einstellungen',  description: 'Globale Konfiguration, Feature-Flags und Plattform-Parameter',       icon: 'Settings01Icon',  accentColor: '#8B5CF6', routePath: '/admin/settings',  isEnabled: false, isAdmin: true },
+  { id: 'admin-data',      title: 'Datenbankmanager',      description: 'Datenbankstrukturen einsehen, exportieren und warten',               icon: 'Database01Icon',  accentColor: '#EA4335', routePath: '/admin/data',      isEnabled: false, isAdmin: true },
 ]
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const moduleIconMap: Record<string, any> = {
@@ -51,7 +52,7 @@ const moduleIconMap: Record<string, any> = {
   MessageMultiple01Icon, StarAward01Icon, InboxIcon,
   FolderLockedIcon, CalendarCheckIn01Icon, Award01Icon,
   Analytics01Icon, Audit01Icon, Settings01Icon,
-  Database01Icon, Crown02Icon, UserGroup02Icon,
+  Database01Icon, Crown02Icon, UserGroup02Icon, Building01Icon,
 }
 function getGreeting() {
   const h = new Date().getHours()

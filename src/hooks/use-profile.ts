@@ -51,6 +51,7 @@ export function useProfile() {
               role: (data.role as UserRole) ?? 'apprentice',
               createdAt: data.created_at,
               updatedAt: data.updated_at,
+              companyId: data.company_id ?? undefined,
             })
           } else {
             setProfile(null)

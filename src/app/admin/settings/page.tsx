@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { HugeiconsIcon } from '@hugeicons/react'
 import {
   Settings01Icon, Alert01Icon, ArrowLeft01Icon, CheckmarkCircle01Icon,
-  ToggleOnIcon, ToggleOffIcon, InformationCircleIcon,
+  ToggleOnIcon, ToggleOffIcon, InformationCircleIcon, PaintBoardIcon,
 } from '@hugeicons/core-free-icons'
 
 interface AdminSettings {
@@ -24,6 +24,8 @@ interface AdminSettings {
   invitationExpiryHours: number
   requireApprovalForReports: boolean
   enablePushNotifications: boolean
+  logoUrl: string
+  accentColor: string
 }
 
 const DEFAULT_SETTINGS: AdminSettings = {
@@ -36,9 +38,12 @@ const DEFAULT_SETTINGS: AdminSettings = {
   invitationExpiryHours: 72,
   requireApprovalForReports: true,
   enablePushNotifications: false,
+  logoUrl: '',
+  accentColor: '#4285f4',
 }
 
 const SETTINGS_KEY = 'azubihub-admin-settings'
+const BRANDING_KEY = 'azubihub-global-branding'
 
 function Toggle({ value, onChange, disabled }: { value: boolean; onChange: (v: boolean) => void; disabled?: boolean }) {
   return (
@@ -97,6 +102,13 @@ export default function AdminSettingsPage() {
   function handleSave() {
     try {
       localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings))
+      // Also persist branding separately
+      const branding = {
+        name: settings.platformName,
+        logoUrl: settings.logoUrl,
+        accentColor: settings.accentColor,
+      }
+      localStorage.setItem(BRANDING_KEY, JSON.stringify(branding))
       setSaved(true)
       setTimeout(() => setSaved(false), 3000)
     } catch { /* ignore */ }
@@ -125,7 +137,7 @@ export default function AdminSettingsPage() {
   if (!isMounted) return null
 
   return (
-    <div className="flex flex-col min-h-full bg-background">
+    <div className="flex flex-col min-h-full bg-background" style={{ fontFamily: '"Google Sans","Roboto",-apple-system,"Segoe UI",sans-serif' }}>
       {/* Header */}
       <div className="border-b border-border bg-card px-3 sm:px-6 py-4 sm:py-6">
         <div className="max-w-3xl mx-auto flex items-center justify-between gap-3">
@@ -159,6 +171,106 @@ export default function AdminSettingsPage() {
               Diese Einstellungen werden im Browser-localStorage gespeichert. Sie sind plattformweit sichtbar nur für diese Sitzung — für persistente Einstellungen eine Datenbanktabelle verwenden.
             </p>
           </div>
+
+          {/* === Globales Branding === */}
+          <Card className="border rounded-2xl">
+            <CardContent className="p-4">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                <HugeiconsIcon icon={PaintBoardIcon} size={16} style={{ color: '#4285f4' }} />
+                <h2 style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'hsl(var(--foreground))', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                  Globales Branding
+                </h2>
+              </div>
+              <p style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', marginBottom: 14 }}>
+                Erscheinungsbild für Nutzer ohne Unternehmens-Zuweisung
+              </p>
+
+              <SettingRow label="Plattformname" description="Name der Plattform in Navigation und Benachrichtigungen">
+                <Input
+                  value={settings.platformName}
+                  onChange={e => updateSetting('platformName', e.target.value)}
+                  className="w-40 h-8 text-sm"
+                  placeholder="AzubiHub"
+                />
+              </SettingRow>
+
+              <SettingRow label="Logo-URL" description="URL zu einem Bild, das als Plattform-Logo angezeigt wird">
+                <div className="flex items-center gap-2">
+                  {settings.logoUrl && (
+                    <div style={{ width: 28, height: 28, borderRadius: 6, border: '1px solid hsl(var(--border))', overflow: 'hidden', background: 'hsl(var(--muted))' }}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={settings.logoUrl}
+                        alt=""
+                        style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                        onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
+                      />
+                    </div>
+                  )}
+                  <Input
+                    value={settings.logoUrl}
+                    onChange={e => updateSetting('logoUrl', e.target.value)}
+                    className="w-52 h-8 text-sm"
+                    placeholder="https://…/logo.png"
+                  />
+                </div>
+              </SettingRow>
+
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, padding: '14px 0', borderBottom: '1px solid hsl(var(--border))' }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: '0.875rem', fontWeight: 500, color: 'hsl(var(--foreground))' }}>Akzentfarbe</div>
+                  <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', marginTop: 2 }}>Primärfarbe der Plattform</div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+                  <input
+                    type="color"
+                    value={settings.accentColor}
+                    onChange={e => updateSetting('accentColor', e.target.value)}
+                    style={{ width: 32, height: 32, borderRadius: 8, border: '1px solid hsl(var(--border))', cursor: 'pointer', padding: 2, background: 'transparent' }}
+                  />
+                  <Input
+                    value={settings.accentColor}
+                    onChange={e => updateSetting('accentColor', e.target.value)}
+                    className="w-24 h-8 text-sm font-mono"
+                    maxLength={7}
+                    placeholder="#4285f4"
+                  />
+                </div>
+              </div>
+
+              {/* Branding preview */}
+              <div style={{ marginTop: 14 }}>
+                <Label className="text-xs font-medium text-muted-foreground mb-2 block">Vorschau — Navbar</Label>
+                <div style={{ padding: '10px 14px', borderRadius: 10, background: 'hsl(var(--muted)/0.4)', border: '1px solid hsl(var(--border))', display: 'inline-flex', alignItems: 'center', gap: 10 }}>
+                  {settings.logoUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={settings.logoUrl}
+                      alt=""
+                      style={{ width: 28, height: 28, borderRadius: 6, objectFit: 'contain', background: 'hsl(var(--muted))' }}
+                      onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
+                    />
+                  ) : (
+                    <div style={{
+                      width: 28, height: 28, borderRadius: 6,
+                      background: settings.accentColor,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      color: 'white', fontWeight: 700, fontSize: '0.75rem',
+                    }}>
+                      {(settings.platformName || 'A')[0].toUpperCase()}
+                    </div>
+                  )}
+                  <span style={{ fontSize: '0.9375rem', fontWeight: 700, color: settings.accentColor }}>
+                    {settings.platformName || 'AzubiHub'}
+                  </span>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 8px', borderRadius: 20, background: settings.accentColor + '18', border: `1px solid ${settings.accentColor}30` }}>
+                    <div style={{ width: 5, height: 5, borderRadius: '50%', background: settings.accentColor }} />
+                    <span style={{ fontSize: '0.6875rem', fontWeight: 600, color: settings.accentColor }}>Plattform</span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Platform */}
           <Card className="border rounded-2xl">

@@ -28,6 +28,18 @@ export interface TrainingProfile {
   role: UserRole
   createdAt: string
   updatedAt: string
+  companyId?: string
+}
+
+export interface Company {
+  id: string
+  name: string
+  logoUrl: string | null
+  accentColor: string
+  website: string | null
+  userCount?: number
+  createdAt: string
+  updatedAt: string
 }
 
 export interface DailyEntry {

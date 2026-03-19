@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useProfile } from '@/hooks/use-profile'
 import { useAuth } from '@/contexts/AuthContext'
 import { useTheme } from '@/contexts/ThemeContext'
+import { useBranding } from '@/hooks/use-branding'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { Logout01Icon } from '@hugeicons/core-free-icons'
 
@@ -89,6 +90,7 @@ export default function DashboardLayout({ children, sections, subtitle }: Props)
   const { profile } = useProfile()
   const { logout }  = useAuth()
   const { theme, toggleTheme } = useTheme()
+  const branding = useBranding()
 
   const [mobileOpen, setMobileOpen] = React.useState(false)
   const [collapsed,  setCollapsed]  = React.useState(false)
@@ -97,7 +99,7 @@ export default function DashboardLayout({ children, sections, subtitle }: Props)
 
   const initials     = profile ? `${profile.firstName?.[0] ?? ''}${profile.lastName?.[0] ?? ''}`.toUpperCase() : 'AZ'
   const isDark       = theme === 'dark'
-  const primaryColor = isDark ? '#8ab4f8' : '#4285f4'
+  const primaryColor = branding.accentColor || (isDark ? '#8ab4f8' : '#4285f4')
   const activeBg     = isDark ? 'rgba(138,180,248,0.14)' : 'rgba(66,133,244,0.10)'
   const hoverBg      = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)'
 
@@ -148,17 +150,27 @@ export default function DashboardLayout({ children, sections, subtitle }: Props)
             onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/App Icon.png" alt="AzubiHub"
-              width={isCollapsed ? 36 : 28}
-              height={isCollapsed ? 36 : 28}
-              style={{ borderRadius: isCollapsed ? 10 : 6, objectFit: 'cover', flexShrink: 0, transition: 'width 220ms, height 220ms, border-radius 220ms' }}
-            />
+            {branding.logoUrl ? (
+              <img
+                src={branding.logoUrl} alt={branding.name}
+                width={isCollapsed ? 36 : 28}
+                height={isCollapsed ? 36 : 28}
+                style={{ borderRadius: isCollapsed ? 10 : 6, objectFit: 'cover', flexShrink: 0, transition: 'width 220ms, height 220ms, border-radius 220ms' }}
+              />
+            ) : (
+              <img
+                src="/App Icon.png" alt="AzubiHub"
+                width={isCollapsed ? 36 : 28}
+                height={isCollapsed ? 36 : 28}
+                style={{ borderRadius: isCollapsed ? 10 : 6, objectFit: 'cover', flexShrink: 0, transition: 'width 220ms, height 220ms, border-radius 220ms' }}
+              />
+            )}
             {!isCollapsed && (
               <div style={{ textAlign: 'left', lineHeight: 1, overflow: 'hidden' }}>
-                <div style={{ fontSize: '0.875rem', fontWeight: 600, whiteSpace: 'nowrap' }}>
-                  <span style={{ color: '#4285f4' }}>Azubi</span>
-                  <span style={{ color: 'hsl(var(--sidebar-foreground) / 0.7)', fontWeight: 400 }}>Hub</span>
+                <div style={{ fontSize: '0.875rem', fontWeight: 600, whiteSpace: 'nowrap', color: 'hsl(var(--sidebar-foreground))' }}>
+                  {branding.name !== 'AzubiHub' ? branding.name : (
+                    <><span style={{ color: primaryColor }}>Azubi</span><span style={{ color: 'hsl(var(--sidebar-foreground) / 0.7)', fontWeight: 400 }}>Hub</span></>
+                  )}
                 </div>
                 <div style={{ fontSize: '0.6875rem', color: 'hsl(var(--muted-foreground))', whiteSpace: 'nowrap' }}>{subtitle}</div>
               </div>
