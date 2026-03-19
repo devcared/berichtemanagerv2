@@ -84,7 +84,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           router.push('/setup')
         }
       } else {
-        if (isLoginRegisterRoute || isSetupRoute) {
+        if (isLoginRegisterRoute) {
           router.push('/')
         }
       }

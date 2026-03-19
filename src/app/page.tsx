@@ -72,7 +72,7 @@ function GripIcon() {
 
 function AppHome() {
   const router = useRouter()
-  const { profile } = useProfile()
+  const { profile, loading: profileLoading } = useProfile()
   const { logout } = useAuth()
   const { theme, toggleTheme } = useTheme()
   const [isMounted, setIsMounted] = useState(false)
@@ -225,6 +225,21 @@ function AppHome() {
       </header>
 
       <div style={{ maxWidth: 960, margin: '0 auto', padding: '0 clamp(1rem, 4vw, 1.5rem)' }}>
+
+        {/* ── No profile banner ── */}
+        {!profileLoading && !profile && (
+          <div style={{ marginTop: 'clamp(1rem, 3vw, 2rem)', padding: '1rem 1.25rem', borderRadius: 12, background: isDark ? 'rgba(234,67,53,0.12)' : 'rgba(234,67,53,0.08)', border: '1px solid rgba(234,67,53,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '0.875rem', color: '#ea4335', fontWeight: 500 }}>
+              Dein Profil ist noch nicht eingerichtet. Richte es ein, um alle Funktionen zu nutzen.
+            </span>
+            <button
+              onClick={() => router.push('/setup')}
+              style={{ padding: '0.4375rem 1rem', borderRadius: 8, border: 'none', background: '#ea4335', color: 'white', fontSize: '0.8125rem', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}
+            >
+              Profil einrichten
+            </button>
+          </div>
+        )}
 
         {/* ── Greeting ── */}
         <div style={{ paddingTop: 'clamp(1.5rem, 5vw, 3rem)', paddingBottom: '2.75rem' }}>
