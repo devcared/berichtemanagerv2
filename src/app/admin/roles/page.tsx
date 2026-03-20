@@ -113,6 +113,13 @@ export default function AdminRolesPage() {
   const [newRoleBase, setNewRoleBase]   = useState<'apprentice' | 'trainer' | 'admin'>('apprentice')
   const [newRolePerms, setNewRolePerms] = useState<Record<string, boolean>>(() => basePerms('apprentice'))
 
+  // Edit existing role state
+  const [editingRoleId, setEditingRoleId]   = useState<string | null>(null)
+  const [editRoleName, setEditRoleName]     = useState('')
+  const [editRoleDesc, setEditRoleDesc]     = useState('')
+  const [editRoleBase, setEditRoleBase]     = useState<'apprentice' | 'trainer' | 'admin'>('apprentice')
+  const [editRolePerms, setEditRolePerms]   = useState<Record<string, boolean>>({})
+
   // ── hydrate from localStorage ──────────────────────────────────────────────
   useEffect(() => {
     setIsMounted(true)
@@ -214,6 +221,32 @@ export default function AdminRolesPage() {
     const updated = customRoles.filter(r => r.id !== id)
     setCustomRoles(updated)
     try { localStorage.setItem(CUSTOM_ROLES_KEY, JSON.stringify(updated)) } catch { /* ignore */ }
+    if (editingRoleId === id) setEditingRoleId(null)
+  }
+
+  function openEditRole(cr: CustomRole) {
+    setEditingRoleId(cr.id)
+    setEditRoleName(cr.name)
+    setEditRoleDesc(cr.description)
+    setEditRoleBase(cr.baseRole)
+    setEditRolePerms({ ...cr.permissions })
+    setShowRoleForm(false) // close create form if open
+  }
+
+  function saveEditRole() {
+    if (!editingRoleId || !editRoleName.trim()) return
+    const updated = customRoles.map(cr =>
+      cr.id !== editingRoleId ? cr : {
+        ...cr,
+        name:        editRoleName.trim(),
+        description: editRoleDesc.trim(),
+        baseRole:    editRoleBase,
+        permissions: { ...editRolePerms },
+      }
+    )
+    setCustomRoles(updated)
+    try { localStorage.setItem(CUSTOM_ROLES_KEY, JSON.stringify(updated)) } catch { /* ignore */ }
+    setEditingRoleId(null)
   }
 
   // ── User role change ───────────────────────────────────────────────────────
@@ -350,13 +383,22 @@ export default function AdminRolesPage() {
                         )}
                       </div>
                       {isCustom && (
-                        <button
-                          onClick={() => deleteCustomRole(custom!.id)}
-                          style={{ width: 26, height: 26, borderRadius: 6, border: 'none', background: '#ea433510', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
-                          title="Rolle löschen"
-                        >
-                          <HugeiconsIcon icon={Delete01Icon} size={13} style={{ color: '#ea4335' }} />
-                        </button>
+                        <div style={{ display: 'flex', gap: 4 }}>
+                          <button
+                            onClick={() => openEditRole(custom!)}
+                            style={{ width: 26, height: 26, borderRadius: 6, border: 'none', background: editingRoleId === custom!.id ? '#4285f420' : 'hsl(var(--muted))', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+                            title="Rolle bearbeiten"
+                          >
+                            <HugeiconsIcon icon={Edit01Icon} size={13} style={{ color: editingRoleId === custom!.id ? '#4285f4' : 'hsl(var(--muted-foreground))' }} />
+                          </button>
+                          <button
+                            onClick={() => deleteCustomRole(custom!.id)}
+                            style={{ width: 26, height: 26, borderRadius: 6, border: 'none', background: '#ea433510', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+                            title="Rolle löschen"
+                          >
+                            <HugeiconsIcon icon={Delete01Icon} size={13} style={{ color: '#ea4335' }} />
+                          </button>
+                        </div>
                       )}
                     </div>
                     <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', lineHeight: 1.5 }}>
@@ -509,6 +551,159 @@ export default function AdminRolesPage() {
               </CardContent>
             </Card>
           )}
+
+          {/* ── Edit existing role form ──────────────────────────────────── */}
+          {editingRoleId && (() => {
+            const cr = customRoles.find(r => r.id === editingRoleId)
+            if (!cr) return null
+            return (
+              <Card className="border rounded-2xl overflow-hidden" style={{ borderColor: '#4285f440' }}>
+                <CardContent className="p-4">
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <HugeiconsIcon icon={Edit01Icon} size={15} style={{ color: '#4285f4' }} />
+                      <h2 className="text-sm font-semibold text-foreground">
+                        Rolle bearbeiten: <span style={{ color: '#4285f4' }}>{cr.name}</span>
+                      </h2>
+                    </div>
+                    <button
+                      onClick={() => setEditingRoleId(null)}
+                      style={{ width: 26, height: 26, borderRadius: 6, border: 'none', background: 'hsl(var(--muted))', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    >
+                      <HugeiconsIcon icon={Cancel01Icon} size={13} style={{ color: 'hsl(var(--muted-foreground))' }} />
+                    </button>
+                  </div>
+
+                  {/* Basic fields */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
+                    <div>
+                      <Label htmlFor="edit-role-name" className="text-xs font-medium text-muted-foreground mb-1 block">
+                        Rollenname <span style={{ color: '#ea4335' }}>*</span>
+                      </Label>
+                      <Input
+                        id="edit-role-name"
+                        value={editRoleName}
+                        onChange={e => setEditRoleName(e.target.value)}
+                        className="h-9 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs font-medium text-muted-foreground mb-1 block">Basis-Rolle</Label>
+                      <Select value={editRoleBase} onValueChange={v => setEditRoleBase(v as 'apprentice' | 'trainer' | 'admin')}>
+                        <SelectTrigger className="h-9 text-sm">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="apprentice">Auszubildender</SelectItem>
+                          <SelectItem value="trainer">Ausbilder</SelectItem>
+                          <SelectItem value="admin">Administrator</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="sm:col-span-2">
+                      <Label htmlFor="edit-role-desc" className="text-xs font-medium text-muted-foreground mb-1 block">Beschreibung</Label>
+                      <Input
+                        id="edit-role-desc"
+                        value={editRoleDesc}
+                        onChange={e => setEditRoleDesc(e.target.value)}
+                        placeholder="Kurze Beschreibung der Rolle…"
+                        className="h-9 text-sm"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Permission checklist */}
+                  <div style={{ marginBottom: 16 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                        Berechtigungen
+                      </p>
+                      <div style={{ display: 'flex', gap: 6 }}>
+                        <button
+                          onClick={() => setEditRolePerms(basePerms(editRoleBase))}
+                          style={{ fontSize: '0.6875rem', color: 'hsl(var(--muted-foreground))', background: 'none', border: '1px solid hsl(var(--border))', padding: '2px 8px', borderRadius: 5, cursor: 'pointer' }}
+                        >
+                          Basis-Rechte übernehmen
+                        </button>
+                        <button
+                          onClick={() => {
+                            const all: Record<string, boolean> = {}
+                            DEFAULT_PERMISSIONS.forEach(p => { all[p.label] = true })
+                            setEditRolePerms(all)
+                          }}
+                          style={{ fontSize: '0.6875rem', color: 'hsl(var(--muted-foreground))', background: 'none', border: '1px solid hsl(var(--border))', padding: '2px 8px', borderRadius: 5, cursor: 'pointer' }}
+                        >
+                          Alle
+                        </button>
+                        <button
+                          onClick={() => {
+                            const none: Record<string, boolean> = {}
+                            DEFAULT_PERMISSIONS.forEach(p => { none[p.label] = false })
+                            setEditRolePerms(none)
+                          }}
+                          style={{ fontSize: '0.6875rem', color: 'hsl(var(--muted-foreground))', background: 'none', border: '1px solid hsl(var(--border))', padding: '2px 8px', borderRadius: 5, cursor: 'pointer' }}
+                        >
+                          Keine
+                        </button>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-0">
+                      {GROUPS.map(group => (
+                        <div key={group} style={{ marginBottom: 14 }}>
+                          <p style={{ fontSize: '0.6875rem', fontWeight: 600, color: 'hsl(var(--muted-foreground))', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>
+                            {group}
+                          </p>
+                          {DEFAULT_PERMISSIONS.filter(p => p.group === group).map(perm => {
+                            const enabled = editRolePerms[perm.label] ?? false
+                            return (
+                              <label
+                                key={perm.label}
+                                style={{
+                                  display: 'flex', alignItems: 'center', gap: 10,
+                                  padding: '5px 8px', borderRadius: 7, cursor: 'pointer',
+                                  transition: 'background 100ms', marginBottom: 2,
+                                }}
+                                onMouseEnter={e => (e.currentTarget.style.background = 'hsl(var(--accent))')}
+                                onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={enabled}
+                                  onChange={() => setEditRolePerms(prev => ({ ...prev, [perm.label]: !prev[perm.label] }))}
+                                  style={{ width: 15, height: 15, accentColor: '#4285f4', cursor: 'pointer', flexShrink: 0 }}
+                                />
+                                <span style={{ fontSize: '0.8125rem', color: enabled ? 'hsl(var(--foreground))' : 'hsl(var(--muted-foreground))' }}>
+                                  {perm.label}
+                                </span>
+                              </label>
+                            )
+                          })}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: 8, paddingTop: 4, borderTop: '1px solid hsl(var(--border))' }}>
+                    <Button
+                      size="sm"
+                      onClick={saveEditRole}
+                      disabled={!editRoleName.trim()}
+                      style={{ background: '#4285f4', color: 'white', border: 'none' }}
+                    >
+                      <HugeiconsIcon icon={CheckmarkCircle01Icon} size={14} className="mr-1.5" />
+                      Änderungen speichern
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={() => setEditingRoleId(null)}>
+                      Abbrechen
+                    </Button>
+                    <div style={{ marginLeft: 'auto', fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', display: 'flex', alignItems: 'center' }}>
+                      {Object.values(editRolePerms).filter(Boolean).length} von {DEFAULT_PERMISSIONS.length} Rechten aktiv
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )
+          })()}
 
           {/* ── Permission matrix ────────────────────────────────────────── */}
           <Card className="border rounded-2xl overflow-hidden">

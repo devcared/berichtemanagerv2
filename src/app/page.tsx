@@ -8,6 +8,7 @@ import { useProfile } from '@/hooks/use-profile'
 import { useAuth } from '@/contexts/AuthContext'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useBranding } from '@/hooks/use-branding'
+import { useAchievements } from '@/hooks/use-achievements'
 import type { AppModule } from '@/types'
 import {
   BookOpenIcon, CheckListIcon, CalendarIcon, GridViewIcon, Logout01Icon,
@@ -30,7 +31,7 @@ const modules: AppModule[] = [
   { id: 'nachrichten', title: 'Nachrichten-Center', description: 'Alle Nachrichten und Benachrichtigungen auf einen Blick', icon: 'InboxIcon', accentColor: '#3B82F6', routePath: '/nachrichten', isEnabled: false },
   { id: 'dokumente', title: 'Dokumenten-Tresor', description: 'Sichere Ablage für wichtige Ausbildungsunterlagen', icon: 'FolderLockedIcon', accentColor: '#8B5CF6', routePath: '/dokumente', isEnabled: false },
   { id: 'termine', title: 'Termine & Fristen', description: 'Behalte Abgaben, Prüfungen und wichtige Daten im Blick', icon: 'CalendarCheckIn01Icon', accentColor: '#EA4335', routePath: '/termine', isEnabled: false },
-  { id: 'achievements', title: 'Achievements & Badges', description: 'Sammle Auszeichnungen für deinen Ausbildungsfortschritt', icon: 'Award01Icon', accentColor: '#10B981', routePath: '/achievements', isEnabled: false },
+  { id: 'achievements', title: 'Achievements & Badges', description: 'Sammle Auszeichnungen für deinen Ausbildungsfortschritt', icon: 'Award01Icon', accentColor: '#10B981', routePath: '/achievements', isEnabled: true },
   // Admin modules
   { id: 'admin-users',     title: 'Benutzerverwaltung',    description: 'Alle Nutzer, Rollen und Berechtigungen zentral verwalten',   icon: 'UserGroup02Icon', accentColor: '#4285f4', routePath: '/admin/users',     isEnabled: false, isAdmin: true },
   { id: 'admin-companies', title: 'Unternehmen verwalten', description: 'Unternehmen anlegen und Branding pro Firma konfigurieren',     icon: 'Building01Icon',  accentColor: '#0f9d58', routePath: '/admin/companies', isEnabled: false, isAdmin: true },
@@ -68,6 +69,7 @@ export default function AppHome() {
   const { logout } = useAuth()
   const { theme, toggleTheme } = useTheme()
   const branding = useBranding()
+  const { newCount: newAchievements } = useAchievements()
   const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => { setIsMounted(true) }, [])
@@ -175,11 +177,13 @@ export default function AppHome() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '0.625rem' }}>
             {enabledModules.map(m => {
               const Icon = iconMap[m.icon]
+              const badge = isMounted && m.id === 'achievements' && newAchievements > 0 ? newAchievements : 0
               return (
                 <button
                   key={m.id}
                   onClick={() => router.push(m.routePath)}
                   style={{
+                    position: 'relative',
                     display: 'flex', alignItems: 'center', gap: 12,
                     padding: '0.75rem 1rem', borderRadius: 10,
                     border: '1px solid hsl(var(--border))',
@@ -191,6 +195,15 @@ export default function AppHome() {
                   onMouseEnter={e => { e.currentTarget.style.background = 'hsl(var(--accent))'; e.currentTarget.style.borderColor = 'hsl(var(--border))' }}
                   onMouseLeave={e => { e.currentTarget.style.background = 'hsl(var(--card))'; e.currentTarget.style.borderColor = 'hsl(var(--border))' }}
                 >
+                  {badge > 0 && (
+                    <div style={{
+                      position: 'absolute', top: -6, right: -6,
+                      minWidth: 18, height: 18, padding: '0 4px', borderRadius: 9999,
+                      background: '#ea4335', border: '2px solid hsl(var(--background))',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: '0.5625rem', fontWeight: 800, color: 'white', lineHeight: 1,
+                    }}>{badge}</div>
+                  )}
                   {Icon && (
                     <div style={{ width: 38, height: 38, borderRadius: 9, background: m.accentColor + '18', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                       <HugeiconsIcon icon={Icon} size={19} style={{ color: m.accentColor }} />
