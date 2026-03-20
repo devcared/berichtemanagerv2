@@ -23,7 +23,6 @@ import {
   BuildingIcon,
   UserIcon,
   CalendarIcon,
-  CheckmarkCircle01Icon,
 } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 import type { WeeklyReport } from '@/types'
@@ -204,30 +203,31 @@ export default function BerichtsheftDashboard() {
   }
 
   return (
-    <div style={{ padding: 'clamp(1rem, 3vw, 1.5rem)', display: 'flex', flexDirection: 'column', gap: '1.25rem', flex: 1, fontFamily: '"Google Sans","Roboto",-apple-system,sans-serif' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.25rem' }} className="lg:grid-cols-[1fr_300px]">
+    <div style={{ padding: 'clamp(0.875rem, 2.5vw, 1.25rem)', display: 'flex', flexDirection: 'column', gap: '1rem', flex: 1, fontFamily: '"Google Sans","Roboto",-apple-system,sans-serif' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }} className="lg:grid-cols-[1fr_280px]">
 
         {/* ══ LEFT COLUMN ══ */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', minWidth: 0 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', minWidth: 0 }}>
 
           {/* 1. Current week status */}
           <div style={card}>
-            <p style={sectionLabel}>Aktuelle Woche</p>
-            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-              <div>
-                <div style={{ fontSize: '1.0625rem', fontWeight: 500, color: 'hsl(var(--foreground))', marginBottom: 6 }}>
-                  {currentKW}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div>
+                  <p style={{ ...sectionLabel, marginBottom: 2 }}>Aktuelle Woche</p>
+                  <div style={{ fontSize: '0.9375rem', fontWeight: 500, color: 'hsl(var(--foreground))' }}>
+                    {currentKW}
+                  </div>
                 </div>
-                {currentReport ? (
-                  <StatusBadge status={currentReport.status} />
-                ) : (
-                  <span style={{ fontSize: '0.8125rem', color: 'hsl(var(--muted-foreground))' }}>Noch kein Bericht angelegt</span>
+                {currentReport && <StatusBadge status={currentReport.status} />}
+                {!currentReport && (
+                  <span style={{ fontSize: '0.8125rem', color: 'hsl(var(--muted-foreground))' }}>Kein Bericht</span>
                 )}
               </div>
               <div style={{ display: 'flex', gap: 8 }}>
                 {currentReport && (currentReport.status === 'draft' || currentReport.status === 'needs_revision') && (
                   <Button size="sm" onClick={() => router.push(`/berichtsheft/editor/${currentWeekId}`)}>
-                    Bericht öffnen
+                    Öffnen
                   </Button>
                 )}
                 {currentReport && currentReport.status !== 'draft' && currentReport.status !== 'needs_revision' && (
@@ -237,18 +237,12 @@ export default function BerichtsheftDashboard() {
                 )}
                 {!currentReport && (
                   <Button size="sm" onClick={() => router.push(`/berichtsheft/editor/${currentWeekId}`)}>
-                    <HugeiconsIcon icon={Add01Icon} size={15} style={{ marginRight: 4 }} />
-                    Neuen Bericht erstellen
+                    <HugeiconsIcon icon={Add01Icon} size={14} style={{ marginRight: 4 }} />
+                    Neuer Bericht
                   </Button>
                 )}
               </div>
             </div>
-            {currentReport?.status === 'approved' && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 10, fontSize: '0.8125rem', color: '#22c55e' }}>
-                <HugeiconsIcon icon={CheckmarkCircle01Icon} size={14} />
-                <span>Freigegeben</span>
-              </div>
-            )}
           </div>
 
           {/* 2. Recent reports list */}
@@ -303,46 +297,21 @@ export default function BerichtsheftDashboard() {
             )}
           </div>
 
-          {/* 3. Shortcuts */}
-          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-            {[
-              { label: '+ Neuer Bericht', href: `/berichtsheft/editor/${currentWeekId}` },
-              { label: 'Kalender', href: '/berichtsheft/kalender' },
-              { label: 'Statistiken', href: '/berichtsheft/statistiken' },
-            ].map(({ label, href }) => (
-              <button
-                key={href}
-                onClick={() => router.push(href)}
-                style={{
-                  padding: '8px 16px', borderRadius: 8,
-                  border: '1px solid hsl(var(--border))',
-                  background: 'hsl(var(--card))', color: 'hsl(var(--foreground))',
-                  fontSize: '0.875rem', cursor: 'pointer', fontFamily: 'inherit',
-                  transition: 'background 100ms',
-                }}
-                onMouseEnter={e => (e.currentTarget.style.background = 'hsl(var(--accent))')}
-                onMouseLeave={e => (e.currentTarget.style.background = 'hsl(var(--card))')}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
         </div>
 
         {/* ══ RIGHT COLUMN ══ */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
 
-          {/* Profile card */}
+          {/* Profile + Training progress (combined) */}
           <div style={card}>
-            <p style={sectionLabel}>Profil</p>
             {profile ? (
               <>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: '1rem' }}>
-                  <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'hsl(var(--primary))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.875rem', fontWeight: 700, color: 'white', flexShrink: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: '0.875rem' }}>
+                  <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'hsl(var(--primary))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8125rem', fontWeight: 700, color: 'white', flexShrink: 0 }}>
                     {initials}
                   </div>
                   <div style={{ minWidth: 0 }}>
-                    <div style={{ fontSize: '0.9375rem', fontWeight: 600, color: 'hsl(var(--foreground))', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <div style={{ fontSize: '0.875rem', fontWeight: 600, color: 'hsl(var(--foreground))', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {profile.firstName} {profile.lastName}
                     </div>
                     <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -350,14 +319,39 @@ export default function BerichtsheftDashboard() {
                     </div>
                   </div>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.8125rem', color: 'hsl(var(--muted-foreground))' }}>
-                    <HugeiconsIcon icon={BuildingIcon} size={14} style={{ flexShrink: 0 }} />
-                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{profile.companyName}</span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: '0.875rem' }}>
+                  {profile.companyName && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
+                      <HugeiconsIcon icon={BuildingIcon} size={12} style={{ flexShrink: 0 }} />
+                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{profile.companyName}</span>
+                    </div>
+                  )}
+                  {profile.trainerName && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
+                      <HugeiconsIcon icon={UserIcon} size={12} style={{ flexShrink: 0 }} />
+                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{profile.trainerName}</span>
+                    </div>
+                  )}
+                </div>
+                <div style={{ height: 1, background: 'hsl(var(--border))', margin: '0 0 0.875rem' }} />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginBottom: 4 }}>
+                      <span style={{ color: 'hsl(var(--muted-foreground))' }}>Ausbildungsjahr {trainingYear} / {totalYears}</span>
+                      <span style={{ color: 'hsl(var(--foreground))', fontWeight: 500 }}>{trainingPct}%</span>
+                    </div>
+                    <Progress value={trainingPct} className="h-1.5" />
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.8125rem', color: 'hsl(var(--muted-foreground))' }}>
-                    <HugeiconsIcon icon={UserIcon} size={14} style={{ flexShrink: 0 }} />
-                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{profile.trainerName}</span>
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginBottom: 4 }}>
+                      <span style={{ color: 'hsl(var(--muted-foreground))' }}>Urlaub</span>
+                      <span style={{ color: 'hsl(var(--foreground))' }}>{vacationUsed} / {vacationTotal} Tage</span>
+                    </div>
+                    <Progress value={(vacationUsed / vacationTotal) * 100} className="h-1.5" />
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem' }}>
+                    <span style={{ color: 'hsl(var(--muted-foreground))' }}>Kranktage</span>
+                    <span style={{ color: 'hsl(var(--foreground))' }}>{sickUsed} Tage</span>
                   </div>
                 </div>
               </>
@@ -367,36 +361,6 @@ export default function BerichtsheftDashboard() {
                 <Button size="sm" variant="outline" onClick={() => router.push('/setup')}>Einrichten</Button>
               </div>
             )}
-          </div>
-
-          {/* Training progress */}
-          <div style={card}>
-            <p style={sectionLabel}>Ausbildungsfortschritt</p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', marginBottom: 6 }}>
-                  <span style={{ color: 'hsl(var(--foreground))', fontWeight: 500 }}>
-                    Ausbildungsjahr {trainingYear} von {totalYears}
-                  </span>
-                  <span style={{ color: 'hsl(var(--muted-foreground))' }}>{trainingPct}%</span>
-                </div>
-                <Progress value={trainingPct} className="h-1.5" />
-              </div>
-              <div style={{ height: 1, background: 'hsl(var(--border))' }} />
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', marginBottom: 6 }}>
-                  <span style={{ color: 'hsl(var(--muted-foreground))' }}>Urlaub</span>
-                  <span style={{ color: 'hsl(var(--foreground))', fontWeight: 500 }}>{vacationUsed} / {vacationTotal} Tage</span>
-                </div>
-                <Progress value={(vacationUsed / vacationTotal) * 100} className="h-1.5" />
-              </div>
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem' }}>
-                  <span style={{ color: 'hsl(var(--muted-foreground))' }}>Kranktage</span>
-                  <span style={{ color: 'hsl(var(--foreground))', fontWeight: 500 }}>{sickUsed} Tage</span>
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* Mini calendar */}

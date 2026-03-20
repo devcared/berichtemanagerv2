@@ -86,7 +86,7 @@ export default function KalenderPage() {
   }, [currentMonth, days.length])
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', flex: 1, padding: 'clamp(1rem, 3vw, 1.5rem)', gap: '1.25rem', fontFamily: '"Google Sans","Roboto",-apple-system,sans-serif' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', flex: 1, padding: 'clamp(0.875rem, 2.5vw, 1.25rem)', gap: '1rem', fontFamily: '"Google Sans","Roboto",-apple-system,sans-serif' }}>
 
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>

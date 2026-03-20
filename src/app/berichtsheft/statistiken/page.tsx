@@ -100,7 +100,7 @@ export default function StatistikenPage() {
   }
 
   return (
-    <div style={{ padding: 'clamp(1rem, 3vw, 1.5rem)', display: 'flex', flexDirection: 'column', gap: '1.25rem', fontFamily: '"Google Sans","Roboto",-apple-system,sans-serif' }}>
+    <div style={{ padding: 'clamp(0.875rem, 2.5vw, 1.25rem)', display: 'flex', flexDirection: 'column', gap: '1rem', fontFamily: '"Google Sans","Roboto",-apple-system,sans-serif' }}>
 
       {/* Header */}
       <div>
@@ -109,7 +109,7 @@ export default function StatistikenPage() {
       </div>
 
       {/* ── Top stat grid ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '0.75rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '0.5rem' }}>
         {[
           { value: stats.total,       label: 'Berichte gesamt',    color: 'hsl(var(--foreground))' },
           { value: stats.approved,    label: 'Freigegeben',        color: '#22c55e' },
@@ -120,9 +120,9 @@ export default function StatistikenPage() {
           { value: stats.sickDays,    label: 'Kranktage',          color: '#ef4444' },
           { value: missingWeeks.length, label: 'Fehlende Wochen',  color: '#f97316' },
         ].map(({ value, label, color }) => (
-          <div key={label} style={{ ...card, textAlign: 'center', padding: '1rem' }}>
-            <div style={{ fontSize: '1.75rem', fontWeight: 700, color, lineHeight: 1 }}>{value}</div>
-            <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', marginTop: 4 }}>{label}</div>
+          <div key={label} style={{ ...card, textAlign: 'center', padding: '0.75rem 0.625rem' }}>
+            <div style={{ fontSize: '1.5rem', fontWeight: 700, color, lineHeight: 1 }}>{value}</div>
+            <div style={{ fontSize: '0.6875rem', color: 'hsl(var(--muted-foreground))', marginTop: 3 }}>{label}</div>
           </div>
         ))}
       </div>

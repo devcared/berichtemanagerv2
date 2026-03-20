@@ -246,15 +246,15 @@ export default function AdminCompaniesPage() {
   return (
     <div className="flex flex-col min-h-full bg-background" style={{ fontFamily: '"Google Sans","Roboto",-apple-system,"Segoe UI",sans-serif' }}>
       {/* Header */}
-      <div className="border-b border-border bg-card px-3 sm:px-6 py-4 sm:py-6">
+      <div className="border-b border-border bg-card px-3 sm:px-6 py-3 sm:py-4">
         <div className="max-w-5xl mx-auto flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(66,133,244,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <HugeiconsIcon icon={Building01Icon} size={20} style={{ color: '#4285f4' }} />
+          <div className="flex items-center gap-2.5">
+            <div style={{ width: 34, height: 34, borderRadius: 10, background: 'rgba(66,133,244,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <HugeiconsIcon icon={Building01Icon} size={17} style={{ color: '#4285f4' }} />
             </div>
             <div>
-              <h1 className="text-lg font-semibold text-foreground">Unternehmen verwalten</h1>
-              <p className="text-xs text-muted-foreground">Unternehmensprofile und Nutzerzuweisungen</p>
+              <h1 className="text-base font-semibold text-foreground leading-tight">Unternehmen verwalten</h1>
+              <p className="text-xs text-muted-foreground">Profile und Nutzerzuweisungen</p>
             </div>
           </div>
           <Button

@@ -185,7 +185,7 @@ export default function AusbilderPage() {
   }
 
   return (
-    <div style={{ padding: 'clamp(1rem, 3vw, 1.5rem)', display: 'flex', flexDirection: 'column', gap: '1.25rem', fontFamily: '"Google Sans","Roboto",-apple-system,sans-serif' }}>
+    <div style={{ padding: 'clamp(0.875rem, 2.5vw, 1.25rem)', display: 'flex', flexDirection: 'column', gap: '1rem', fontFamily: '"Google Sans","Roboto",-apple-system,sans-serif' }}>
 
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
@@ -206,17 +206,17 @@ export default function AusbilderPage() {
         </div>
       </div>
 
-      {/* ── Overview stat cards ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '0.75rem' }}>
+      {/* ── Overview stat strip ── */}
+      <div style={{ ...card, padding: '0.625rem 0', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)' }}>
         {[
           { value: counts.pending,        label: 'Offen',        color: '#3b82f6' },
           { value: counts.needs_revision, label: 'Überarbeitung', color: '#ef4444' },
           { value: counts.approved,       label: 'Freigegeben',  color: '#22c55e' },
           { value: counts.all,            label: 'Gesamt',       color: 'hsl(var(--foreground))' },
-        ].map(({ value, label, color }) => (
-          <div key={label} style={{ ...card, textAlign: 'center', padding: '1rem' }}>
-            <div style={{ fontSize: '1.75rem', fontWeight: 700, color, lineHeight: 1 }}>{value}</div>
-            <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', marginTop: 4 }}>{label}</div>
+        ].map(({ value, label, color }, i, arr) => (
+          <div key={label} style={{ textAlign: 'center', padding: '0.5rem 0.75rem', borderRight: i < arr.length - 1 ? '1px solid hsl(var(--border))' : 'none' }}>
+            <div style={{ fontSize: '1.375rem', fontWeight: 700, color, lineHeight: 1 }}>{value}</div>
+            <div style={{ fontSize: '0.6875rem', color: 'hsl(var(--muted-foreground))', marginTop: 3 }}>{label}</div>
           </div>
         ))}
       </div>

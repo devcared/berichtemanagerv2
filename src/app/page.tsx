@@ -160,19 +160,19 @@ export default function AppHome() {
         )}
 
         {/* Greeting */}
-        <div style={{ paddingTop: 'clamp(2rem, 5vw, 3.5rem)', paddingBottom: '2rem' }}>
-          <h1 style={{ fontSize: 'clamp(1.5rem, 3.5vw, 2rem)', fontWeight: 400, lineHeight: 1.2, marginBottom: '0.25rem', letterSpacing: '-0.01em', color: 'hsl(var(--foreground))' }}>
+        <div style={{ paddingTop: '1.25rem', paddingBottom: '1rem' }}>
+          <h1 style={{ fontSize: 'clamp(1.25rem, 3vw, 1.625rem)', fontWeight: 400, lineHeight: 1.2, marginBottom: '0.2rem', letterSpacing: '-0.01em', color: 'hsl(var(--foreground))' }}>
             {greeting}
           </h1>
-          <p style={{ fontSize: '0.9375rem', color: 'hsl(var(--muted-foreground))' }}>{todayLabel}</p>
+          <p style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>{todayLabel}</p>
         </div>
 
         {/* ── Enabled modules ── */}
-        <section style={{ marginBottom: '2.5rem' }}>
-          <p style={{ fontSize: '0.6875rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'hsl(var(--muted-foreground))', marginBottom: '0.875rem' }}>
+        <section style={{ marginBottom: '1.5rem' }}>
+          <p style={{ fontSize: '0.6875rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>
             Deine Module
           </p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '0.75rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '0.625rem' }}>
             {enabledModules.map(m => {
               const Icon = iconMap[m.icon]
               return (
@@ -180,8 +180,8 @@ export default function AppHome() {
                   key={m.id}
                   onClick={() => router.push(m.routePath)}
                   style={{
-                    display: 'flex', alignItems: 'flex-start', gap: 14,
-                    padding: '1rem 1.125rem', borderRadius: 12,
+                    display: 'flex', alignItems: 'center', gap: 12,
+                    padding: '0.75rem 1rem', borderRadius: 10,
                     border: '1px solid hsl(var(--border))',
                     background: 'hsl(var(--card))',
                     cursor: 'pointer', textAlign: 'left',
@@ -192,15 +192,15 @@ export default function AppHome() {
                   onMouseLeave={e => { e.currentTarget.style.background = 'hsl(var(--card))'; e.currentTarget.style.borderColor = 'hsl(var(--border))' }}
                 >
                   {Icon && (
-                    <div style={{ width: 44, height: 44, borderRadius: 10, background: m.accentColor + '18', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <HugeiconsIcon icon={Icon} size={22} style={{ color: m.accentColor }} />
+                    <div style={{ width: 38, height: 38, borderRadius: 9, background: m.accentColor + '18', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <HugeiconsIcon icon={Icon} size={19} style={{ color: m.accentColor }} />
                     </div>
                   )}
-                  <div style={{ flex: 1, minWidth: 0, paddingTop: 2 }}>
-                    <div style={{ fontSize: '0.9375rem', fontWeight: 500, color: 'hsl(var(--foreground))', marginBottom: '0.25rem' }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: '0.875rem', fontWeight: 500, color: 'hsl(var(--foreground))', marginBottom: '0.15rem' }}>
                       {m.title}
                     </div>
-                    <div style={{ fontSize: '0.8125rem', color: 'hsl(var(--muted-foreground))', lineHeight: 1.4 }}>
+                    <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', lineHeight: 1.35, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {m.description}
                     </div>
                   </div>
@@ -212,11 +212,11 @@ export default function AppHome() {
 
         {/* ── Admin modules ── */}
         {adminModules.length > 0 && (
-          <section style={{ marginBottom: '2.5rem' }}>
-            <p style={{ fontSize: '0.6875rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'hsl(var(--muted-foreground))', marginBottom: '0.875rem' }}>
+          <section style={{ marginBottom: '1.5rem' }}>
+            <p style={{ fontSize: '0.6875rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>
               Administration
             </p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '0.75rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '0.625rem' }}>
               {adminModules.map(m => {
                 const Icon = iconMap[m.icon]
                 return (
@@ -224,8 +224,8 @@ export default function AppHome() {
                     key={m.id}
                     onClick={() => router.push(m.routePath)}
                     style={{
-                      display: 'flex', alignItems: 'flex-start', gap: 14,
-                      padding: '1rem 1.125rem', borderRadius: 12,
+                      display: 'flex', alignItems: 'center', gap: 12,
+                      padding: '0.75rem 1rem', borderRadius: 10,
                       border: '1px solid hsl(var(--border))',
                       background: 'hsl(var(--card))',
                       cursor: 'pointer', textAlign: 'left',
@@ -236,13 +236,13 @@ export default function AppHome() {
                     onMouseLeave={e => (e.currentTarget.style.background = 'hsl(var(--card))')}
                   >
                     {Icon && (
-                      <div style={{ width: 44, height: 44, borderRadius: 10, background: m.accentColor + '18', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                        <HugeiconsIcon icon={Icon} size={22} style={{ color: m.accentColor }} />
+                      <div style={{ width: 38, height: 38, borderRadius: 9, background: m.accentColor + '18', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <HugeiconsIcon icon={Icon} size={19} style={{ color: m.accentColor }} />
                       </div>
                     )}
-                    <div style={{ flex: 1, minWidth: 0, paddingTop: 2 }}>
-                      <div style={{ fontSize: '0.9375rem', fontWeight: 500, color: 'hsl(var(--foreground))', marginBottom: '0.25rem' }}>{m.title}</div>
-                      <div style={{ fontSize: '0.8125rem', color: 'hsl(var(--muted-foreground))', lineHeight: 1.4 }}>{m.description}</div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: '0.875rem', fontWeight: 500, color: 'hsl(var(--foreground))', marginBottom: '0.15rem' }}>{m.title}</div>
+                      <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', lineHeight: 1.35, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.description}</div>
                     </div>
                   </button>
                 )
@@ -253,38 +253,26 @@ export default function AppHome() {
 
         {/* ── Coming soon modules ── */}
         {disabledModules.length > 0 && (
-          <section style={{ marginBottom: '3rem' }}>
-            <p style={{ fontSize: '0.6875rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'hsl(var(--muted-foreground))', marginBottom: '0.875rem' }}>
+          <section style={{ marginBottom: '2rem' }}>
+            <p style={{ fontSize: '0.6875rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'hsl(var(--muted-foreground))', marginBottom: '0.625rem' }}>
               Bald verfügbar
             </p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '0.75rem' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
               {disabledModules.map(m => {
                 const Icon = iconMap[m.icon]
                 return (
                   <div
                     key={m.id}
                     style={{
-                      display: 'flex', alignItems: 'flex-start', gap: 14,
-                      padding: '1rem 1.125rem', borderRadius: 12,
+                      display: 'inline-flex', alignItems: 'center', gap: 6,
+                      padding: '5px 12px', borderRadius: 9999,
                       border: '1px solid hsl(var(--border))',
                       background: 'hsl(var(--card))',
-                      opacity: 0.5,
+                      opacity: 0.55,
                     }}
                   >
-                    {Icon && (
-                      <div style={{ width: 44, height: 44, borderRadius: 10, background: 'hsl(var(--muted))', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                        <HugeiconsIcon icon={Icon} size={22} style={{ color: 'hsl(var(--muted-foreground))' }} />
-                      </div>
-                    )}
-                    <div style={{ flex: 1, minWidth: 0, paddingTop: 2 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: '0.25rem' }}>
-                        <span style={{ fontSize: '0.9375rem', fontWeight: 500, color: 'hsl(var(--foreground))' }}>{m.title}</span>
-                        <span style={{ fontSize: '0.625rem', fontWeight: 600, letterSpacing: '0.04em', padding: '2px 6px', borderRadius: 4, background: 'hsl(var(--muted))', color: 'hsl(var(--muted-foreground))', whiteSpace: 'nowrap' }}>
-                          Bald
-                        </span>
-                      </div>
-                      <div style={{ fontSize: '0.8125rem', color: 'hsl(var(--muted-foreground))', lineHeight: 1.4 }}>{m.description}</div>
-                    </div>
+                    {Icon && <HugeiconsIcon icon={Icon} size={13} style={{ color: 'hsl(var(--muted-foreground))' }} />}
+                    <span style={{ fontSize: '0.8125rem', color: 'hsl(var(--foreground))', whiteSpace: 'nowrap' }}>{m.title}</span>
                   </div>
                 )
               })}

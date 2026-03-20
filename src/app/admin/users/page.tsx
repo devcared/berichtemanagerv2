@@ -552,34 +552,31 @@ export default function AdminUsersPage() {
       )}
 
       {/* Header */}
-      <div className="border-b border-border bg-card px-3 sm:px-6 py-4 sm:py-6">
+      <div className="border-b border-border bg-card px-3 sm:px-6 py-3 sm:py-4">
         <div className="max-w-5xl mx-auto">
-          <div className="flex items-center gap-3 mb-4">
-            <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(66,133,244,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <HugeiconsIcon icon={UserGroup02Icon} size={20} style={{ color: '#4285f4' }} />
-            </div>
-            <div>
-              <h1 className="text-lg font-semibold text-foreground">Benutzerverwaltung</h1>
-              <p className="text-xs text-muted-foreground">Verwalte alle Nutzer, Rollen und Berechtigungen</p>
+          <div className="flex items-center justify-between gap-3 mb-3">
+            <div className="flex items-center gap-2.5">
+              <div style={{ width: 34, height: 34, borderRadius: 10, background: 'rgba(66,133,244,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <HugeiconsIcon icon={UserGroup02Icon} size={17} style={{ color: '#4285f4' }} />
+              </div>
+              <div>
+                <h1 className="text-base font-semibold text-foreground leading-tight">Benutzerverwaltung</h1>
+                <p className="text-xs text-muted-foreground">Nutzer, Rollen und Berechtigungen</p>
+              </div>
             </div>
           </div>
 
-          {/* Stats row */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {/* Stats strip */}
+          <div className="rounded-xl border border-border bg-background grid grid-cols-4 divide-x divide-border">
             {[
-              { label: 'Gesamt', value: profiles.length, color: '#4285f4', icon: UserGroup02Icon },
-              { label: 'Auszubildende', value: apprentices.length, color: '#fbbc04', icon: UserCircleIcon },
-              { label: 'Ausbilder', value: trainers.length, color: '#34a853', icon: CheckmarkBadge01Icon },
-              { label: 'Admins', value: admins.length, color: '#4285f4', icon: Shield01Icon },
+              { label: 'Gesamt', value: profiles.length, color: '#4285f4' },
+              { label: 'Auszubildende', value: apprentices.length, color: '#fbbc04' },
+              { label: 'Ausbilder', value: trainers.length, color: '#34a853' },
+              { label: 'Admins', value: admins.length, color: '#4285f4' },
             ].map(stat => (
-              <div key={stat.label} className="rounded-xl border border-border bg-background p-3 flex items-center gap-2.5">
-                <div style={{ width: 32, height: 32, borderRadius: 8, background: `${stat.color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <HugeiconsIcon icon={stat.icon} size={16} style={{ color: stat.color }} />
-                </div>
-                <div>
-                  <div className="text-lg font-bold text-foreground leading-none">{stat.value}</div>
-                  <div className="text-xs text-muted-foreground mt-0.5">{stat.label}</div>
-                </div>
+              <div key={stat.label} className="px-3 py-2 text-center">
+                <div className="text-base font-bold leading-none" style={{ color: stat.color }}>{stat.value}</div>
+                <div className="text-xs text-muted-foreground mt-0.5">{stat.label}</div>
               </div>
             ))}
           </div>
