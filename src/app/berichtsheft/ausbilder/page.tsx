@@ -11,9 +11,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { HugeiconsIcon } from '@hugeicons/react'
 import {
-  CheckmarkBadge01Icon, Alert01Icon, Clock01Icon, ArrowRight01Icon,
+  CheckmarkBadge01Icon, Alert01Icon,
   Search01Icon, Notification01Icon, UserMultiple02Icon,
-  CheckmarkCircle01Icon,
 } from '@hugeicons/core-free-icons'
 import type { ReportStatus } from '@/types'
 
@@ -186,40 +185,7 @@ export default function AusbilderPage() {
   }
 
   return (
-<<<<<<< HEAD
-    <div className="flex flex-col min-h-full bg-background">
-      {/* Hero Header */}
-      <div className="border-b border-border bg-card px-3 sm:px-6 py-4 sm:py-6">
-        <div className="max-w-5xl mx-auto">
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
-            <div className="flex items-center gap-4">
-              <div className="size-12 bg-primary rounded-xl flex items-center justify-center">
-                <HugeiconsIcon icon={CheckmarkBadge01Icon} size={24} className="text-primary-foreground" />
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground font-medium mb-0.5">Willkommen zurück,</p>
-                <h1 className="text-xl font-medium">
-                  {profile.firstName} {profile.lastName}
-                </h1>
-                <p className="text-sm text-muted-foreground mt-0.5">
-                  {format(new Date(), "EEEE, d. MMMM yyyy", { locale: de })} · Ausbilder-Dashboard
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs shrink-0"
-                onClick={() => router.push('/berichtsheft/ausbilder/verwaltung')}>
-                <HugeiconsIcon icon={UserMultiple02Icon} size={14} />
-                Verwaltung
-              </Button>
-              <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs shrink-0" onClick={loadReports}>
-                Aktualisieren
-              </Button>
-            </div>
-          </div>
-=======
     <div style={{ padding: 'clamp(1rem, 3vw, 1.5rem)', display: 'flex', flexDirection: 'column', gap: '1.25rem', fontFamily: '"Google Sans","Roboto",-apple-system,sans-serif' }}>
->>>>>>> c7e38c75d92a41da0e090cad901c0eb81b72169b
 
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
@@ -240,92 +206,6 @@ export default function AusbilderPage() {
         </div>
       </div>
 
-<<<<<<< HEAD
-      <div className="flex-1 px-3 sm:px-6 py-4 sm:py-6 max-w-5xl mx-auto w-full">
-        {/* Stats Row */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-          {[
-            {
-              key: 'submitted', label: 'Warten auf Prüfung',
-              value: counts.submitted, icon: Clock01Icon,
-              color: 'text-blue-500', bg: 'bg-blue-500/10', border: 'border-blue-500/20',
-            },
-            {
-              key: 'in_review', label: 'In Prüfung',
-              value: counts.in_review, icon: FilterHorizontalIcon,
-              color: 'text-orange-500', bg: 'bg-orange-500/10', border: 'border-orange-500/20',
-            },
-            {
-              key: 'needs_revision', label: 'Überarbeitung nötig',
-              value: counts.needs_revision, icon: Alert01Icon,
-              color: 'text-red-500', bg: 'bg-red-500/10', border: 'border-red-500/20',
-            },
-            {
-              key: 'approved', label: 'Freigegeben',
-              value: counts.approved, icon: CheckmarkCircle01Icon,
-              color: 'text-green-500', bg: 'bg-green-500/10', border: 'border-green-500/20',
-            },
-          ].map(s => (
-            <button
-              key={s.key}
-              onClick={() => setActiveTab(s.key)}
-              className={cn(
-                'rounded-xl border p-4 text-left transition-colors',
-                activeTab === s.key
-                  ? `${s.border} ${s.bg}`
-                  : 'border-border bg-card hover:border-border/80'
-              )}
-            >
-              <div className={cn('size-9 rounded-xl flex items-center justify-center mb-3', s.bg, s.color)}>
-                <HugeiconsIcon icon={s.icon} size={18} />
-              </div>
-              <div className={cn('text-3xl font-bold tabular-nums', activeTab === s.key ? s.color : '')}>
-                {s.value}
-              </div>
-              <div className="text-xs text-muted-foreground mt-1 leading-tight">{s.label}</div>
-            </button>
-          ))}
-        </div>
-
-        {/* Search + Tabs */}
-        <Card className="border-border overflow-hidden">
-          {/* Toolbar */}
-          <div className="border-b border-border px-3 sm:px-4 py-2.5 sm:py-3 flex items-center gap-2 sm:gap-3">
-            <div className="relative flex-1 max-w-xs">
-              <HugeiconsIcon
-                icon={Search01Icon}
-                size={14}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-              />
-              <Input
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                placeholder="Azubi suchen…"
-                className="h-8 pl-8 text-xs bg-background border-border"
-              />
-            </div>
-            <div className="flex items-center gap-1 ml-auto">
-              {([
-                { key: 'submitted' as SortKey, label: 'Datum' },
-                { key: 'name' as SortKey, label: 'Name' },
-                { key: 'week' as SortKey, label: 'KW' },
-              ] as const).map(s => (
-                <button
-                  key={s.key}
-                  onClick={() => toggleSort(s.key)}
-                  className={cn(
-                    'flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium transition-colors',
-                    sortKey === s.key
-                      ? 'bg-primary/10 text-primary'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-                  )}
-                >
-                  {s.label}
-                  {sortKey === s.key && <HugeiconsIcon icon={SortIcon} size={11} />}
-                </button>
-              ))}
-            </div>
-=======
       {/* ── Overview stat cards ── */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '0.75rem' }}>
         {[
@@ -337,7 +217,6 @@ export default function AusbilderPage() {
           <div key={label} style={{ ...card, textAlign: 'center', padding: '1rem' }}>
             <div style={{ fontSize: '1.75rem', fontWeight: 700, color, lineHeight: 1 }}>{value}</div>
             <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', marginTop: 4 }}>{label}</div>
->>>>>>> c7e38c75d92a41da0e090cad901c0eb81b72169b
           </div>
         ))}
       </div>

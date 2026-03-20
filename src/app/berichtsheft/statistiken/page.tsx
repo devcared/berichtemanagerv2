@@ -104,13 +104,8 @@ export default function StatistikenPage() {
 
       {/* Header */}
       <div>
-<<<<<<< HEAD
-        <h1 className="text-xl font-medium text-foreground">Statistiken</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">Übersicht deines Ausbildungsfortschritts</p>
-=======
         <h1 style={{ fontSize: '1.25rem', fontWeight: 500, color: 'hsl(var(--foreground))', marginBottom: 2 }}>Statistiken</h1>
         <p style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>Auswertung deines Ausbildungsfortschritts</p>
->>>>>>> c7e38c75d92a41da0e090cad901c0eb81b72169b
       </div>
 
       {/* ── Top stat grid ── */}

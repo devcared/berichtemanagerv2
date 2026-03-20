@@ -91,15 +91,10 @@ export default function KalenderPage() {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
         <div>
-<<<<<<< HEAD
-          <h1 className="text-xl font-medium text-foreground">Kalender</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Übersicht aller Berichtswochen</p>
-=======
           <h1 style={{ fontSize: '1.25rem', fontWeight: 500, color: 'hsl(var(--foreground))', marginBottom: 2 }}>Kalender</h1>
           <p style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>
             Alle Berichtswochen auf einen Blick
           </p>
->>>>>>> c7e38c75d92a41da0e090cad901c0eb81b72169b
         </div>
         <Button
           onClick={() => navigateToWeek(today)}

@@ -204,25 +204,8 @@ export default function BerichtsheftDashboard() {
   }
 
   return (
-<<<<<<< HEAD
-    <div className="flex flex-1 flex-col gap-4 sm:gap-6 p-3 sm:p-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-medium text-foreground">Dashboard</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            {format(new Date(), "EEEE, d. MMMM yyyy", { locale: de })}
-          </p>
-        </div>
-        <Button className="self-start sm:self-auto" onClick={() => router.push(`/berichtsheft/editor/${currentWeekId}`)}>
-          <HugeiconsIcon icon={Add01Icon} size={16} data-icon="inline-start" />
-          <span className="hidden sm:inline">Aktuelle KW ausfüllen</span>
-          <span className="sm:hidden">KW ausfüllen</span>
-        </Button>
-      </div>
-=======
     <div style={{ padding: 'clamp(1rem, 3vw, 1.5rem)', display: 'flex', flexDirection: 'column', gap: '1.25rem', flex: 1, fontFamily: '"Google Sans","Roboto",-apple-system,sans-serif' }}>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.25rem' }} className="lg:grid-cols-[1fr_300px]">
->>>>>>> c7e38c75d92a41da0e090cad901c0eb81b72169b
 
         {/* ══ LEFT COLUMN ══ */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', minWidth: 0 }}>
