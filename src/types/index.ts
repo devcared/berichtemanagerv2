@@ -29,6 +29,8 @@ export interface TrainingProfile {
   createdAt: string
   updatedAt: string
   companyId?: string
+  pendingCompanyId?: string
+  pendingCompanyName?: string
 }
 
 export interface Company {

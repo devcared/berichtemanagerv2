@@ -8,6 +8,7 @@ export function useProfile() {
   const [profile, setProfile] = useState<TrainingProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [refreshKey, setRefreshKey] = useState(0)
   const supabase = createClient()
   const { user } = useAuth()
 
@@ -52,6 +53,8 @@ export function useProfile() {
               createdAt: data.created_at,
               updatedAt: data.updated_at,
               companyId: data.company_id ?? undefined,
+              pendingCompanyId: data.pending_company_id ?? undefined,
+              pendingCompanyName: data.pending_company_name ?? undefined,
             })
           } else {
             setProfile(null)
@@ -70,7 +73,7 @@ export function useProfile() {
     load()
     return () => { cancelled = true }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user])
+  }, [user, refreshKey])
 
   const saveProfile = useCallback(async (p: TrainingProfile) => {
     if (!user) throw new Error('Nutzer nicht angemeldet')
@@ -111,5 +114,9 @@ export function useProfile() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
 
-  return { profile, saveProfile, loading, error }
+  const refreshProfile = useCallback(() => {
+    setRefreshKey(k => k + 1)
+  }, [])
+
+  return { profile, saveProfile, refreshProfile, loading, error }
 }

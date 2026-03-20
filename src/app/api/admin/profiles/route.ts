@@ -15,7 +15,7 @@ export async function GET() {
     // Alle Profile laden
     const { data: profiles, error: profilesError } = await admin
       .from('profiles')
-      .select('id, first_name, last_name, occupation, company_name, role, created_at')
+      .select('id, first_name, last_name, occupation, company_name, role, created_at, company_id, pending_company_id, pending_company_name')
       .order('last_name', { ascending: true })
 
     if (profilesError) throw profilesError
@@ -51,6 +51,9 @@ export async function GET() {
         role: p.role,
         email: emailMap[p.id] ?? '',
         createdAt: p.created_at,
+        companyId: p.company_id ?? null,
+        pendingCompanyId: p.pending_company_id ?? null,
+        pendingCompanyName: p.pending_company_name ?? null,
         stats: {
           total: userReports.length,
           approved: userReports.filter(r => r.status === 'approved').length,

@@ -8,6 +8,7 @@ import { useTheme } from '@/contexts/ThemeContext'
 import { useBranding } from '@/hooks/use-branding'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { Logout01Icon, ChevronLeft, ChevronRight } from '@hugeicons/core-free-icons'
+import CompanyInvitationModal from '@/components/company-invitation-modal'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface NavItem { label: string; href: string; icon: any; trainerOnly?: boolean; adminOnly?: boolean }
@@ -143,11 +144,6 @@ export default function DashboardLayout({ children, sections, subtitle }: Props)
           gap: 4,
         }}>
           <button
-<<<<<<< HEAD
-            onClick={() => isCollapsed && !forMobile ? setCollapsed(false) : router.push('/')}
-            title={isCollapsed ? 'Sidebar öffnen' : 'Zur Übersicht'}
-            style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'transparent', border: 'none', cursor: 'pointer', borderRadius: 8, padding: '0.25rem 0.375rem', transition: 'background 120ms', fontFamily: 'inherit', overflow: 'hidden', flex: isCollapsed ? undefined : 1, minWidth: 0 }}
-=======
             onClick={() => router.push('/')}
             style={{
               display: 'flex', alignItems: 'center', gap: 8,
@@ -156,7 +152,6 @@ export default function DashboardLayout({ children, sections, subtitle }: Props)
               transition: 'background 150ms', fontFamily: 'inherit',
               overflow: 'hidden', flex: isCollapsed ? undefined : 1, minWidth: 0,
             }}
->>>>>>> c7e38c75d92a41da0e090cad901c0eb81b72169b
             onMouseEnter={e => (e.currentTarget.style.background = hoverBg)}
             onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
           >
@@ -182,27 +177,16 @@ export default function DashboardLayout({ children, sections, subtitle }: Props)
             )}
           </button>
 
-<<<<<<< HEAD
-          {/* Collapse toggle in logo row — Google Workspace style */}
-=======
->>>>>>> c7e38c75d92a41da0e090cad901c0eb81b72169b
+          {/* Collapse toggle — Google Workspace style */}
           {!isCollapsed && !forMobile && (
             <button
               onClick={() => setCollapsed(true)}
               title="Sidebar minimieren"
-<<<<<<< HEAD
-              style={iconBtn({ width: 28, height: 28, borderRadius: 6, flexShrink: 0 })}
-              onMouseEnter={e => (e.currentTarget.style.background = hoverBg)}
-              onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-            >
-              <ChevronLeft />
-=======
               style={{ width: 28, height: 28, border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'hsl(var(--muted-foreground))', flexShrink: 0, transition: 'background 150ms' }}
               onMouseEnter={e => (e.currentTarget.style.background = hoverBg)}
               onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
             >
               <HugeiconsIcon icon={ChevronLeft} size={15} />
->>>>>>> c7e38c75d92a41da0e090cad901c0eb81b72169b
             </button>
           )}
         </div>
@@ -358,13 +342,8 @@ export default function DashboardLayout({ children, sections, subtitle }: Props)
                   <div style={{ fontSize: '0.6875rem', color: 'hsl(var(--muted-foreground))', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {roleLabel}
                   </div>
-<<<<<<< HEAD
-                </button>
-              </div>
-=======
                 </div>
               </button>
->>>>>>> c7e38c75d92a41da0e090cad901c0eb81b72169b
             )}
           </div>
         </div>
@@ -475,6 +454,9 @@ export default function DashboardLayout({ children, sections, subtitle }: Props)
           <span style={{ fontSize: '0.5625rem', fontWeight: 500, letterSpacing: '0.03em', lineHeight: 1 }}>Profil</span>
         </button>
       </nav>
+
+      {/* Company invitation modal — shown when user has a pending company assignment */}
+      <CompanyInvitationModal />
     </div>
   )
 }

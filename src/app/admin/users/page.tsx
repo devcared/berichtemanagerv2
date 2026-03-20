@@ -24,7 +24,7 @@ import {
   Shield01Icon, Mail01Icon, Edit01Icon, Delete01Icon, LockPasswordIcon,
   UserAdd01Icon, UserMinus01Icon, UserCheck01Icon, CheckmarkCircle01Icon,
   Alert01Icon, Search01Icon, File01Icon, MoreVerticalIcon, Building01Icon,
-  OfficeChairIcon, ArrowLeft01Icon,
+  OfficeChairIcon, ArrowLeft01Icon, Cancel01Icon,
 } from '@hugeicons/core-free-icons'
 import { cn } from '@/lib/utils'
 
@@ -37,6 +37,8 @@ interface ProfileWithStats {
   role: 'apprentice' | 'trainer' | 'admin'
   email: string
   createdAt: string
+  companyId?: string | null
+  pendingCompanyId?: string | null
   stats: {
     total: number
     approved: number
@@ -44,6 +46,12 @@ interface ProfileWithStats {
     needsRevision: number
     lastSubmissionAt: string | null
   }
+}
+
+interface CompanyOption {
+  id: string
+  name: string
+  accent_color: string
 }
 
 type ActiveTab = 'apprentices' | 'trainers' | 'admins' | 'invite'
@@ -76,6 +84,8 @@ function UserCard({
   onRoleChange,
   onDelete,
   onResetPassword,
+  onAssignCompany,
+  onUnassignCompany,
 }: {
   user: ProfileWithStats
   currentUserId: string
@@ -83,6 +93,8 @@ function UserCard({
   onRoleChange: (u: ProfileWithStats, role: 'apprentice' | 'trainer' | 'admin') => void
   onDelete: (u: ProfileWithStats) => void
   onResetPassword: (email: string) => void
+  onAssignCompany: (u: ProfileWithStats) => void
+  onUnassignCompany: (u: ProfileWithStats) => void
 }) {
   const isSelf = user.id === currentUserId
   const avatarColor = user.role === 'admin' ? '#4285f4' : user.role === 'trainer' ? '#34a853' : '#fbbc04'
@@ -127,6 +139,12 @@ function UserCard({
                   <span className="text-xs text-muted-foreground truncate">{user.companyName}</span>
                 </div>
               )}
+              {user.pendingCompanyId && !user.companyId && (
+                <div className="flex items-center gap-1 mt-0.5">
+                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#fbbc04', flexShrink: 0 }} />
+                  <span className="text-xs truncate" style={{ color: '#b38600' }}>Einladung ausstehend</span>
+                </div>
+              )}
             </div>
 
             {/* Actions dropdown */}
@@ -145,6 +163,18 @@ function UserCard({
                   <DropdownMenuItem onClick={() => onResetPassword(user.email)}>
                     <HugeiconsIcon icon={LockPasswordIcon} size={14} className="mr-2" />
                     Passwort zurücksetzen
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator />
+                {/* Company assignment */}
+                <DropdownMenuItem onClick={() => onAssignCompany(user)}>
+                  <HugeiconsIcon icon={Building01Icon} size={14} className="mr-2" />
+                  Unternehmen zuweisen
+                </DropdownMenuItem>
+                {(user.companyId || user.pendingCompanyId) && (
+                  <DropdownMenuItem onClick={() => onUnassignCompany(user)} className="text-destructive focus:text-destructive">
+                    <HugeiconsIcon icon={Cancel01Icon} size={14} className="mr-2" />
+                    Zuweisung aufheben
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuSeparator />
@@ -244,6 +274,13 @@ export default function AdminUsersPage() {
   const [resetSuccess, setResetSuccess] = useState('')
   const [resetError, setResetError] = useState('')
 
+  // Company assignment
+  const [companies, setCompanies] = useState<CompanyOption[]>([])
+  const [assignCompanyUser, setAssignCompanyUser] = useState<ProfileWithStats | null>(null)
+  const [assignCompanyId, setAssignCompanyId] = useState<string>('')
+  const [isAssigningCompany, setIsAssigningCompany] = useState(false)
+  const [assignCompanyError, setAssignCompanyError] = useState('')
+
   // Invite
   const [inviteEmail, setInviteEmail] = useState('')
   const [inviteRole, setInviteRole] = useState<'apprentice' | 'trainer' | 'admin'>('apprentice')
@@ -255,10 +292,19 @@ export default function AdminUsersPage() {
     setLoading(true)
     setLoadError('')
     try {
-      const res = await fetch('/api/admin/profiles')
-      const json = await res.json()
-      if (!res.ok) throw new Error(json.error ?? 'Fehler beim Laden')
-      setProfiles(json.profiles)
+      const [profilesRes, companiesRes] = await Promise.all([
+        fetch('/api/admin/profiles'),
+        fetch('/api/admin/companies'),
+      ])
+      const profilesJson = await profilesRes.json()
+      const companiesJson = await companiesRes.json()
+      if (!profilesRes.ok) throw new Error(profilesJson.error ?? 'Fehler beim Laden')
+      setProfiles(profilesJson.profiles)
+      if (companiesRes.ok) {
+        setCompanies((companiesJson.companies ?? []).map((c: { id: string; name: string; accent_color: string }) => ({
+          id: c.id, name: c.name, accent_color: c.accent_color,
+        })))
+      }
     } catch (err) {
       setLoadError(err instanceof Error ? err.message : 'Unbekannter Fehler')
     } finally {
@@ -358,6 +404,51 @@ export default function AdminUsersPage() {
       setResetError(err instanceof Error ? err.message : 'Fehler.')
       setTimeout(() => setResetError(''), 5000)
     }
+  }
+
+  function openAssignCompany(user: ProfileWithStats) {
+    setAssignCompanyUser(user)
+    setAssignCompanyId(companies[0]?.id ?? '')
+    setAssignCompanyError('')
+  }
+
+  async function handleAssignCompany() {
+    if (!assignCompanyUser || !assignCompanyId) return
+    setIsAssigningCompany(true)
+    setAssignCompanyError('')
+    const company = companies.find(c => c.id === assignCompanyId)
+    try {
+      const res = await fetch('/api/admin/companies/assign', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: assignCompanyUser.id, companyId: assignCompanyId, companyName: company?.name ?? null }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+      setProfiles(prev => prev.map(p =>
+        p.id === assignCompanyUser.id
+          ? { ...p, pendingCompanyId: assignCompanyId }
+          : p
+      ))
+      setAssignCompanyUser(null)
+    } catch (err) {
+      setAssignCompanyError(err instanceof Error ? err.message : 'Fehler.')
+    } finally {
+      setIsAssigningCompany(false)
+    }
+  }
+
+  async function handleUnassignCompany(user: ProfileWithStats) {
+    try {
+      await fetch('/api/admin/companies/assign', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id, companyId: null }),
+      })
+      setProfiles(prev => prev.map(p =>
+        p.id === user.id ? { ...p, companyId: null, pendingCompanyId: null } : p
+      ))
+    } catch { /* ignore */ }
   }
 
   async function handleInvite() {
@@ -580,6 +671,8 @@ export default function AdminUsersPage() {
                       onRoleChange={(u, role) => setConfirmRoleChange({ user: u, newRole: role })}
                       onDelete={u => setConfirmDelete(u)}
                       onResetPassword={handlePasswordReset}
+                      onAssignCompany={openAssignCompany}
+                      onUnassignCompany={handleUnassignCompany}
                     />
                   ))}
                 </div>
@@ -722,6 +815,57 @@ export default function AdminUsersPage() {
             >
               {isChangingRole && <div className="size-3.5 rounded-full border-2 border-white/30 border-t-white animate-spin mr-2" />}
               Rolle ändern
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Company assignment dialog */}
+      <AlertDialog open={!!assignCompanyUser} onOpenChange={open => !open && setAssignCompanyUser(null)}>
+        <AlertDialogContent className="max-w-sm">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Unternehmen zuweisen</AlertDialogTitle>
+            <AlertDialogDescription>
+              {assignCompanyUser && (
+                <>Wähle ein Unternehmen für <strong>{assignCompanyUser.firstName} {assignCompanyUser.lastName}</strong>. Der Nutzer erhält eine Einladung und muss diese bestätigen.</>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="py-2">
+            {companies.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Keine Unternehmen vorhanden. Erstelle zuerst ein Unternehmen.</p>
+            ) : (
+              <Select value={assignCompanyId} onValueChange={setAssignCompanyId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Unternehmen wählen…" />
+                </SelectTrigger>
+                <SelectContent>
+                  {companies.map(c => (
+                    <SelectItem key={c.id} value={c.id}>
+                      <div className="flex items-center gap-2">
+                        <div style={{ width: 10, height: 10, borderRadius: 3, background: c.accent_color, flexShrink: 0 }} />
+                        {c.name}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            {assignCompanyError && (
+              <div className="flex items-center gap-2 rounded-lg bg-destructive/10 border border-destructive/20 px-3 py-2 text-xs text-destructive mt-3">
+                <HugeiconsIcon icon={Alert01Icon} size={13} />
+                {assignCompanyError}
+              </div>
+            )}
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isAssigningCompany}>Abbrechen</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleAssignCompany}
+              disabled={isAssigningCompany || companies.length === 0 || !assignCompanyId}
+            >
+              {isAssigningCompany && <div className="size-3.5 rounded-full border-2 border-white/30 border-t-white animate-spin mr-2" />}
+              Einladung senden
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

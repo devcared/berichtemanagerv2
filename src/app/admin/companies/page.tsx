@@ -41,6 +41,7 @@ interface ProfileData {
   role: string
   email: string
   companyId: string | null
+  pendingCompanyId?: string | null
 }
 
 interface FormState {
@@ -95,10 +96,11 @@ export default function AdminCompaniesPage() {
           (profilesJson.profiles ?? []).map((p: {
             id: string; firstName: string; lastName: string;
             occupation: string; companyName: string; role: string;
-            email: string; companyId?: string | null
+            email: string; companyId?: string | null; pendingCompanyId?: string | null
           }) => ({
             ...p,
             companyId: p.companyId ?? null,
+            pendingCompanyId: p.pendingCompanyId ?? null,
           }))
         )
       }
@@ -187,21 +189,17 @@ export default function AdminCompaniesPage() {
     } catch { /* ignore */ }
   }
 
-  async function handleAssign(userId: string, companyId: string | null) {
+  async function handleAssign(userId: string, companyId: string | null, companyName?: string | null) {
     setAssigning(userId)
     try {
       const res = await fetch('/api/admin/companies/assign', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, companyId }),
+        body: JSON.stringify({ userId, companyId, companyName: companyName ?? null }),
       })
       if (res.ok) {
-        setAllProfiles(prev =>
-          prev.map(p => p.id === userId ? { ...p, companyId } : p)
-        )
-        // Update company user counts
         await loadData()
-        showSuccess(companyId ? 'Nutzer zugewiesen' : 'Zuweisung aufgehoben')
+        showSuccess(companyId ? 'Einladung gesendet' : 'Zuweisung aufgehoben')
       }
     } catch { /* ignore */ } finally {
       setAssigning(null)
@@ -243,7 +241,7 @@ export default function AdminCompaniesPage() {
     )
   }
 
-  const unassignedProfiles = allProfiles.filter(p => !p.companyId)
+  const unassignedProfiles = allProfiles.filter(p => !p.companyId && !p.pendingCompanyId)
 
   return (
     <div className="flex flex-col min-h-full bg-background" style={{ fontFamily: '"Google Sans","Roboto",-apple-system,"Segoe UI",sans-serif' }}>
@@ -492,6 +490,7 @@ export default function AdminCompaniesPage() {
               {companies.map(c => {
                 const isExpanded = expandedCompany === c.id
                 const assignedUsers = allProfiles.filter(p => p.companyId === c.id)
+                const pendingUsers = allProfiles.filter(p => p.pendingCompanyId === c.id)
                 return (
                   <Card
                     key={c.id}
@@ -607,7 +606,7 @@ export default function AdminCompaniesPage() {
                           <p style={{ fontSize: '0.6875rem', fontWeight: 600, color: 'hsl(var(--muted-foreground))', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>
                             Zugewiesene Nutzer
                           </p>
-                          {assignedUsers.length === 0 ? (
+                          {assignedUsers.length === 0 && pendingUsers.length === 0 ? (
                             <p style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', marginBottom: 8 }}>
                               Noch keine Nutzer zugewiesen.
                             </p>
@@ -635,6 +634,29 @@ export default function AdminCompaniesPage() {
                                   </div>
                                 )
                               })}
+                              {pendingUsers.map(p => {
+                                const initials = `${p.firstName?.[0] ?? ''}${p.lastName?.[0] ?? ''}`.toUpperCase()
+                                return (
+                                  <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 8px', borderRadius: 8, background: 'rgba(251,188,4,0.08)', border: '1px solid rgba(251,188,4,0.25)' }}>
+                                    <div style={{ width: 26, height: 26, borderRadius: '50%', background: 'rgba(251,188,4,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.625rem', fontWeight: 700, color: '#b38600', flexShrink: 0 }}>
+                                      {initials}
+                                    </div>
+                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                      <div style={{ fontSize: '0.75rem', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                        {p.firstName} {p.lastName}
+                                      </div>
+                                      <div style={{ fontSize: '0.625rem', color: '#b38600', fontWeight: 500 }}>Einladung ausstehend</div>
+                                    </div>
+                                    <button
+                                      onClick={() => handleAssign(p.id, null)}
+                                      disabled={assigning === p.id}
+                                      style={{ fontSize: '0.6875rem', color: '#ea4335', background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px', borderRadius: 6, flexShrink: 0 }}
+                                    >
+                                      {assigning === p.id ? '…' : 'Zurückziehen'}
+                                    </button>
+                                  </div>
+                                )
+                              })}
                             </div>
                           )}
 
@@ -658,11 +680,11 @@ export default function AdminCompaniesPage() {
                                         </div>
                                       </div>
                                       <button
-                                        onClick={() => handleAssign(p.id, c.id)}
+                                        onClick={() => handleAssign(p.id, c.id, c.name)}
                                         disabled={assigning === p.id}
                                         style={{ fontSize: '0.6875rem', color: c.accent_color, background: c.accent_color + '15', border: `1px solid ${c.accent_color}30`, cursor: 'pointer', padding: '3px 8px', borderRadius: 6, flexShrink: 0, fontWeight: 500 }}
                                       >
-                                        {assigning === p.id ? '…' : 'Zuweisen'}
+                                        {assigning === p.id ? '…' : 'Einladen'}
                                       </button>
                                     </div>
                                   )
