@@ -143,8 +143,8 @@ export default function DashboardLayout({ children, sections, subtitle }: Props)
           gap: 6, minHeight: 56,
         }}>
           <button
-            onClick={() => router.push('/')}
-            title="Zur Übersicht"
+            onClick={() => isCollapsed && !forMobile ? setCollapsed(false) : router.push('/')}
+            title={isCollapsed ? 'Sidebar öffnen' : 'Zur Übersicht'}
             style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'transparent', border: 'none', cursor: 'pointer', borderRadius: 8, padding: '0.25rem 0.375rem', transition: 'background 120ms', fontFamily: 'inherit', overflow: 'hidden', flex: isCollapsed ? undefined : 1, minWidth: 0 }}
             onMouseEnter={e => (e.currentTarget.style.background = hoverBg)}
             onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
@@ -176,6 +176,19 @@ export default function DashboardLayout({ children, sections, subtitle }: Props)
               </div>
             )}
           </button>
+
+          {/* Collapse toggle in logo row — Google Workspace style */}
+          {!isCollapsed && !forMobile && (
+            <button
+              onClick={() => setCollapsed(true)}
+              title="Sidebar minimieren"
+              style={iconBtn({ width: 28, height: 28, borderRadius: 6, flexShrink: 0 })}
+              onMouseEnter={e => (e.currentTarget.style.background = hoverBg)}
+              onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+            >
+              <ChevronLeft />
+            </button>
+          )}
         </div>
 
         {/* ── Navigation ── */}
@@ -321,17 +334,6 @@ export default function DashboardLayout({ children, sections, subtitle }: Props)
                     </div>
                   </div>
                 </button>
-                {!forMobile && (
-                  <button
-                    onClick={() => setCollapsed(true)}
-                    title="Sidebar minimieren"
-                    style={iconBtn({ width: 28, height: 28, borderRadius: 6, flexShrink: 0 })}
-                    onMouseEnter={e => (e.currentTarget.style.background = hoverBg)}
-                    onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-                  >
-                    <ChevronLeft />
-                  </button>
-                )}
               </div>
             )}
           </div>

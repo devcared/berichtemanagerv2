@@ -144,7 +144,7 @@ export default function StatistikenPage() {
     <div className="flex flex-col flex-1 gap-6 p-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Statistiken</h1>
+        <h1 className="text-xl font-medium text-foreground">Statistiken</h1>
         <p className="text-sm text-muted-foreground mt-0.5">Übersicht deines Ausbildungsfortschritts</p>
       </div>
 

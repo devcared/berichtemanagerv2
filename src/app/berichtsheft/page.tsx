@@ -113,7 +113,7 @@ export default function BerichtsheftDashboard() {
     <div className="flex flex-1 flex-col gap-4 sm:gap-6 p-3 sm:p-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-foreground">Dashboard</h1>
+          <h1 className="text-xl font-medium text-foreground">Dashboard</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
             {format(new Date(), "EEEE, d. MMMM yyyy", { locale: de })}
           </p>

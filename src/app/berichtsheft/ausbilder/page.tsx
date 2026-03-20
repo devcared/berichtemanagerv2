@@ -199,12 +199,12 @@ export default function AusbilderPage() {
         <div className="max-w-5xl mx-auto">
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
             <div className="flex items-center gap-4">
-              <div className="size-12 bg-primary rounded-2xl flex items-center justify-center shadow-lg shadow-primary/25">
+              <div className="size-12 bg-primary rounded-xl flex items-center justify-center">
                 <HugeiconsIcon icon={CheckmarkBadge01Icon} size={24} className="text-primary-foreground" />
               </div>
               <div>
                 <p className="text-xs text-muted-foreground font-medium mb-0.5">Willkommen zurück,</p>
-                <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
+                <h1 className="text-xl font-medium">
                   {profile.firstName} {profile.lastName}
                 </h1>
                 <p className="text-sm text-muted-foreground mt-0.5">
@@ -275,7 +275,7 @@ export default function AusbilderPage() {
               key={s.key}
               onClick={() => setActiveTab(s.key)}
               className={cn(
-                'rounded-2xl border p-4 text-left transition-all hover:scale-[1.02]',
+                'rounded-xl border p-4 text-left transition-colors',
                 activeTab === s.key
                   ? `${s.border} ${s.bg}`
                   : 'border-border bg-card hover:border-border/80'

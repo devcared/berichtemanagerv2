@@ -93,7 +93,7 @@ export default function KalenderPage() {
       {/* Page header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Kalender</h1>
+          <h1 className="text-xl font-medium text-foreground">Kalender</h1>
           <p className="text-sm text-muted-foreground mt-0.5">Übersicht aller Berichtswochen</p>
         </div>
         <Button
