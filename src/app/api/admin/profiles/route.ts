@@ -12,12 +12,21 @@ export async function GET() {
 
     const admin = createAdminClient()
 
-    // Alle Profile laden
-    const { data: profiles, error: profilesError } = await admin
+    // Alle Profile laden (mit Fallback falls pending-Spalten noch nicht migriert)
+    let profilesResult = await admin
       .from('profiles')
       .select('id, first_name, last_name, occupation, company_name, role, created_at, company_id, pending_company_id, pending_company_name')
       .order('last_name', { ascending: true })
 
+    if (profilesResult.error) {
+      // Spalten pending_company_id/pending_company_name existieren noch nicht → Fallback
+      profilesResult = await admin
+        .from('profiles')
+        .select('id, first_name, last_name, occupation, company_name, role, created_at, company_id')
+        .order('last_name', { ascending: true }) as typeof profilesResult
+    }
+
+    const { data: profiles, error: profilesError } = profilesResult
     if (profilesError) throw profilesError
 
     // Report-Statistiken pro Profil laden
@@ -51,9 +60,9 @@ export async function GET() {
         role: p.role,
         email: emailMap[p.id] ?? '',
         createdAt: p.created_at,
-        companyId: p.company_id ?? null,
-        pendingCompanyId: p.pending_company_id ?? null,
-        pendingCompanyName: p.pending_company_name ?? null,
+        companyId: (p as Record<string, unknown>).company_id ?? null,
+        pendingCompanyId: (p as Record<string, unknown>).pending_company_id ?? null,
+        pendingCompanyName: (p as Record<string, unknown>).pending_company_name ?? null,
         stats: {
           total: userReports.length,
           approved: userReports.filter(r => r.status === 'approved').length,
