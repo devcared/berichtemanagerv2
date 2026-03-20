@@ -22,11 +22,13 @@ import { HugeiconsIcon } from '@hugeicons/react'
 import {
   UserGroup02Icon, UserCircleIcon, Crown02Icon, CheckmarkBadge01Icon,
   Shield01Icon, Mail01Icon, Edit01Icon, Delete01Icon, LockPasswordIcon,
-  UserAdd01Icon, UserMinus01Icon, UserCheck01Icon, CheckmarkCircle01Icon,
+  UserAdd01Icon, UserCheck01Icon, CheckmarkCircle01Icon,
   Alert01Icon, Search01Icon, File01Icon, MoreVerticalIcon, Building01Icon,
   OfficeChairIcon, ArrowLeft01Icon, Cancel01Icon,
 } from '@hugeicons/core-free-icons'
 import { cn } from '@/lib/utils'
+
+// ── Shared types ─────────────────────────────────────────────────────────────
 
 interface ProfileWithStats {
   id: string
@@ -54,9 +56,44 @@ interface CompanyOption {
   accent_color: string
 }
 
+/** Mirrors the CustomRole shape from the roles page */
+interface CustomRole {
+  id: string
+  name: string
+  description: string
+  baseRole: 'apprentice' | 'trainer' | 'admin'
+  permissions: Record<string, boolean>
+}
+
 type ActiveTab = 'apprentices' | 'trainers' | 'admins' | 'invite'
 
-function RoleBadge({ role }: { role: string }) {
+// ── localStorage keys ────────────────────────────────────────────────────────
+const CUSTOM_ROLES_KEY       = 'azubihub-custom-roles'
+const CUSTOM_ASSIGNMENTS_KEY = 'azubihub-custom-role-assignments' // Record<userId, customRoleId>
+
+// ── Colours per built-in role ────────────────────────────────────────────────
+const BUILTIN_COLOR: Record<string, string> = {
+  admin:      '#4285f4',
+  trainer:    '#34a853',
+  apprentice: '#fbbc04',
+}
+const CUSTOM_COLORS = ['#a855f7', '#ec4899', '#06b6d4', '#f97316', '#14b8a6']
+function customColor(index: number) { return CUSTOM_COLORS[index % CUSTOM_COLORS.length] }
+
+// ── RoleBadge ────────────────────────────────────────────────────────────────
+function RoleBadge({ role, customLabel, customColor: cc }: {
+  role: string
+  customLabel?: string
+  customColor?: string
+}) {
+  if (customLabel && cc) {
+    return (
+      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 8px', borderRadius: 9999, fontSize: '0.6875rem', fontWeight: 600, background: cc + '18', color: cc, border: `1px solid ${cc}30` }}>
+        <HugeiconsIcon icon={Crown02Icon} size={10} />
+        {customLabel}
+      </span>
+    )
+  }
   if (role === 'admin') return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 8px', borderRadius: 9999, fontSize: '0.6875rem', fontWeight: 600, background: 'rgba(66,133,244,0.12)', color: '#4285f4', border: '1px solid rgba(66,133,244,0.25)' }}>
       <HugeiconsIcon icon={Shield01Icon} size={10} />
@@ -77,11 +114,14 @@ function RoleBadge({ role }: { role: string }) {
   )
 }
 
+// ── UserCard ─────────────────────────────────────────────────────────────────
 function UserCard({
   user,
   currentUserId,
+  customRoleName,
+  customRoleColor,
   onEdit,
-  onRoleChange,
+  onChangeRole,
   onDelete,
   onResetPassword,
   onAssignCompany,
@@ -89,16 +129,18 @@ function UserCard({
 }: {
   user: ProfileWithStats
   currentUserId: string
+  customRoleName?: string
+  customRoleColor?: string
   onEdit: (u: ProfileWithStats) => void
-  onRoleChange: (u: ProfileWithStats, role: 'apprentice' | 'trainer' | 'admin') => void
+  onChangeRole: (u: ProfileWithStats) => void
   onDelete: (u: ProfileWithStats) => void
   onResetPassword: (email: string) => void
   onAssignCompany: (u: ProfileWithStats) => void
   onUnassignCompany: (u: ProfileWithStats) => void
 }) {
-  const isSelf = user.id === currentUserId
-  const avatarColor = user.role === 'admin' ? '#4285f4' : user.role === 'trainer' ? '#34a853' : '#fbbc04'
-  const initials = `${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}`.toUpperCase()
+  const isSelf      = user.id === currentUserId
+  const avatarColor = customRoleColor ?? BUILTIN_COLOR[user.role] ?? '#fbbc04'
+  const initials    = `${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}`.toUpperCase()
 
   return (
     <Card className="border rounded-2xl overflow-hidden hover:shadow-md transition-shadow">
@@ -121,7 +163,7 @@ function UserCard({
                   {user.firstName} {user.lastName}
                   {isSelf && <span className="ml-1 text-xs text-muted-foreground font-normal">(Du)</span>}
                 </span>
-                <RoleBadge role={user.role} />
+                <RoleBadge role={user.role} customLabel={customRoleName} customColor={customRoleColor} />
               </div>
               <div className="flex items-center gap-1 mt-0.5">
                 <HugeiconsIcon icon={Mail01Icon} size={11} className="text-muted-foreground shrink-0" />
@@ -178,23 +220,11 @@ function UserCard({
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuSeparator />
-                {/* Role changes */}
-                {!isSelf && user.role !== 'apprentice' && (
-                  <DropdownMenuItem onClick={() => onRoleChange(user, 'apprentice')}>
-                    <HugeiconsIcon icon={UserMinus01Icon} size={14} className="mr-2 text-yellow-600" />
-                    Zu Auszubildendem
-                  </DropdownMenuItem>
-                )}
-                {!isSelf && user.role !== 'trainer' && (
-                  <DropdownMenuItem onClick={() => onRoleChange(user, 'trainer')}>
-                    <HugeiconsIcon icon={UserCheck01Icon} size={14} className="mr-2 text-green-600" />
-                    Zu Ausbilder
-                  </DropdownMenuItem>
-                )}
-                {!isSelf && user.role !== 'admin' && (
-                  <DropdownMenuItem onClick={() => onRoleChange(user, 'admin')}>
-                    <HugeiconsIcon icon={Shield01Icon} size={14} className="mr-2 text-blue-600" />
-                    Zu Admin befördern
+                {/* Single role-change action */}
+                {!isSelf && (
+                  <DropdownMenuItem onClick={() => onChangeRole(user)}>
+                    <HugeiconsIcon icon={UserCheck01Icon} size={14} className="mr-2" />
+                    Rolle ändern
                   </DropdownMenuItem>
                 )}
                 {!isSelf && <DropdownMenuSeparator />}
@@ -241,53 +271,70 @@ function UserCard({
   )
 }
 
+// ── AdminUsersPage ────────────────────────────────────────────────────────────
 export default function AdminUsersPage() {
   const router = useRouter()
   const { profile, loading: profileLoading } = useProfile()
 
   const [profiles, setProfiles] = useState<ProfileWithStats[]>([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading]   = useState(true)
   const [loadError, setLoadError] = useState('')
   const [activeTab, setActiveTab] = useState<ActiveTab>('apprentices')
-  const [search, setSearch] = useState('')
+  const [search, setSearch]     = useState('')
+  const [isMounted, setIsMounted] = useState(false)
+
+  // Custom roles (from localStorage — read-only here, managed in roles page)
+  const [customRoles, setCustomRoles] = useState<CustomRole[]>([])
+  /** userId → customRoleId */
+  const [customAssignments, setCustomAssignments] = useState<Record<string, string>>({})
 
   // Role change dialog
-  const [confirmRoleChange, setConfirmRoleChange] = useState<{
-    user: ProfileWithStats
-    newRole: 'apprentice' | 'trainer' | 'admin'
-  } | null>(null)
-  const [isChangingRole, setIsChangingRole] = useState(false)
-  const [roleError, setRoleError] = useState('')
+  const [roleChangeUser, setRoleChangeUser]   = useState<ProfileWithStats | null>(null)
+  const [selectedNewRole, setSelectedNewRole] = useState<string>('')
+  const [isChangingRole, setIsChangingRole]   = useState(false)
+  const [roleError, setRoleError]             = useState('')
 
   // Delete dialog
   const [confirmDelete, setConfirmDelete] = useState<ProfileWithStats | null>(null)
-  const [isDeleting, setIsDeleting] = useState(false)
-  const [deleteError, setDeleteError] = useState('')
+  const [isDeleting, setIsDeleting]       = useState(false)
+  const [deleteError, setDeleteError]     = useState('')
 
   // Edit profile
-  const [editUser, setEditUser] = useState<ProfileWithStats | null>(null)
-  const [editForm, setEditForm] = useState({ firstName: '', lastName: '', occupation: '', companyName: '' })
+  const [editUser, setEditUser]   = useState<ProfileWithStats | null>(null)
+  const [editForm, setEditForm]   = useState({ firstName: '', lastName: '', occupation: '', companyName: '' })
   const [isSavingEdit, setIsSavingEdit] = useState(false)
   const [editError, setEditError] = useState('')
 
   // Password reset
   const [resetSuccess, setResetSuccess] = useState('')
-  const [resetError, setResetError] = useState('')
+  const [resetError, setResetError]     = useState('')
 
   // Company assignment
-  const [companies, setCompanies] = useState<CompanyOption[]>([])
+  const [companies, setCompanies]               = useState<CompanyOption[]>([])
   const [assignCompanyUser, setAssignCompanyUser] = useState<ProfileWithStats | null>(null)
-  const [assignCompanyId, setAssignCompanyId] = useState<string>('')
+  const [assignCompanyId, setAssignCompanyId]     = useState<string>('')
   const [isAssigningCompany, setIsAssigningCompany] = useState(false)
   const [assignCompanyError, setAssignCompanyError] = useState('')
 
   // Invite
-  const [inviteEmail, setInviteEmail] = useState('')
-  const [inviteRole, setInviteRole] = useState<'apprentice' | 'trainer' | 'admin'>('apprentice')
-  const [isInviting, setIsInviting] = useState(false)
+  const [inviteEmail, setInviteEmail]   = useState('')
+  const [inviteRole, setInviteRole]     = useState<'apprentice' | 'trainer' | 'admin'>('apprentice')
+  const [isInviting, setIsInviting]     = useState(false)
   const [inviteSuccess, setInviteSuccess] = useState('')
-  const [inviteError, setInviteError] = useState('')
+  const [inviteError, setInviteError]   = useState('')
 
+  // ── localStorage hydration ──────────────────────────────────────────────
+  useEffect(() => {
+    setIsMounted(true)
+    try {
+      const storedRoles = localStorage.getItem(CUSTOM_ROLES_KEY)
+      if (storedRoles) setCustomRoles(JSON.parse(storedRoles) as CustomRole[])
+      const storedAssignments = localStorage.getItem(CUSTOM_ASSIGNMENTS_KEY)
+      if (storedAssignments) setCustomAssignments(JSON.parse(storedAssignments) as Record<string, string>)
+    } catch { /* ignore */ }
+  }, [])
+
+  // ── Data loading ────────────────────────────────────────────────────────
   const loadProfiles = useCallback(async () => {
     setLoading(true)
     setLoadError('')
@@ -296,7 +343,7 @@ export default function AdminUsersPage() {
         fetch('/api/admin/profiles'),
         fetch('/api/admin/companies'),
       ])
-      const profilesJson = await profilesRes.json()
+      const profilesJson  = await profilesRes.json()
       const companiesJson = await companiesRes.json()
       if (!profilesRes.ok) throw new Error(profilesJson.error ?? 'Fehler beim Laden')
       setProfiles(profilesJson.profiles)
@@ -316,19 +363,62 @@ export default function AdminUsersPage() {
     if (!profileLoading && profile?.role === 'admin') loadProfiles()
   }, [profile, profileLoading, loadProfiles])
 
-  async function handleRoleChange(userId: string, newRole: 'apprentice' | 'trainer' | 'admin') {
+  // ── Helpers ─────────────────────────────────────────────────────────────
+  /** Returns { customRoleName, customRoleColor } for a user, or undefined */
+  function getCustomRoleInfo(userId: string): { name: string; color: string } | undefined {
+    const cid = customAssignments[userId]
+    if (!cid) return undefined
+    const idx = customRoles.findIndex(cr => cr.id === cid)
+    if (idx === -1) return undefined
+    return { name: customRoles[idx].name, color: customColor(idx) }
+  }
+
+  // ── Handlers ─────────────────────────────────────────────────────────────
+  function openRoleChange(user: ProfileWithStats) {
+    // Pre-select current custom role or built-in role
+    const current = customAssignments[user.id] ?? user.role
+    setRoleChangeUser(user)
+    setSelectedNewRole(current)
+    setRoleError('')
+  }
+
+  async function handleRoleChange() {
+    if (!roleChangeUser || !selectedNewRole) return
     setIsChangingRole(true)
     setRoleError('')
     try {
+      // Resolve the DB role (custom roles map to their baseRole)
+      const customRole = customRoles.find(cr => cr.id === selectedNewRole)
+      const dbRole = customRole
+        ? customRole.baseRole
+        : (selectedNewRole as 'apprentice' | 'trainer' | 'admin')
+
       const res = await fetch('/api/admin/profiles', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, role: newRole }),
+        body: JSON.stringify({ userId: roleChangeUser.id, role: dbRole }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error)
-      setProfiles(prev => prev.map(p => p.id === userId ? { ...p, role: newRole } : p))
-      setConfirmRoleChange(null)
+
+      // Update profiles in memory
+      setProfiles(prev => prev.map(p =>
+        p.id === roleChangeUser.id ? { ...p, role: dbRole } : p
+      ))
+
+      // Update custom assignment in localStorage
+      setCustomAssignments(prev => {
+        const next = { ...prev }
+        if (customRole) {
+          next[roleChangeUser.id] = customRole.id
+        } else {
+          delete next[roleChangeUser.id]
+        }
+        try { localStorage.setItem(CUSTOM_ASSIGNMENTS_KEY, JSON.stringify(next)) } catch { /* ignore */ }
+        return next
+      })
+
+      setRoleChangeUser(null)
     } catch (err) {
       setRoleError(err instanceof Error ? err.message : 'Fehler.')
     } finally {
@@ -374,11 +464,7 @@ export default function AdminUsersPage() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error)
-      setProfiles(prev => prev.map(p =>
-        p.id === editUser.id
-          ? { ...p, ...editForm }
-          : p
-      ))
+      setProfiles(prev => prev.map(p => p.id === editUser.id ? { ...p, ...editForm } : p))
       setEditUser(null)
     } catch (err) {
       setEditError(err instanceof Error ? err.message : 'Fehler.')
@@ -426,9 +512,7 @@ export default function AdminUsersPage() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error)
       setProfiles(prev => prev.map(p =>
-        p.id === assignCompanyUser.id
-          ? { ...p, pendingCompanyId: assignCompanyId }
-          : p
+        p.id === assignCompanyUser.id ? { ...p, pendingCompanyId: assignCompanyId } : p
       ))
       setAssignCompanyUser(null)
     } catch (err) {
@@ -474,6 +558,7 @@ export default function AdminUsersPage() {
     }
   }
 
+  // ── Guards ──────────────────────────────────────────────────────────────
   if (profileLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -500,9 +585,10 @@ export default function AdminUsersPage() {
     )
   }
 
+  // ── Derived ─────────────────────────────────────────────────────────────
   const apprentices = profiles.filter(p => p.role === 'apprentice')
-  const trainers = profiles.filter(p => p.role === 'trainer')
-  const admins = profiles.filter(p => p.role === 'admin')
+  const trainers    = profiles.filter(p => p.role === 'trainer')
+  const admins      = profiles.filter(p => p.role === 'admin')
 
   function filterList(list: ProfileWithStats[]) {
     if (!search.trim()) return list
@@ -512,23 +598,27 @@ export default function AdminUsersPage() {
     )
   }
 
-  const filteredApprentices = filterList(apprentices)
-  const filteredTrainers = filterList(trainers)
-  const filteredAdmins = filterList(admins)
+  const currentList = activeTab === 'apprentices' ? filterList(apprentices)
+    : activeTab === 'trainers'   ? filterList(trainers)
+    : activeTab === 'admins'     ? filterList(admins)
+    : []
 
-  const roleLabel = { apprentice: 'Auszubildender', trainer: 'Ausbilder', admin: 'Administrator' }
-
-  const tabs: { id: ActiveTab; label: string; count: number; color: string }[] = [
-    { id: 'apprentices', label: 'Auszubildende', count: apprentices.length, color: '#fbbc04' },
-    { id: 'trainers', label: 'Ausbilder', count: trainers.length, color: '#34a853' },
-    { id: 'admins', label: 'Admins', count: admins.length, color: '#4285f4' },
-    { id: 'invite', label: 'Einladen', count: 0, color: '#ea4335' },
+  const tabs: { id: ActiveTab; label: string; count: number }[] = [
+    { id: 'apprentices', label: 'Auszubildende', count: apprentices.length },
+    { id: 'trainers',    label: 'Ausbilder',      count: trainers.length },
+    { id: 'admins',      label: 'Admins',          count: admins.length },
+    { id: 'invite',      label: 'Einladen',        count: 0 },
   ]
 
-  const currentList = activeTab === 'apprentices' ? filteredApprentices
-    : activeTab === 'trainers' ? filteredTrainers
-    : activeTab === 'admins' ? filteredAdmins
-    : []
+  // Label for the role change dialog description
+  function roleLabel(roleId: string): string {
+    const cr = customRoles.find(c => c.id === roleId)
+    if (cr) return cr.name
+    if (roleId === 'admin')      return 'Administrator'
+    if (roleId === 'trainer')    return 'Ausbilder'
+    if (roleId === 'apprentice') return 'Auszubildender'
+    return roleId
+  }
 
   return (
     <div className="flex flex-col min-h-full bg-background">
@@ -569,10 +659,10 @@ export default function AdminUsersPage() {
           {/* Stats strip */}
           <div className="rounded-xl border border-border bg-background grid grid-cols-4 divide-x divide-border">
             {[
-              { label: 'Gesamt', value: profiles.length, color: '#4285f4' },
+              { label: 'Gesamt',        value: profiles.length,    color: '#4285f4' },
               { label: 'Auszubildende', value: apprentices.length, color: '#fbbc04' },
-              { label: 'Ausbilder', value: trainers.length, color: '#34a853' },
-              { label: 'Admins', value: admins.length, color: '#4285f4' },
+              { label: 'Ausbilder',     value: trainers.length,    color: '#34a853' },
+              { label: 'Admins',        value: admins.length,      color: '#4285f4' },
             ].map(stat => (
               <div key={stat.label} className="px-3 py-2 text-center">
                 <div className="text-base font-bold leading-none" style={{ color: stat.color }}>{stat.value}</div>
@@ -583,7 +673,7 @@ export default function AdminUsersPage() {
         </div>
       </div>
 
-      {/* Tabs + Search */}
+      {/* Tabs */}
       <div className="border-b border-border bg-background px-3 sm:px-6 sticky top-[57px] z-10">
         <div className="max-w-5xl mx-auto">
           <div className="flex items-center gap-0 overflow-x-auto">
@@ -621,7 +711,6 @@ export default function AdminUsersPage() {
       <div className="flex-1 px-3 sm:px-6 py-4">
         <div className="max-w-5xl mx-auto space-y-4">
 
-          {/* Search bar (not for invite tab) */}
           {activeTab !== 'invite' && (
             <div className="relative">
               <HugeiconsIcon icon={Search01Icon} size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
@@ -634,14 +723,12 @@ export default function AdminUsersPage() {
             </div>
           )}
 
-          {/* Loading */}
           {loading && (
             <div className="flex items-center justify-center py-16">
               <div className="size-6 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
             </div>
           )}
 
-          {/* Error */}
           {loadError && (
             <div className="flex items-center gap-2 rounded-xl bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive">
               <HugeiconsIcon icon={Alert01Icon} size={15} />
@@ -650,7 +737,6 @@ export default function AdminUsersPage() {
             </div>
           )}
 
-          {/* User list */}
           {!loading && activeTab !== 'invite' && (
             <>
               {currentList.length === 0 ? (
@@ -659,19 +745,24 @@ export default function AdminUsersPage() {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
-                  {currentList.map(user => (
-                    <UserCard
-                      key={user.id}
-                      user={user}
-                      currentUserId={profile?.id ?? ''}
-                      onEdit={openEdit}
-                      onRoleChange={(u, role) => setConfirmRoleChange({ user: u, newRole: role })}
-                      onDelete={u => setConfirmDelete(u)}
-                      onResetPassword={handlePasswordReset}
-                      onAssignCompany={openAssignCompany}
-                      onUnassignCompany={handleUnassignCompany}
-                    />
-                  ))}
+                  {currentList.map(user => {
+                    const crInfo = isMounted ? getCustomRoleInfo(user.id) : undefined
+                    return (
+                      <UserCard
+                        key={user.id}
+                        user={user}
+                        currentUserId={profile?.id ?? ''}
+                        customRoleName={crInfo?.name}
+                        customRoleColor={crInfo?.color}
+                        onEdit={openEdit}
+                        onChangeRole={openRoleChange}
+                        onDelete={u => setConfirmDelete(u)}
+                        onResetPassword={handlePasswordReset}
+                        onAssignCompany={openAssignCompany}
+                        onUnassignCompany={handleUnassignCompany}
+                      />
+                    )
+                  })}
                 </div>
               )}
             </>
@@ -740,6 +831,101 @@ export default function AdminUsersPage() {
         </div>
       </div>
 
+      {/* ── Role change dialog ────────────────────────────────────────────── */}
+      <AlertDialog open={!!roleChangeUser} onOpenChange={open => !open && setRoleChangeUser(null)}>
+        <AlertDialogContent className="max-w-sm">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Rolle ändern</AlertDialogTitle>
+            <AlertDialogDescription>
+              Wähle eine neue Rolle für{' '}
+              <strong>{roleChangeUser?.firstName} {roleChangeUser?.lastName}</strong>.
+              {customRoles.length > 0 && ' Benutzerdefinierte Rollen sind ebenfalls verfügbar.'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <div className="py-2 space-y-3">
+            <Select value={selectedNewRole} onValueChange={setSelectedNewRole}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Rolle wählen…" />
+              </SelectTrigger>
+              <SelectContent>
+                {/* ── Built-in roles ── */}
+                <div style={{ padding: '4px 8px 2px', fontSize: '0.625rem', fontWeight: 700, color: 'hsl(var(--muted-foreground))', textTransform: 'uppercase', letterSpacing: '0.07em' }}>
+                  Standard-Rollen
+                </div>
+                {[
+                  { value: 'apprentice', label: 'Auszubildender', color: '#fbbc04', Icon: UserCircleIcon },
+                  { value: 'trainer',    label: 'Ausbilder',       color: '#34a853', Icon: CheckmarkBadge01Icon },
+                  { value: 'admin',      label: 'Administrator',   color: '#4285f4', Icon: Shield01Icon },
+                ].map(r => (
+                  <SelectItem key={r.value} value={r.value}>
+                    <div className="flex items-center gap-2">
+                      <HugeiconsIcon icon={r.Icon} size={13} style={{ color: r.color, flexShrink: 0 }} />
+                      {r.label}
+                    </div>
+                  </SelectItem>
+                ))}
+
+                {/* ── Custom roles ── */}
+                {customRoles.length > 0 && (
+                  <>
+                    <div style={{ height: 1, background: 'hsl(var(--border))', margin: '4px 8px' }} />
+                    <div style={{ padding: '4px 8px 2px', fontSize: '0.625rem', fontWeight: 700, color: 'hsl(var(--muted-foreground))', textTransform: 'uppercase', letterSpacing: '0.07em' }}>
+                      Benutzerdefiniert
+                    </div>
+                    {customRoles.map((cr, i) => {
+                      const cc = customColor(i)
+                      return (
+                        <SelectItem key={cr.id} value={cr.id}>
+                          <div className="flex items-center gap-2">
+                            <HugeiconsIcon icon={Crown02Icon} size={13} style={{ color: cc, flexShrink: 0 }} />
+                            <span>{cr.name}</span>
+                            <span style={{ fontSize: '0.6875rem', color: 'hsl(var(--muted-foreground))' }}>
+                              ({ROLE_CONFIG_LABEL[cr.baseRole]})
+                            </span>
+                          </div>
+                        </SelectItem>
+                      )
+                    })}
+                  </>
+                )}
+              </SelectContent>
+            </Select>
+
+            {/* Preview badge */}
+            {selectedNewRole && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', borderRadius: 8, background: 'hsl(var(--muted)/0.5)', border: '1px solid hsl(var(--border))' }}>
+                <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>Neue Rolle:</span>
+                {(() => {
+                  const cr = customRoles.find(c => c.id === selectedNewRole)
+                  const idx = customRoles.findIndex(c => c.id === selectedNewRole)
+                  if (cr) return <RoleBadge role={cr.baseRole} customLabel={cr.name} customColor={customColor(idx)} />
+                  return <RoleBadge role={selectedNewRole} />
+                })()}
+              </div>
+            )}
+
+            {roleError && (
+              <div className="flex items-center gap-2 rounded-lg bg-destructive/10 border border-destructive/20 px-3 py-2 text-xs text-destructive">
+                <HugeiconsIcon icon={Alert01Icon} size={13} />
+                {roleError}
+              </div>
+            )}
+          </div>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isChangingRole}>Abbrechen</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleRoleChange}
+              disabled={isChangingRole || !selectedNewRole}
+            >
+              {isChangingRole && <div className="size-3.5 rounded-full border-2 border-white/30 border-t-white animate-spin mr-2" />}
+              Rolle setzen
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Edit profile dialog */}
       <AlertDialog open={!!editUser} onOpenChange={open => !open && setEditUser(null)}>
         <AlertDialogContent className="max-w-md">
@@ -785,38 +971,6 @@ export default function AdminUsersPage() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Role change dialog */}
-      <AlertDialog open={!!confirmRoleChange} onOpenChange={open => !open && setConfirmRoleChange(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Rolle ändern</AlertDialogTitle>
-            <AlertDialogDescription>
-              {confirmRoleChange && (
-                <>
-                  Soll die Rolle von <strong>{confirmRoleChange.user.firstName} {confirmRoleChange.user.lastName}</strong> zu <strong>{roleLabel[confirmRoleChange.newRole]}</strong> geändert werden?
-                </>
-              )}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          {roleError && (
-            <div className="flex items-center gap-2 rounded-lg bg-destructive/10 border border-destructive/20 px-3 py-2 text-xs text-destructive mx-6">
-              <HugeiconsIcon icon={Alert01Icon} size={13} />
-              {roleError}
-            </div>
-          )}
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isChangingRole}>Abbrechen</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => confirmRoleChange && handleRoleChange(confirmRoleChange.user.id, confirmRoleChange.newRole)}
-              disabled={isChangingRole}
-            >
-              {isChangingRole && <div className="size-3.5 rounded-full border-2 border-white/30 border-t-white animate-spin mr-2" />}
-              Rolle ändern
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
       {/* Company assignment dialog */}
       <AlertDialog open={!!assignCompanyUser} onOpenChange={open => !open && setAssignCompanyUser(null)}>
         <AlertDialogContent className="max-w-sm">
@@ -830,7 +984,7 @@ export default function AdminUsersPage() {
           </AlertDialogHeader>
           <div className="py-2">
             {companies.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Keine Unternehmen vorhanden. Erstelle zuerst ein Unternehmen.</p>
+              <p className="text-sm text-muted-foreground">Keine Unternehmen vorhanden.</p>
             ) : (
               <Select value={assignCompanyId} onValueChange={setAssignCompanyId}>
                 <SelectTrigger>
@@ -875,9 +1029,7 @@ export default function AdminUsersPage() {
             <AlertDialogTitle>Nutzer löschen</AlertDialogTitle>
             <AlertDialogDescription>
               {confirmDelete && (
-                <>
-                  Soll <strong>{confirmDelete.firstName} {confirmDelete.lastName}</strong> unwiderruflich gelöscht werden? Alle Daten dieses Nutzers gehen verloren.
-                </>
+                <>Soll <strong>{confirmDelete.firstName} {confirmDelete.lastName}</strong> unwiderruflich gelöscht werden? Alle Daten dieses Nutzers gehen verloren.</>
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -902,4 +1054,11 @@ export default function AdminUsersPage() {
       </AlertDialog>
     </div>
   )
+}
+
+// Used in select item labels (needs to be module-level for TSC)
+const ROLE_CONFIG_LABEL: Record<string, string> = {
+  apprentice: 'Azubi',
+  trainer:    'Ausbilder',
+  admin:      'Admin',
 }
