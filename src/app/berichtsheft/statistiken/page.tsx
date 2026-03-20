@@ -1,339 +1,244 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
 
 import { useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { format } from 'date-fns'
-import { de } from 'date-fns/locale'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { getISOWeekYear, eachWeekOfInterval, getISOWeek as fnsGetISOWeek } from 'date-fns'
 import { Progress } from '@/components/ui/progress'
-import { Separator } from '@/components/ui/separator'
 import { useReports } from '@/hooks/use-reports'
 import { useProfile } from '@/hooks/use-profile'
 import { formatWeekId, getCalendarWeekLabel } from '@/lib/week-utils'
-import { StatusBadge } from '@/components/berichtsheft/status-badge'
-import { cn } from '@/lib/utils'
 import {
-  Add01Icon,
-  ClockIcon,
-  BuildingIcon,
-  BookOpenIcon,
-  AnalyticsUpIcon,
-  AlertCircleIcon,
+  AnalyticsUpIcon, ClockIcon, BuildingIcon, BookOpenIcon, AlertCircleIcon,
 } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
-import { getISOWeekYear, eachWeekOfInterval, getISOWeek as fnsGetISOWeek } from 'date-fns'
-import type { WeeklyReport } from '@/types'
 
 function CompletionRing({ percentage }: { percentage: number }) {
-  const size = 140
-  const strokeWidth = 10
-  const radius = (size - strokeWidth) / 2
-  const circumference = 2 * Math.PI * radius
-  const offset = circumference - (percentage / 100) * circumference
+  const size = 120
+  const sw   = 9
+  const r    = (size - sw) / 2
+  const circ = 2 * Math.PI * r
+  const offset = circ - (percentage / 100) * circ
 
   return (
-    <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
-      <svg width={size} height={size} className="-rotate-90">
-        {/* Background track */}
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          stroke="hsl(var(--border))"
-          strokeWidth={strokeWidth}
-          fill="none"
-        />
-        {/* Progress arc */}
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          stroke="hsl(var(--primary))"
-          strokeWidth={strokeWidth}
-          fill="none"
-          strokeDasharray={circumference}
-          strokeDashoffset={offset}
-          strokeLinecap="round"
-          className="transition-all duration-700 ease-out"
+    <div style={{ position: 'relative', width: size, height: size, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
+        <circle cx={size / 2} cy={size / 2} r={r} stroke="hsl(var(--border))" strokeWidth={sw} fill="none" />
+        <circle cx={size / 2} cy={size / 2} r={r} stroke="hsl(var(--primary))" strokeWidth={sw} fill="none"
+          strokeDasharray={circ} strokeDashoffset={offset} strokeLinecap="round"
+          style={{ transition: 'stroke-dashoffset 700ms ease-out' }}
         />
       </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-3xl font-bold text-foreground">{percentage}%</span>
-        <span className="text-xs text-muted-foreground mt-0.5">Abgeschlossen</span>
+      <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+        <span style={{ fontSize: '1.5rem', fontWeight: 700, color: 'hsl(var(--foreground))', lineHeight: 1 }}>{percentage}%</span>
+        <span style={{ fontSize: '0.625rem', color: 'hsl(var(--muted-foreground))', marginTop: 2 }}>Fertig</span>
       </div>
     </div>
   )
 }
 
 export default function StatistikenPage() {
-  const router = useRouter()
+  const router  = useRouter()
   const { reports, loading } = useReports()
   const { profile } = useProfile()
 
   const stats = useMemo(() => {
-    const completed = reports.filter(r => r.status === 'submitted' || r.status === 'in_review' || r.status === 'approved').length
-    const drafts = reports.filter(r => r.status === 'draft').length
-    const total = reports.length
+    const completed = reports.filter(r => ['submitted', 'in_review', 'approved'].includes(r.status)).length
+    const approved  = reports.filter(r => r.status === 'approved').length
+    const drafts    = reports.filter(r => r.status === 'draft').length
+    const total     = reports.length
     const completionPct = total > 0 ? Math.round((completed / total) * 100) : 0
 
-    let totalHours = 0
-    let companyHours = 0
-    let schoolHours = 0
-    let interCompanyHours = 0
-    let vacationDays = 0
-    let sickDays = 0
+    let totalHours = 0, companyH = 0, schoolH = 0, interH = 0, vacDays = 0, sickDays = 0
 
     reports.forEach(r => {
       totalHours += r.totalHours
       r.entries.forEach(e => {
-        if (e.category === 'company') companyHours += e.hours
-        else if (e.category === 'vocationalSchool') schoolHours += e.hours
-        else if (e.category === 'interCompany') interCompanyHours += e.hours
-        else if (e.category === 'vacation') vacationDays++
-        else if (e.category === 'sick') sickDays++
+        if (e.category === 'company')          companyH += e.hours
+        else if (e.category === 'vocationalSchool') schoolH += e.hours
+        else if (e.category === 'interCompany')     interH  += e.hours
+        else if (e.category === 'vacation')         vacDays++
+        else if (e.category === 'sick')             sickDays++
       })
     })
 
-    return {
-      completed,
-      drafts,
-      total,
-      completionPct,
-      totalHours,
-      companyHours,
-      schoolHours,
-      interCompanyHours,
-      vacationDays,
-      sickDays,
-    }
+    return { completed, approved, drafts, total, completionPct, totalHours, companyH, schoolH, interH, vacDays, sickDays }
   }, [reports])
 
-  // Find missing weeks (training period so far)
   const missingWeeks = useMemo(() => {
     if (!profile) return []
     const reportSet = new Set(reports.map(r => formatWeekId(r.year, r.calendarWeek)))
     const trainingStart = new Date(profile.trainingStart)
     const now = new Date()
-    // Get all work weeks from training start to now
-    const weeks = eachWeekOfInterval(
-      { start: trainingStart, end: now },
-      { weekStartsOn: 1 }
-    )
-    return weeks
-      .map(w => ({
-        week: fnsGetISOWeek(w),
-        year: getISOWeekYear(w),
-        date: w,
-      }))
+    return eachWeekOfInterval({ start: trainingStart, end: now }, { weekStartsOn: 1 })
+      .map(w => ({ week: fnsGetISOWeek(w), year: getISOWeekYear(w), date: w }))
       .filter(({ week, year }) => !reportSet.has(formatWeekId(year, week)))
-      .slice(-10)
+      .slice(-8)
       .reverse()
   }, [profile, reports])
 
-  const weeklyTarget = profile?.weeklyHours ?? 40
-  const hoursPct = stats.totalHours > 0 ? Math.min(100, Math.round((stats.companyHours / stats.totalHours) * 100)) : 0
-  const schoolPct = stats.totalHours > 0 ? Math.min(100, Math.round((stats.schoolHours / stats.totalHours) * 100)) : 0
-  const interPct = stats.totalHours > 0 ? Math.min(100, Math.round((stats.interCompanyHours / stats.totalHours) * 100)) : 0
-
-  const vacationMax = 25
+  const vacMax  = 25
   const sickMax = 15
 
+  const pct = (n: number, total: number) => total > 0 ? Math.round((n / total) * 100) : 0
+
+  const sectionLabel: React.CSSProperties = {
+    fontSize: '0.6875rem', fontWeight: 600, letterSpacing: '0.08em',
+    textTransform: 'uppercase', color: 'hsl(var(--muted-foreground))', marginBottom: '0.875rem',
+  }
+
+  const card: React.CSSProperties = {
+    background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))',
+    borderRadius: 12, padding: '1.125rem',
+  }
+
+  if (loading) {
+    return (
+      <div style={{ padding: 'clamp(1rem, 3vw, 1.5rem)', color: 'hsl(var(--muted-foreground))', fontSize: '0.875rem' }}>
+        Lade Statistiken…
+      </div>
+    )
+  }
+
   return (
-    <div className="flex flex-col flex-1 gap-6 p-6">
+    <div style={{ padding: 'clamp(1rem, 3vw, 1.5rem)', display: 'flex', flexDirection: 'column', gap: '1.25rem', fontFamily: '"Google Sans","Roboto",-apple-system,sans-serif' }}>
+
       {/* Header */}
       <div>
+<<<<<<< HEAD
         <h1 className="text-xl font-medium text-foreground">Statistiken</h1>
         <p className="text-sm text-muted-foreground mt-0.5">Übersicht deines Ausbildungsfortschritts</p>
+=======
+        <h1 style={{ fontSize: '1.25rem', fontWeight: 500, color: 'hsl(var(--foreground))', marginBottom: 2 }}>Statistiken</h1>
+        <p style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>Auswertung deines Ausbildungsfortschritts</p>
+>>>>>>> c7e38c75d92a41da0e090cad901c0eb81b72169b
       </div>
 
-      {loading ? (
-        <div className="text-muted-foreground text-sm">Lade Daten...</div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {/* Completion Ring */}
-          <Card className="bg-card border-border md:col-span-1">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base font-semibold flex items-center gap-2">
-                <HugeiconsIcon icon={AnalyticsUpIcon} size={16} className="text-primary" />
-                Fortschritt
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col items-center gap-4">
-              <CompletionRing percentage={stats.completionPct} />
-              <div className="grid grid-cols-3 w-full gap-3 text-center">
-                <div>
-                  <div className="text-xl font-bold text-foreground">{stats.total}</div>
-                  <div className="text-xs text-muted-foreground">Gesamt</div>
+      {/* ── Top stat grid ── */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '0.75rem' }}>
+        {[
+          { value: stats.total,       label: 'Berichte gesamt',    color: 'hsl(var(--foreground))' },
+          { value: stats.approved,    label: 'Freigegeben',        color: '#22c55e' },
+          { value: stats.completed,   label: 'Eingereicht',        color: '#3b82f6' },
+          { value: stats.drafts,      label: 'Entwürfe',           color: '#eab308' },
+          { value: stats.totalHours,  label: 'Stunden gesamt',     color: 'hsl(var(--foreground))' },
+          { value: stats.vacDays,     label: 'Urlaubstage',        color: '#8b5cf6' },
+          { value: stats.sickDays,    label: 'Kranktage',          color: '#ef4444' },
+          { value: missingWeeks.length, label: 'Fehlende Wochen',  color: '#f97316' },
+        ].map(({ value, label, color }) => (
+          <div key={label} style={{ ...card, textAlign: 'center', padding: '1rem' }}>
+            <div style={{ fontSize: '1.75rem', fontWeight: 700, color, lineHeight: 1 }}>{value}</div>
+            <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', marginTop: 4 }}>{label}</div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.25rem' }} className="md:grid-cols-2 xl:grid-cols-3">
+
+        {/* Completion ring */}
+        <div style={card}>
+          <p style={sectionLabel}>Berichts-Fortschritt</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
+            <CompletionRing percentage={stats.completionPct} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {[
+                { label: 'Freigegeben', value: stats.approved,  color: '#22c55e' },
+                { label: 'Eingereicht', value: stats.completed - stats.approved, color: '#3b82f6' },
+                { label: 'Entwürfe',    value: stats.drafts,    color: '#eab308' },
+              ].map(({ label, value, color }) => (
+                <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: color, flexShrink: 0 }} />
+                  <span style={{ fontSize: '0.8125rem', color: 'hsl(var(--muted-foreground))' }}>{label}</span>
+                  <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'hsl(var(--foreground))' }}>{value}</span>
                 </div>
-                <div>
-                  <div className="text-xl font-bold text-green-500">{stats.completed}</div>
-                  <div className="text-xs text-muted-foreground">Fertig</div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Hours breakdown */}
+        <div style={card}>
+          <p style={sectionLabel}>Stunden-Aufteilung</p>
+          <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
+            <div style={{ fontSize: '2.25rem', fontWeight: 700, color: 'hsl(var(--foreground))', lineHeight: 1 }}>{stats.totalHours}</div>
+            <div style={{ fontSize: '0.8125rem', color: 'hsl(var(--muted-foreground))', marginTop: 2 }}>Gesamtstunden</div>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
+            {[
+              { label: 'Betrieb',     icon: BuildingIcon,  value: stats.companyH, percent: pct(stats.companyH, stats.totalHours), color: '#3b82f6' },
+              { label: 'Berufsschule', icon: BookOpenIcon, value: stats.schoolH,  percent: pct(stats.schoolH,  stats.totalHours), color: '#8b5cf6' },
+              { label: 'Überbetrieblich', icon: BuildingIcon, value: stats.interH, percent: pct(stats.interH,  stats.totalHours), color: '#06b6d4' },
+            ].map(({ label, icon, value, percent, color }) => (
+              <div key={label}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <HugeiconsIcon icon={icon} size={13} style={{ color: 'hsl(var(--muted-foreground))' }} />
+                    <span style={{ fontSize: '0.8125rem', color: 'hsl(var(--muted-foreground))' }}>{label}</span>
+                  </div>
+                  <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'hsl(var(--foreground))' }}>{value}h <span style={{ fontWeight: 400, color: 'hsl(var(--muted-foreground))' }}>({percent}%)</span></span>
                 </div>
-                <div>
-                  <div className="text-xl font-bold text-yellow-500">{stats.drafts}</div>
-                  <div className="text-xs text-muted-foreground">Entwürfe</div>
+                <div style={{ height: 4, borderRadius: 2, background: 'hsl(var(--border))', overflow: 'hidden' }}>
+                  <div style={{ width: `${percent}%`, height: '100%', background: color, borderRadius: 2, transition: 'width 500ms ease' }} />
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            ))}
+          </div>
+        </div>
 
-          {/* Hours Breakdown */}
-          <Card className="bg-card border-border md:col-span-1">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base font-semibold flex items-center gap-2">
-                <HugeiconsIcon icon={ClockIcon} size={16} className="text-primary" />
-                Stunden
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-5">
-              <div className="text-center py-2">
-                <div className="text-4xl font-bold text-foreground">{stats.totalHours}</div>
-                <div className="text-sm text-muted-foreground mt-1">Gesamtstunden</div>
+        {/* Absences */}
+        <div style={card}>
+          <p style={sectionLabel}>Abwesenheiten</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', marginBottom: 6 }}>
+                <span style={{ color: 'hsl(var(--muted-foreground))' }}>Urlaub</span>
+                <span style={{ fontWeight: 600, color: 'hsl(var(--foreground))' }}>{stats.vacDays} / {vacMax} Tage</span>
               </div>
-              <Separator />
-              <div className="space-y-4">
-                <div>
-                  <div className="flex justify-between text-xs mb-1.5">
-                    <span className="text-muted-foreground flex items-center gap-1.5">
-                      <span className="size-2 rounded-full bg-blue-500 inline-block" />
-                      Betrieb
-                    </span>
-                    <span className="text-foreground font-medium">{stats.companyHours}h ({hoursPct}%)</span>
-                  </div>
-                  <Progress value={hoursPct} className="h-2" />
-                </div>
-                <div>
-                  <div className="flex justify-between text-xs mb-1.5">
-                    <span className="text-muted-foreground flex items-center gap-1.5">
-                      <span className="size-2 rounded-full bg-emerald-500 inline-block" />
-                      Berufsschule
-                    </span>
-                    <span className="text-foreground font-medium">{stats.schoolHours}h ({schoolPct}%)</span>
-                  </div>
-                  <Progress value={schoolPct} className="h-2" />
-                </div>
-                <div>
-                  <div className="flex justify-between text-xs mb-1.5">
-                    <span className="text-muted-foreground flex items-center gap-1.5">
-                      <span className="size-2 rounded-full bg-violet-500 inline-block" />
-                      Überbetrieblich
-                    </span>
-                    <span className="text-foreground font-medium">{stats.interCompanyHours}h ({interPct}%)</span>
-                  </div>
-                  <Progress value={interPct} className="h-2" />
-                </div>
+              <Progress value={pct(stats.vacDays, vacMax)} className="h-1.5" />
+            </div>
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', marginBottom: 6 }}>
+                <span style={{ color: 'hsl(var(--muted-foreground))' }}>Kranktage</span>
+                <span style={{ fontWeight: 600, color: 'hsl(var(--foreground))' }}>{stats.sickDays} Tage</span>
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Absences */}
-          <Card className="bg-card border-border md:col-span-2 xl:col-span-1">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base font-semibold flex items-center gap-2">
-                <HugeiconsIcon icon={BookOpenIcon} size={16} className="text-primary" />
-                Abwesenheiten
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-5">
-              <div className="space-y-4">
-                <div>
-                  <div className="flex justify-between text-sm mb-1.5">
-                    <span className="text-foreground font-medium">Urlaub</span>
-                    <span className={cn(
-                      'font-semibold text-xs',
-                      stats.vacationDays > vacationMax * 0.8 ? 'text-red-400' : 'text-foreground'
-                    )}>
-                      {stats.vacationDays} / {vacationMax} Tage
-                    </span>
-                  </div>
-                  <Progress
-                    value={(stats.vacationDays / vacationMax) * 100}
-                    className="h-2"
-                  />
-                </div>
-                <div>
-                  <div className="flex justify-between text-sm mb-1.5">
-                    <span className="text-foreground font-medium">Krank</span>
-                    <span className={cn(
-                      'font-semibold text-xs',
-                      stats.sickDays > sickMax * 0.8 ? 'text-red-400' : 'text-foreground'
-                    )}>
-                      {stats.sickDays} / {sickMax} Tage
-                    </span>
-                  </div>
-                  <Progress
-                    value={(stats.sickDays / sickMax) * 100}
-                    className="h-2"
-                  />
-                </div>
+              <div style={{ height: 6, borderRadius: 3, background: 'hsl(var(--border))', overflow: 'hidden' }}>
+                <div style={{ width: `${Math.min(100, pct(stats.sickDays, sickMax))}%`, height: '100%', background: '#ef4444', borderRadius: 3, transition: 'width 500ms ease' }} />
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-              <Separator />
-
-              <div className="grid grid-cols-2 gap-3 text-center">
-                <div className="rounded-lg bg-muted/40 p-3">
-                  <div className="text-2xl font-bold text-amber-400">{stats.vacationDays}</div>
-                  <div className="text-xs text-muted-foreground mt-0.5">Urlaubstage</div>
-                  <div className="text-xs text-muted-foreground">{vacationMax - stats.vacationDays} übrig</div>
-                </div>
-                <div className="rounded-lg bg-muted/40 p-3">
-                  <div className="text-2xl font-bold text-red-400">{stats.sickDays}</div>
-                  <div className="text-xs text-muted-foreground mt-0.5">Kranktage</div>
-                  <div className="text-xs text-muted-foreground">{sickMax - stats.sickDays} übrig</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Missing Weeks */}
-          {missingWeeks.length > 0 && (
-            <Card className="bg-card border-border md:col-span-2 xl:col-span-3">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base font-semibold flex items-center gap-2">
-                  <HugeiconsIcon icon={AlertCircleIcon} size={16} className="text-yellow-500" />
-                  Fehlende Berichte
-                  <span className="ml-auto text-xs font-normal text-muted-foreground">
-                    {missingWeeks.length} ausstehend
-                  </span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {missingWeeks.map(({ week, year, date }) => (
-                    <div
-                      key={formatWeekId(year, week)}
-                      className="flex items-center justify-between p-3 rounded-lg bg-yellow-500/5 border border-yellow-500/20"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="size-8 rounded-lg bg-yellow-500/15 flex items-center justify-center shrink-0">
-                          <span className="text-yellow-500 text-xs font-bold">{week}</span>
-                        </div>
-                        <div>
-                          <div className="text-sm font-medium text-foreground">
-                            {getCalendarWeekLabel(week, year)}
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            {format(date, "d. MMM yyyy", { locale: de })}
-                          </div>
-                        </div>
-                      </div>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="border-yellow-500/30 text-yellow-400 hover:bg-yellow-500/10 hover:text-yellow-300"
-                        onClick={() => router.push(`/berichtsheft/editor/${formatWeekId(year, week)}`)}
-                      >
-                        <HugeiconsIcon icon={Add01Icon} size={14} data-icon="inline-start" />
-                        Jetzt ausfüllen
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+      {/* Missing weeks */}
+      {missingWeeks.length > 0 && (
+        <div style={card}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: '0.875rem' }}>
+            <HugeiconsIcon icon={AlertCircleIcon} size={16} style={{ color: '#f97316', flexShrink: 0 }} />
+            <p style={{ ...sectionLabel, marginBottom: 0 }}>Fehlende Wochen ({missingWeeks.length})</p>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            {missingWeeks.map((w, i) => (
+              <button
+                key={`${w.year}-${w.week}`}
+                onClick={() => router.push(`/berichtsheft/editor/${formatWeekId(w.year, w.week)}`)}
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  padding: '9px 8px', border: 'none', cursor: 'pointer',
+                  background: 'transparent', textAlign: 'left', fontFamily: 'inherit',
+                  borderRadius: 8, transition: 'background 100ms',
+                  borderTop: i > 0 ? '1px solid hsl(var(--border))' : 'none',
+                }}
+                onMouseEnter={e => (e.currentTarget.style.background = 'hsl(var(--muted) / 0.5)')}
+                onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+              >
+                <span style={{ fontSize: '0.875rem', color: 'hsl(var(--foreground))' }}>
+                  {getCalendarWeekLabel(w.week, w.year)}
+                </span>
+                <span style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: 4, background: 'rgba(249,115,22,0.12)', color: '#f97316', fontWeight: 500 }}>
+                  Ausstehend
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
       )}
     </div>

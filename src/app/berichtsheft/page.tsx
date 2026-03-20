@@ -1,115 +1,210 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
 
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, isSameMonth, isToday, isSameDay } from 'date-fns'
+import {
+  format, startOfMonth, endOfMonth, eachDayOfInterval,
+  getDay, isSameMonth, isToday, isSameDay,
+} from 'date-fns'
 import { de } from 'date-fns/locale'
+import { getISOWeekYear } from 'date-fns'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Progress } from '@/components/ui/progress'
-import { Separator } from '@/components/ui/separator'
 import { useProfile } from '@/hooks/use-profile'
 import { useReports } from '@/hooks/use-reports'
 import { formatWeekId, getISOWeek, getCurrentWeekId, getCalendarWeekLabel } from '@/lib/week-utils'
 import { StatusBadge } from '@/components/berichtsheft/status-badge'
 import { cn } from '@/lib/utils'
 import {
-  BuildingIcon,
-  UserIcon,
-  CalendarIcon,
-  ClockIcon,
-  CheckmarkCircle01Icon,
   Add01Icon,
   ChevronLeft,
   ChevronRight,
+  ArrowRight01Icon,
+  BuildingIcon,
+  UserIcon,
+  CalendarIcon,
+  CheckmarkCircle01Icon,
 } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
-import { getISOWeekYear } from 'date-fns'
+import type { WeeklyReport } from '@/types'
 
 const DAY_LABELS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So']
 
 function getDayIndex(date: Date): number {
-  // getDay returns 0=Sun, 1=Mon,...
   const d = getDay(date)
   return d === 0 ? 6 : d - 1
 }
 
-export default function BerichtsheftDashboard() {
+/* ── Compact mini calendar ── */
+function MiniCalendar({ reports }: { reports: WeeklyReport[] }) {
   const router = useRouter()
-  const { profile } = useProfile()
-  const { reports, loading } = useReports()
   const [currentMonth, setCurrentMonth] = useState(new Date())
 
-  const [vacationUsed] = useState(8)
-  const [sickUsed] = useState(3)
-  const vacationTotal = 25
-  const sickTotal = 15
+  const reportsByWeek = useMemo(() => {
+    const map: Record<string, WeeklyReport> = {}
+    reports.forEach(r => { map[formatWeekId(r.year, r.calendarWeek)] = r })
+    return map
+  }, [reports])
 
-  const completedReports = reports.filter(r => r.status === 'submitted' || r.status === 'in_review' || r.status === 'approved').length
-  const totalReports = reports.length
-  const completionPct = totalReports > 0 ? Math.round((completedReports / totalReports) * 100) : 0
+  const { days, prefixDays } = useMemo(() => {
+    const start = startOfMonth(currentMonth)
+    const end   = endOfMonth(currentMonth)
+    const days  = eachDayOfInterval({ start, end })
+    return { days, prefixDays: Array<null>(getDayIndex(start)).fill(null) }
+  }, [currentMonth])
+
+  function getDotColor(date: Date): string | null {
+    const key = formatWeekId(getISOWeekYear(date), getISOWeek(date))
+    const r = reportsByWeek[key]
+    if (!r) return null
+    if (r.status === 'approved')   return '#22c55e'
+    if (r.status === 'submitted' || r.status === 'in_review') return '#3b82f6'
+    if (r.status === 'needs_revision') return '#ef4444'
+    if (r.status === 'draft')      return '#eab308'
+    return null
+  }
+
+  return (
+    <div>
+      {/* Month nav */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+        <span style={{ fontSize: '0.875rem', fontWeight: 500, color: 'hsl(var(--foreground))' }}>
+          {format(currentMonth, 'MMMM yyyy', { locale: de })}
+        </span>
+        <div style={{ display: 'flex', gap: 2 }}>
+          <button
+            onClick={() => setCurrentMonth(m => new Date(m.getFullYear(), m.getMonth() - 1, 1))}
+            style={{ width: 26, height: 26, border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'hsl(var(--muted-foreground))' }}
+            onMouseEnter={e => (e.currentTarget.style.background = 'hsl(var(--accent))')}
+            onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+          >
+            <HugeiconsIcon icon={ChevronLeft} size={13} />
+          </button>
+          <button
+            onClick={() => setCurrentMonth(m => new Date(m.getFullYear(), m.getMonth() + 1, 1))}
+            style={{ width: 26, height: 26, border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'hsl(var(--muted-foreground))' }}
+            onMouseEnter={e => (e.currentTarget.style.background = 'hsl(var(--accent))')}
+            onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+          >
+            <HugeiconsIcon icon={ChevronRight} size={13} />
+          </button>
+        </div>
+      </div>
+
+      {/* Day labels */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 2, marginBottom: 4 }}>
+        {DAY_LABELS.map(d => (
+          <div key={d} style={{ textAlign: 'center', fontSize: '0.625rem', fontWeight: 600, color: 'hsl(var(--muted-foreground))', padding: '2px 0' }}>
+            {d}
+          </div>
+        ))}
+      </div>
+
+      {/* Day cells */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 2 }}>
+        {prefixDays.map((_, i) => <div key={`p-${i}`} />)}
+        {days.map(date => {
+          const dot  = getDotColor(date)
+          const today = isToday(date)
+          const inMonth = isSameMonth(date, currentMonth)
+          const weekId = formatWeekId(getISOWeekYear(date), getISOWeek(date))
+
+          return (
+            <button
+              key={date.toISOString()}
+              onClick={() => router.push(`/berichtsheft/editor/${weekId}`)}
+              style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center',
+                padding: '3px 0', borderRadius: 6, border: 'none',
+                background: today ? 'hsl(var(--primary) / 0.1)' : 'transparent',
+                cursor: 'pointer', transition: 'background 100ms',
+                opacity: inMonth ? 1 : 0.3,
+              }}
+              onMouseEnter={e => { if (!today) e.currentTarget.style.background = 'hsl(var(--accent))' }}
+              onMouseLeave={e => { if (!today) e.currentTarget.style.background = 'transparent' }}
+            >
+              <span style={{ fontSize: '0.6875rem', fontWeight: today ? 600 : 400, color: today ? 'hsl(var(--primary))' : 'hsl(var(--foreground))' }}>
+                {format(date, 'd')}
+              </span>
+              <span style={{ width: 4, height: 4, borderRadius: '50%', background: dot ?? 'transparent', marginTop: 1, flexShrink: 0 }} />
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Legend */}
+      <div style={{ display: 'flex', gap: 10, marginTop: 10, flexWrap: 'wrap' }}>
+        {[
+          { color: '#22c55e', label: 'Freigegeben' },
+          { color: '#3b82f6', label: 'Eingereicht' },
+          { color: '#eab308', label: 'Entwurf' },
+          { color: '#ef4444', label: 'Überarbeiten' },
+        ].map(({ color, label }) => (
+          <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: color, flexShrink: 0 }} />
+            <span style={{ fontSize: '0.625rem', color: 'hsl(var(--muted-foreground))' }}>{label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+/* ── Main component ── */
+export default function BerichtsheftDashboard() {
+  const router  = useRouter()
+  const { profile } = useProfile()
+  const { reports, loading } = useReports()
+
+  const vacationUsed  = 8
+  const vacationTotal = 25
+  const sickUsed      = 3
+
+  const currentWeekId  = getCurrentWeekId()
+  const currentReport  = useMemo(() => {
+    const map: Record<string, WeeklyReport> = {}
+    reports.forEach(r => { map[formatWeekId(r.year, r.calendarWeek)] = r })
+    return map[currentWeekId]
+  }, [reports, currentWeekId])
+
+  const recentReports = reports.slice(0, 5)
+  const trainingYear  = profile?.currentYear ?? 1
+  const totalYears    = 3
+
+  const trainingStart = profile?.trainingStart ? new Date(profile.trainingStart) : null
+  const trainingEnd   = profile?.trainingEnd   ? new Date(profile.trainingEnd)   : null
+  const trainingPct   = trainingStart && trainingEnd
+    ? Math.min(100, Math.max(0, Math.round(((Date.now() - trainingStart.getTime()) / (trainingEnd.getTime() - trainingStart.getTime())) * 100)))
+    : 0
 
   const initials = profile
     ? `${profile.firstName[0] ?? ''}${profile.lastName[0] ?? ''}`.toUpperCase()
     : 'AZ'
 
-  // Calendar days for current month
-  const monthDays = useMemo(() => {
-    const start = startOfMonth(currentMonth)
-    const end = endOfMonth(currentMonth)
-    const days = eachDayOfInterval({ start, end })
-    const firstDayIndex = getDayIndex(start)
-    const prefixDays: null[] = Array(firstDayIndex).fill(null)
-    return { days, prefixDays }
-  }, [currentMonth])
+  const currentKW = getCalendarWeekLabel(getISOWeek(new Date()), getISOWeekYear(new Date()))
 
-  // Map reports by weekId
-  const reportsByWeek = useMemo(() => {
-    const map: Record<string, typeof reports[0]> = {}
-    reports.forEach(r => {
-      const key = formatWeekId(r.year, r.calendarWeek)
-      map[key] = r
-    })
-    return map
-  }, [reports])
-
-  function getDayReport(date: Date) {
-    const week = getISOWeek(date)
-    const year = getISOWeekYear(date)
-    const key = formatWeekId(year, week)
-    return reportsByWeek[key]
+  function statusBg(status: WeeklyReport['status']) {
+    if (status === 'approved')     return 'rgba(34,197,94,0.08)'
+    if (status === 'submitted' || status === 'in_review') return 'rgba(59,130,246,0.08)'
+    if (status === 'needs_revision') return 'rgba(239,68,68,0.08)'
+    return 'rgba(234,179,8,0.08)'
   }
 
-  function getDayDotColor(date: Date): string | null {
-    const report = getDayReport(date)
-    if (!report) return null
-    if (report.status === 'approved') return 'bg-green-500'
-    if (report.status === 'submitted' || report.status === 'in_review') return 'bg-blue-500'
-    if (report.status === 'needs_revision') return 'bg-red-500'
-    if (report.status === 'draft') return 'bg-yellow-500'
-    return null
+  const sectionLabel: React.CSSProperties = {
+    fontSize: '0.6875rem', fontWeight: 600, letterSpacing: '0.08em',
+    textTransform: 'uppercase', color: 'hsl(var(--muted-foreground))',
+    marginBottom: '0.75rem',
   }
 
-  function navigateToWeek(date: Date) {
-    const week = getISOWeek(date)
-    const year = getISOWeekYear(date)
-    router.push(`/berichtsheft/editor/${formatWeekId(year, week)}`)
+  const card: React.CSSProperties = {
+    background: 'hsl(var(--card))',
+    border: '1px solid hsl(var(--border))',
+    borderRadius: 12,
+    padding: '1.125rem',
   }
-
-  const currentWeekId = getCurrentWeekId()
-  const currentReport = reportsByWeek[currentWeekId]
-
-  const trainingStartYear = profile?.trainingStart
-    ? new Date(profile.trainingStart).getFullYear()
-    : new Date().getFullYear()
-  const trainingYear = profile?.currentYear ?? 1
-
-  const recentReports = reports.slice(0, 5)
 
   return (
+<<<<<<< HEAD
     <div className="flex flex-1 flex-col gap-4 sm:gap-6 p-3 sm:p-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
@@ -124,291 +219,207 @@ export default function BerichtsheftDashboard() {
           <span className="sm:hidden">KW ausfüllen</span>
         </Button>
       </div>
+=======
+    <div style={{ padding: 'clamp(1rem, 3vw, 1.5rem)', display: 'flex', flexDirection: 'column', gap: '1.25rem', flex: 1, fontFamily: '"Google Sans","Roboto",-apple-system,sans-serif' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.25rem' }} className="lg:grid-cols-[1fr_300px]">
+>>>>>>> c7e38c75d92a41da0e090cad901c0eb81b72169b
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-        {/* Left: Profile Panel */}
-        <div className="lg:col-span-1 flex flex-col gap-4">
-          {/* Profile Card */}
-          <Card className="bg-card border-border">
-            <CardContent className="p-5">
-              {profile ? (
-                <>
-                  <div className="flex items-center gap-3 mb-4">
-                    <Avatar className="size-14">
-                      <AvatarFallback className="bg-primary/20 text-primary text-lg font-bold">
-                        {initials}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <h2 className="font-semibold text-foreground text-lg">
-                        {profile.firstName} {profile.lastName}
-                      </h2>
-                      <Badge variant="secondary" className="mt-1 text-xs">
-                        {profile.occupation}
-                      </Badge>
-                    </div>
-                  </div>
+        {/* ══ LEFT COLUMN ══ */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', minWidth: 0 }}>
 
-                  <Separator className="mb-4" />
-
-                  <div className="space-y-3 text-sm">
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <HugeiconsIcon icon={BuildingIcon} size={14} className="shrink-0" />
-                      <span className="truncate">{profile.companyName}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <HugeiconsIcon icon={UserIcon} size={14} className="shrink-0" />
-                      <span className="truncate">Ausbilder: {profile.trainerName}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <HugeiconsIcon icon={CalendarIcon} size={14} className="shrink-0" />
-                      <span>Beginn: {format(new Date(profile.trainingStart), 'dd.MM.yyyy')}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <HugeiconsIcon icon={ClockIcon} size={14} className="shrink-0" />
-                      <span>Ausbildungsjahr {trainingYear}</span>
-                    </div>
-                  </div>
-
-                  <Separator className="my-4" />
-
-                  {/* Absence bars */}
-                  <div className="space-y-3">
-                    <div>
-                      <div className="flex justify-between text-xs mb-1.5">
-                        <span className="text-muted-foreground">Urlaub</span>
-                        <span className="text-foreground font-medium">{vacationUsed} / {vacationTotal} Tage</span>
-                      </div>
-                      <Progress value={(vacationUsed / vacationTotal) * 100} className="h-1.5" />
-                    </div>
-                    <div>
-                      <div className="flex justify-between text-xs mb-1.5">
-                        <span className="text-muted-foreground">Kranktage</span>
-                        <span className="text-foreground font-medium">{sickUsed} / {sickTotal} Tage</span>
-                      </div>
-                      <Progress value={(sickUsed / sickTotal) * 100} className="h-1.5" />
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <div className="text-center py-4">
-                  <p className="text-muted-foreground text-sm mb-3">Kein Profil vorhanden</p>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => router.push('/setup')}
-                  >
-                    Profil einrichten
-                  </Button>
+          {/* 1. Current week status */}
+          <div style={card}>
+            <p style={sectionLabel}>Aktuelle Woche</p>
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+              <div>
+                <div style={{ fontSize: '1.0625rem', fontWeight: 500, color: 'hsl(var(--foreground))', marginBottom: 6 }}>
+                  {currentKW}
                 </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Quick Stats */}
-          <div className="grid grid-cols-2 gap-3">
-            <Card className="bg-card border-border">
-              <CardContent className="p-4 text-center">
-                <div className="text-2xl font-bold text-foreground">{totalReports}</div>
-                <div className="text-xs text-muted-foreground mt-1">Berichte gesamt</div>
-              </CardContent>
-            </Card>
-            <Card className="bg-card border-border">
-              <CardContent className="p-4 text-center">
-                <div className="text-2xl font-bold text-primary">{completionPct}%</div>
-                <div className="text-xs text-muted-foreground mt-1">Abgeschlossen</div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Current Week CTA */}
-          <Card className={cn(
-            "border",
-            currentReport?.status === 'approved'
-              ? 'border-green-500/30 bg-green-500/5'
-              : currentReport?.status === 'submitted' || currentReport?.status === 'in_review'
-              ? 'border-blue-500/30 bg-blue-500/5'
-              : 'border-yellow-500/30 bg-yellow-500/5'
-          )}>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-foreground">
-                  {getCalendarWeekLabel(getISOWeek(new Date()), getISOWeekYear(new Date()))}
-                </span>
                 {currentReport ? (
                   <StatusBadge status={currentReport.status} />
                 ) : (
-                  <Badge variant="outline" className="text-yellow-500 border-yellow-500/40 text-xs">
-                    Ausstehend
-                  </Badge>
+                  <span style={{ fontSize: '0.8125rem', color: 'hsl(var(--muted-foreground))' }}>Noch kein Bericht angelegt</span>
                 )}
               </div>
-              {(!currentReport || currentReport.status === 'draft') && (
-                <Button
-                  size="sm"
-                  className="w-full mt-2"
-                  onClick={() => router.push(`/berichtsheft/editor/${currentWeekId}`)}
-                >
-                  Jetzt ausfüllen
-                </Button>
-              )}
-              {currentReport?.status === 'approved' && (
-                <div className="flex items-center gap-1.5 text-xs text-green-500 mt-1">
-                  <HugeiconsIcon icon={CheckmarkCircle01Icon} size={14} />
-                  <span>Freigegeben</span>
-                </div>
-              )}
-              {(currentReport?.status === 'submitted' || currentReport?.status === 'in_review') && (
-                <div className="flex items-center gap-1.5 text-xs text-blue-500 mt-1">
-                  <HugeiconsIcon icon={CheckmarkCircle01Icon} size={14} />
-                  <span>Eingereicht – wartet auf Freigabe</span>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+              <div style={{ display: 'flex', gap: 8 }}>
+                {currentReport && (currentReport.status === 'draft' || currentReport.status === 'needs_revision') && (
+                  <Button size="sm" onClick={() => router.push(`/berichtsheft/editor/${currentWeekId}`)}>
+                    Bericht öffnen
+                  </Button>
+                )}
+                {currentReport && currentReport.status !== 'draft' && currentReport.status !== 'needs_revision' && (
+                  <Button size="sm" variant="outline" onClick={() => router.push(`/berichtsheft/editor/${currentWeekId}`)}>
+                    Ansehen
+                  </Button>
+                )}
+                {!currentReport && (
+                  <Button size="sm" onClick={() => router.push(`/berichtsheft/editor/${currentWeekId}`)}>
+                    <HugeiconsIcon icon={Add01Icon} size={15} style={{ marginRight: 4 }} />
+                    Neuen Bericht erstellen
+                  </Button>
+                )}
+              </div>
+            </div>
+            {currentReport?.status === 'approved' && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 10, fontSize: '0.8125rem', color: '#22c55e' }}>
+                <HugeiconsIcon icon={CheckmarkCircle01Icon} size={14} />
+                <span>Freigegeben</span>
+              </div>
+            )}
+          </div>
+
+          {/* 2. Recent reports list */}
+          <div style={card}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.875rem' }}>
+              <p style={{ ...sectionLabel, marginBottom: 0 }}>Letzte Berichte</p>
+              <button
+                onClick={() => router.push('/berichtsheft/kalender')}
+                style={{ fontSize: '0.8125rem', color: 'hsl(var(--primary))', background: 'transparent', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 500 }}
+              >
+                Alle anzeigen
+              </button>
+            </div>
+
+            {loading ? (
+              <div style={{ padding: '1rem 0', color: 'hsl(var(--muted-foreground))', fontSize: '0.875rem', textAlign: 'center' }}>
+                Laden…
+              </div>
+            ) : recentReports.length === 0 ? (
+              <div style={{ padding: '1rem 0', color: 'hsl(var(--muted-foreground))', fontSize: '0.875rem', textAlign: 'center' }}>
+                Noch keine Berichte
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                {recentReports.map((r, i) => (
+                  <button
+                    key={r.id}
+                    onClick={() => router.push(`/berichtsheft/editor/${formatWeekId(r.year, r.calendarWeek)}`)}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 12,
+                      padding: '10px 8px', border: 'none', cursor: 'pointer',
+                      background: 'transparent', textAlign: 'left', fontFamily: 'inherit',
+                      borderRadius: 8, transition: 'background 100ms',
+                      borderTop: i > 0 ? '1px solid hsl(var(--border))' : 'none',
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.background = 'hsl(var(--muted) / 0.5)')}
+                    onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                  >
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: '0.875rem', fontWeight: 500, color: 'hsl(var(--foreground))' }}>
+                        KW {r.calendarWeek} / {r.year}
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', marginTop: 1 }}>
+                        {format(new Date(r.weekStart), 'dd.MM.')} – {format(new Date(r.weekEnd), 'dd.MM.yyyy')}
+                      </div>
+                    </div>
+                    <StatusBadge status={r.status} />
+                    <HugeiconsIcon icon={ArrowRight01Icon} size={15} style={{ color: 'hsl(var(--muted-foreground))', flexShrink: 0 }} />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* 3. Shortcuts */}
+          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+            {[
+              { label: '+ Neuer Bericht', href: `/berichtsheft/editor/${currentWeekId}` },
+              { label: 'Kalender', href: '/berichtsheft/kalender' },
+              { label: 'Statistiken', href: '/berichtsheft/statistiken' },
+            ].map(({ label, href }) => (
+              <button
+                key={href}
+                onClick={() => router.push(href)}
+                style={{
+                  padding: '8px 16px', borderRadius: 8,
+                  border: '1px solid hsl(var(--border))',
+                  background: 'hsl(var(--card))', color: 'hsl(var(--foreground))',
+                  fontSize: '0.875rem', cursor: 'pointer', fontFamily: 'inherit',
+                  transition: 'background 100ms',
+                }}
+                onMouseEnter={e => (e.currentTarget.style.background = 'hsl(var(--accent))')}
+                onMouseLeave={e => (e.currentTarget.style.background = 'hsl(var(--card))')}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* Right: Calendar + Recent Reports */}
-        <div className="lg:col-span-2 flex flex-col gap-4">
-          {/* Calendar */}
-          <Card className="bg-card border-border">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-base font-semibold">
-                  {format(currentMonth, 'MMMM yyyy', { locale: de })}
-                </CardTitle>
-                <div className="flex gap-1">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="size-7"
-                    onClick={() => setCurrentMonth(m => new Date(m.getFullYear(), m.getMonth() - 1, 1))}
-                  >
-                    <HugeiconsIcon icon={ChevronLeft} size={14} />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="size-7"
-                    onClick={() => setCurrentMonth(m => new Date(m.getFullYear(), m.getMonth() + 1, 1))}
-                  >
-                    <HugeiconsIcon icon={ChevronRight} size={14} />
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="grid grid-cols-7 gap-px mb-2">
-                {DAY_LABELS.map(d => (
-                  <div key={d} className="text-center text-[11px] font-medium text-muted-foreground py-1">
-                    {d}
+        {/* ══ RIGHT COLUMN ══ */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+
+          {/* Profile card */}
+          <div style={card}>
+            <p style={sectionLabel}>Profil</p>
+            {profile ? (
+              <>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: '1rem' }}>
+                  <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'hsl(var(--primary))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.875rem', fontWeight: 700, color: 'white', flexShrink: 0 }}>
+                    {initials}
                   </div>
-                ))}
-              </div>
-              <div className="grid grid-cols-7 gap-px">
-                {monthDays.prefixDays.map((_, i) => (
-                  <div key={`prefix-${i}`} />
-                ))}
-                {monthDays.days.map(day => {
-                  const dayIdx = getDayIndex(day)
-                  const isWeekend = dayIdx >= 5
-                  const today = isToday(day)
-                  const inMonth = isSameMonth(day, currentMonth)
-                  const dotColor = getDayDotColor(day)
-
-                  return (
-                    <div
-                      key={day.toISOString()}
-                      onClick={() => !isWeekend && navigateToWeek(day)}
-                      className={cn(
-                        'relative flex flex-col items-center justify-center rounded-md p-1 min-h-[44px] text-xs select-none',
-                        isWeekend
-                          ? 'cursor-default'
-                          : 'cursor-pointer hover:bg-accent',
-                        today && 'ring-1 ring-primary',
-                        !inMonth && 'opacity-30',
-                      )}
-                      style={
-                        isWeekend
-                          ? {
-                              backgroundImage:
-                                'repeating-linear-gradient(-45deg, transparent, transparent 3px, rgba(255,255,255,0.03) 3px, rgba(255,255,255,0.03) 6px)',
-                            }
-                          : undefined
-                      }
-                    >
-                      <span className={cn(
-                        'font-medium',
-                        today ? 'text-primary' : isWeekend ? 'text-muted-foreground/50' : 'text-foreground',
-                      )}>
-                        {format(day, 'd')}
-                      </span>
-                      {dotColor && !isWeekend && (
-                        <div className={cn('size-1.5 rounded-full mt-0.5', dotColor)} />
-                      )}
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: '0.9375rem', fontWeight: 600, color: 'hsl(var(--foreground))', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {profile.firstName} {profile.lastName}
                     </div>
-                  )
-                })}
-              </div>
-
-              {/* Legend */}
-              <div className="flex gap-4 mt-4 pt-3 border-t border-border text-xs text-muted-foreground">
-                <div className="flex items-center gap-1.5">
-                  <div className="size-2 rounded-full bg-green-500" />
-                  <span>Abgeschlossen</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <div className="size-2 rounded-full bg-yellow-500" />
-                  <span>Entwurf</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <div className="size-2 rounded-full bg-muted-foreground/40" />
-                  <span>Fehlend</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Recent Reports */}
-          <Card className="bg-card border-border">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base font-semibold">Zuletzt bearbeitet</CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-              {loading ? (
-                <div className="text-sm text-muted-foreground py-4 text-center">Lade Berichte...</div>
-              ) : recentReports.length === 0 ? (
-                <div className="text-sm text-muted-foreground py-4 text-center">
-                  Noch keine Berichte vorhanden.
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {recentReports.map(report => (
-                    <div
-                      key={report.id}
-                      className="flex items-center justify-between p-3 rounded-lg bg-muted/40 hover:bg-muted/60 cursor-pointer transition-colors"
-                      onClick={() => router.push(`/berichtsheft/editor/${formatWeekId(report.year, report.calendarWeek)}`)}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                          <span className="text-primary text-xs font-bold">{report.calendarWeek}</span>
-                        </div>
-                        <div>
-                          <div className="text-sm font-medium text-foreground">
-                            {getCalendarWeekLabel(report.calendarWeek, report.year)}
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            {report.totalHours}h · {report.entries.length} Tage
-                          </div>
-                        </div>
-                      </div>
-                      <StatusBadge status={report.status} />
+                    <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {profile.occupation}
                     </div>
-                  ))}
+                  </div>
                 </div>
-              )}
-            </CardContent>
-          </Card>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.8125rem', color: 'hsl(var(--muted-foreground))' }}>
+                    <HugeiconsIcon icon={BuildingIcon} size={14} style={{ flexShrink: 0 }} />
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{profile.companyName}</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.8125rem', color: 'hsl(var(--muted-foreground))' }}>
+                    <HugeiconsIcon icon={UserIcon} size={14} style={{ flexShrink: 0 }} />
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{profile.trainerName}</span>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div style={{ textAlign: 'center', padding: '0.5rem 0' }}>
+                <p style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))', marginBottom: 10 }}>Kein Profil</p>
+                <Button size="sm" variant="outline" onClick={() => router.push('/setup')}>Einrichten</Button>
+              </div>
+            )}
+          </div>
+
+          {/* Training progress */}
+          <div style={card}>
+            <p style={sectionLabel}>Ausbildungsfortschritt</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', marginBottom: 6 }}>
+                  <span style={{ color: 'hsl(var(--foreground))', fontWeight: 500 }}>
+                    Ausbildungsjahr {trainingYear} von {totalYears}
+                  </span>
+                  <span style={{ color: 'hsl(var(--muted-foreground))' }}>{trainingPct}%</span>
+                </div>
+                <Progress value={trainingPct} className="h-1.5" />
+              </div>
+              <div style={{ height: 1, background: 'hsl(var(--border))' }} />
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', marginBottom: 6 }}>
+                  <span style={{ color: 'hsl(var(--muted-foreground))' }}>Urlaub</span>
+                  <span style={{ color: 'hsl(var(--foreground))', fontWeight: 500 }}>{vacationUsed} / {vacationTotal} Tage</span>
+                </div>
+                <Progress value={(vacationUsed / vacationTotal) * 100} className="h-1.5" />
+              </div>
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem' }}>
+                  <span style={{ color: 'hsl(var(--muted-foreground))' }}>Kranktage</span>
+                  <span style={{ color: 'hsl(var(--foreground))', fontWeight: 500 }}>{sickUsed} Tage</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Mini calendar */}
+          <div style={card}>
+            <MiniCalendar reports={reports} />
+          </div>
         </div>
       </div>
     </div>
